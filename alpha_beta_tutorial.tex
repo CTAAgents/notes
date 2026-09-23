@@ -1,0 +1,440 @@
+\documentclass[UTF8,11pt]{ctexart}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[papersize={176mm,250mm},margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{codegray}{RGB}{230,230,235}
+\definecolor{codered}{RGB}{180,60,60}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codegray},
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{gray!60},
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=4,
+  keywordstyle=\color{codered}\bfseries,
+  commentstyle=\color{gray},
+}
+\newcommand{\codeinl}[1]{\texttt{#1}}
+
+\title{\bfseries 从 Alpha/Beta 到因子中性化与标准化\\[2pt]\large 一套完整的因子量化链路（深度版）}
+\author{量化投研学习笔记}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+本教程以一条可落地的\textbf{因子生产线}为主线：先分清「市场贡献」与「能力贡献」，再把行业与市值等显性/隐性暴露剥除（中性化），最后把信号标准化并交给回测评估。文中给出完整推导、数字算例、可运行代码与统计检验口径，并把“量化工程师为何盯准 Alpha”这一世界观问题一并收束。
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Alpha 与 Beta 到底是什么}
+
+\subsection{本质问题}
+Alpha 与 Beta 不是两个“指标”，而是一套\textbf{收益归因的分解装置}。它们回答的唯一本质问题是：
+\begin{quote}
+一只证券赚的钱里，多少是“跟着市场波动”赚的，多少是“市场都没给你、你靠别的本事赚的”？
+\end{quote}
+这个问题的价值不在于记账，而在于判定一件事：这份收益是否可以被低成本复制、是否可持续、是否真是你的能力。
+
+\subsection{从组合理论到 CAPM（为什么是这个公式）}
+CAPM 的 Beta 来自一条严格论证链：
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{Markowitz 均值-方差框架}：假设投资者只用期望收益与方差决策，所有“给定期望、方差最小”的组合连成\textbf{有效前沿}。
+\item \textbf{资本市场线 CML}：引入无风险利率后，最优配置是无风险资产 $+$ 市场组合 $M$ 的线性组合。
+\item \textbf{均衡（SML）}：在均衡中，任一资产 $i$ 要想住进有效前沿且无套利，其期望超额收益必须正比于它与市场组合的协方差——这就是 Beta 的来源。
+\end{enumerate}
+
+\textbf{定义（CAPM 均衡定价 / SML）：}
+\begin{equation}
+E[R_i]-R_f \;=\; \beta_i\,\big(E[R_m]-R_f\big),
+\qquad
+\beta_i \;=\; \frac{\operatorname{Cov}(R_i,R_m)}{\operatorname{Var}(R_m)}.
+\end{equation}
+
+\begin{itemize}[itemsep=2pt]
+\item \textbf{CAPM}：\textbf{均衡定价}模型，说“期望超额收益由市场 Beta 唯一决定”。
+\item \textbf{市场模型（market model）}：\textbf{实证回归}，仅把一个资产的收益拆成“市场相关部分 $+$ 残差”，并不声称定价。因子分析用的是后者。
+\end{itemize}
+
+\subsection{用回归估计 Beta（实证口径）}
+对已实现收益，用无截距的回归斜率估计：
+\begin{equation}
+\hat\beta = \frac{\sum_{t}(R_{i,t}-\bar R_i)(R_{m,t}-\bar R_m)}
+                 {\sum_{t}(R_{m,t}-\bar R_m)^2}.
+\end{equation}
+
+\subsection{Alpha：剥掉市场后的骨架}
+市场模型写成
+\begin{equation}
+R_{i,t}-R_f \;=\; \alpha_i + \beta_i\,(R_{m,t}-R_f) + \varepsilon_{i,t},
+\end{equation}
+其 OLS 截距就是 Alpha：
+\begin{equation}
+\hat\alpha_i = \overline{R_i-R_f} - \hat\beta_i\,\overline{(R_m-R_f)}.
+\end{equation}
+
+\textbf{一个关键陷阱}：单期数据\textbf{分不出 $\alpha$ 与 $\varepsilon$}。某一期里，你只能看到“又能力又运气”的混合残差 $\alpha+\varepsilon_t$；只有横跨多期、用截距估计，才能把可复现的 Alpha 从随机运气里分离出来——这正是“Alpha 需要大量样本才可信”的数学根源。
+
+\textbf{数字例}：设 $R_f=3\%$，某股真实 $\beta=1.2$，某月市场实际 $R_m=10\%$，该股实际 $R_i=25\%$，则
+\begin{equation}
+(25\%-3\%) \;=\; 1.2\times(10\%-3\%) + 13.6\%.
+\end{equation}
+即超额 $22\% = 8.4\%$（市场贡献）$+13.6\%$（混合残差 $\alpha+\varepsilon$）。$13.6\%$ 里多少是 $\alpha$、多少是 $\varepsilon$，\textbf{本月无法判断}。
+
+\subsection{Alpha 的统计现实：噪声、标准误、显著性}
+设月度残差标准差 $\sigma_\varepsilon$、样本 $T$ 个月，则
+\begin{equation}
+\operatorname{sd}(\hat\alpha)\approx\frac{\sigma_\varepsilon}{\sqrt{T}},
+\qquad
+t_{\hat\alpha}\approx\frac{\hat\alpha}{\sigma_\varepsilon/\sqrt{T}}.
+\end{equation}
+粗略估算：月度波动 $\sigma_\varepsilon=5\%$、真实月 $\alpha=0.5\%$（年化约 $6\%$），一年（$T=12$）的 $t\approx 0.35$，\textbf{远不显著}；要 $t\approx 2$ 需要约 $100$ 个月——近 $8$ 年数据。结论：
+\begin{quote}
+想在统计上验证一个真实的 Alpha，通常需要多年数据；任何短期漂亮的 Alpha 都要打上大问号。
+\end{quote}
+
+\subsection{矩阵形式与多因子推广}
+写成向量形式即可推广到多因子：
+\begin{equation}
+R = X\beta + \varepsilon,
+\qquad
+\hat\beta = (X^{\top}X)^{-1}X^{\top}R,
+\qquad
+\hat\varepsilon = R-X\hat\beta = (I-P)\,R,
+\end{equation}
+其中 $P=X(X^{\top}X)^{-1}X^{\top}$ 是\textbf{投影矩阵}。单因子时 $X=[1,\,R_m]$；多因子时把市场、行业、市值、风格都放进 $X$，残差 $(I-P)R$ 就是被所有已定价因子解释完后剩下的东西——这才是“纯 Alpha”。
+
+\subsection{这个分解为什么有意义：可复制性}
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{4.2cm}@{}}
+\toprule
+ & \textbf{Beta（市场敞口）} & \textbf{Alpha（超额能力）} \\
+\midrule
+本质 & 系统性风险暴露 & 偏离市场均值的能力 \\
+获取成本 & 接近 0（买指数/加杠杆即可复制） & 极高（定价错误、信息、执行） \\
+能否规模复制 & 可，容量近似无限 & 不可，越大越衰减 \\
+统计含义 & 回归斜率（参数） & 截距 / 残差均值 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Beta 是“租金”——承担市场风险就有的期望回报；Alpha 是“工资”——需要真本事。}主动管理就是把 Beta 结构做干净，然后诚实回答：剩下的 Alpha 是真能力，还是样本运气。
+
+\section{为什么要中性化}
+
+\subsection{暴露：显性与隐性}
+$\beta(R_m-R_f)$ 是\textbf{显性暴露}（对市场）。信号还会携带三类\textbf{隐性暴露}：
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}lll@{}}
+\toprule
+暴露 & 机制 & 后果 \\
+\midrule
+行业暴露 & 因子高低可能只是行业整体高/低 & 在赌行业而非选优 \\
+市值暴露 & 因子与大小盘相关 & 在做小盘/大盘而非信号强 \\
+风格/波动 & 动量可能隐含高波动高换手 & 混进另一类可出售的风险溢价 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{中性化 = 把因子里能“被人为构造出来”的那部分系统性暴露拿掉}，只留下来自信息与判断的部分。
+
+\subsection{不做中性化：遗漏变量偏差（fake Alpha）}
+两变量回归演示：真实模型 $y=\beta_1 x_1+\beta_2 x_2+u$，若只回归 $y=\tilde b_1 x_1+e$，则缺失 $x_2$ 造成的偏差为
+\begin{equation}
+E[\tilde b_1] = \beta_1 + \beta_2\,\frac{\operatorname{Cov}(x_1,x_2)}{\operatorname{Var}(x_1)}.
+\end{equation}
+\textbf{只要因子 $x_1$ 与漏掉的暴露 $x_2$（行业/市值）相关，估计的系数/残差就会被拖偏}，伪装成漂亮的 Alpha，实则是行业或市值的功劳。
+
+\subsection{中性化的目标（一句话）}
+让处理后的因子与“行业哑变量、$\ln$ 市值”\textbf{正交}（相关为零，即零显性暴露），从而按该因子排序建仓得到的组合不再隐含行业与市值暴露。
+
+\begin{itemize}[itemsep=2pt]
+\item 中性化处理的是\textbf{因子值}，不是收益率，也不是组合权重（组合层面另有独立的中性化）。
+\item 本文聚焦\textbf{横截面因子值中性化}。
+\end{itemize}
+
+\section{行业 + 市值中性化的具体操作}
+
+\subsection{数学模型（矩阵形式，核心）}
+对某一时点横截面（股票 $i=1,\dots,N$），造设计矩阵 $X$，列为：行业哑变量 + $\ln$市值列 + 全 1 截距列。回归取残差：
+\begin{equation}
+f = X\gamma + \varepsilon
+\quad\Rightarrow\quad
+\hat\gamma=(X^{\top}X)^{-1}X^{\top}f,\quad
+\bar f = f-X\hat\gamma = (I-P)\,f.
+\end{equation}
+
+\subsection{为什么保证正交（线性代数证明）}
+$(I-P)$ 是正交投影矩阵，对 $X$ 任意一列 $v$ 有 $(I-P)v=0$，故
+\begin{equation}
+\big((I-P)f\big)^{\top}v = f^{\top}(I-P)v = 0.
+\end{equation}
+即残差与每一列 $v$ 的内积为 0（正交的严格定义）。由此得三条可操作结论：
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{均值归零}：残差与截距列 $1$ 正交 $\Rightarrow$ 残差和 $=0$。
+\item \textbf{行业正交}：残差与每个行业哑变量正交 $\Rightarrow$ 每个行业的残差均值 $=0$（行业均值对齐）。
+\item \textbf{市值正交}：残差与 $\ln$市值列正交 $\Rightarrow$ 残差与市值不相关。
+\end{enumerate}
+
+\subsection{逐日重估 / 滚动 / 半衰期}
+\begin{itemize}[itemsep=2pt]
+\item \textbf{必须逐期重估 $\gamma$}：行业均值、市值溢价随时间漂移。
+\item \textbf{重估频率}：日频逐日估；月频可月末估一次、用于下月。
+\item \textbf{半衰期}：激进用指数加权（近期权重高）提高灵敏度但放大噪声；默认全样本即可，勿过度复杂化。
+\end{itemize}
+
+\subsection{四个必须注意的坑}
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{哑变量陷阱}：用“全 0 代表基准行业”的编码（每行业一列，让截距吸收基准），而不是每行业独立一列又放截距，否则 $X^{\top}X$ 不可逆。工程上用 \codeinl{np.linalg.lstsq} 的最小范数解可规避。
+\item \textbf{取残差，不取系数}：中性化要的是残差 $(I-P)f$；$\hat\gamma$ 是“暴露大小”，是另一回事。
+\item \textbf{截距别省}：去掉截距，残差均值不再为 0，行业“齐平”性质被破坏。
+\item \textbf{Winsorize 的顺序}：极端值会污染 OLS，建议回归前先粗截尾，或回归后稳健标准化。
+\end{enumerate}
+
+\subsection{为什么极端值影响中性化本身}
+OLS 对离群点敏感：一个残差巨大的股票会拉动拟合线，带偏整个横截面的行业均值 / 市值斜率。故在\textbf{中性化之前}对原始因子做 winsorize（防止少数股绑架），中性化后标准化时再截一次或用稳健 z。常见做法“先 win → 再中性化 → 再 win → 再 z-score”，但别双重过度截尾。
+
+\subsection{算例（感受数字）}
+5 只股票：A/B/C 属“消费”，D/E 属“制造”：
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}llll@{}}
+\toprule
+股票 & 行业 & $\ln$市值 & 原始动量 $f$ \\
+\midrule
+A & 消费 & 10.2 & $+2.0$ \\
+B & 消费 & 11.0 & $+4.0$ \\
+C & 消费 & 12.1 & $+6.0$ \\
+D & 制造 & 10.5 & $+3.0$ \\
+E & 制造 & 11.8 & $+5.0$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+直觉：消费均值 $(2+4+6)/3=4$、制造均值 $(3+5)/2=4$，行业均值相等；但 $f$ 随 $\ln$市值上升故\textbf{有市值暴露}。回归去掉“随市值预期的那份”后，残差即中性化动量——你可在练习里验证残差与 $\ln$市值、行业的协方差都约 $0$。
+
+\subsection{代码实现}
+\begin{lstlisting}[language=Python]
+import numpy as np
+import pandas as pd
+
+def neutralize(raw, industry, ln_cap):
+    """行业 + 市值中性化：横截面 OLS 取残差（均为同一横截面、按 index 对齐）"""
+    X = pd.get_dummies(industry, drop_first=False)   # 行业哑变量
+    X["ln_cap"] = ln_cap.astype(float)               # 市值方向
+    X["intercept"] = 1.0                             # 截距：保证残差均值为 0
+    beta, *_ = np.linalg.lstsq(X.to_numpy(float),
+                               raw.to_numpy(float), rcond=None)  # 最小范数解
+    fitted = X.to_numpy(float) @ beta
+    return pd.Series(raw.to_numpy(float) - fitted, index=raw.index)
+\end{lstlisting}
+
+\section{残差 z-score 标准化的具体步骤}
+
+\subsection{这一步解决什么}
+中性化后的残差已是“零均值、去行业、去市值”，但\textbf{跨日期、跨因子仍不可比}：动量残差是收益率量纲、低波残差是波动量纲；今天横截面与上月的尺度也不同。z-score 一次解决三件事：\textbf{量纲统一、日期可比、分布对齐}。
+
+\subsection{严格步骤}
+\textbf{Step 1——只用“当前一个横截面”求均值与标准差}
+\begin{equation}
+\mu=\frac1N\sum_{i=1}^{N}\bar f_i,\qquad
+\sigma=\sqrt{\frac{1}{N-1}\sum_{i=1}^{N}(\bar f_i-\mu)^2}.
+\end{equation}
+$\mu,\sigma$ 只在当天全部股票上算，\textbf{绝不跨历史混合}。
+
+\textbf{Step 2——逐个代入}
+\begin{equation}
+z_i = \frac{\bar f_i-\mu}{\sigma}.
+\end{equation}
+完成后当天横截面满足：均值($z$)=0、标准差($z$)=1。
+
+\textbf{Step 3——用 z 排序 / 赋权}：排序取 $z_i$ 前 N；赋权 $w_i=z_i/\sum_j|z_j|$，或 rank 权重 $\operatorname{rank}(z)/N-\tfrac12$。
+
+\subsection{z 与评估指标的关联}
+\begin{itemize}[itemsep=2pt]
+\item \textbf{IC}：IC = corr（$z$, 未来收益），常用 Spearman（对 $z$ 与未来收益取 rank 后求相关）。
+\item \textbf{IR}：多空组合 $\operatorname{IR}=\alpha/\sigma(\varepsilon)$，约与 IC 正相关；z 分布是否被极端值扭曲直接决定 IR 可靠性。
+\item \textbf{与分位映射}：某些合成用“$z$ 排名 $/(N+1)$”，前提是 z 已无量纲。
+\end{itemize}
+
+\subsection{两个必须注意的坑}
+\textbf{坑 1——残差非正态，直接 z-score 会被极端值绑架。}市场残差带长尾，极端值把 $\mu$ 拉离众数、把 $\sigma$ 撑大，少数股垄断排序。惯例是 winsorize 后再标准化：
+\begin{lstlisting}[language=Python]
+def zscore_winsorized(resid, lo=0.01, hi=0.99):
+    lo_q, hi_q = np.quantile(resid, [lo, hi])
+    resid_c = np.clip(resid, lo_q, hi_q)
+    return pd.Series((resid_c - resid_c.mean()) / resid_c.std(ddof=1),
+                     index=resid.index)
+\end{lstlisting}
+
+\textbf{更稳健口径（可选）}：中位数替代 $\mu$、MAD 替代 $\sigma$：
+\begin{lstlisting}[language=Python]
+def zscore_robust(resid):
+    med = resid.median()
+    mad = (resid - med).abs().median()
+    if mad == 0:
+        mad = resid.std(ddof=1)
+    return (resid - med) / (mad * 1.4826)  # 1.4826 使 MAD 在正态下约等于 sigma
+\end{lstlisting}
+
+\textbf{坑 2——z 保留多少“量级”取决于怎么用。}只排序则 z 与 rank 基本等价；做加权/多因子合成则 z 保留相对强度、更细，但正因保留尾部，\textbf{才更需要先截尾}。
+
+\begin{quote}
+z-score 本身不产生 Alpha，但它保证你排序、合成、跨期比较时用的是干净、可比的信号。
+\end{quote}
+
+\section{完整信号流水线与 Alpha 评估}
+
+\subsection{完整 pipeline}
+\begin{lstlisting}[language=Python]
+import numpy as np
+import pandas as pd
+
+def neutralize(raw, industry, ln_cap):
+    X = pd.get_dummies(industry, drop_first=False)
+    X["ln_cap"] = ln_cap.astype(float)
+    X["intercept"] = 1.0
+    beta, *_ = np.linalg.lstsq(X.to_numpy(float), raw.to_numpy(float), rcond=None)
+    fitted = X.to_numpy(float) @ beta
+    return pd.Series(raw.to_numpy(float) - fitted, index=raw.index)
+
+def standardize(resid, win=(0.01, 0.99)):
+    lo_q, hi_q = np.quantile(resid, win)
+    resid_c = np.clip(resid, lo_q, hi_q)
+    return pd.Series((resid_c - resid_c.mean()) / resid_c.std(ddof=1),
+                     index=resid.index)
+
+def factor_pipeline(raw, industry, ln_cap):
+    """原始因子 -> 中性化 -> 截尾 + z-score"""
+    resid = neutralize(raw, industry, ln_cap)
+    return standardize(resid)
+\end{lstlisting}
+月度口径：每个月底对当期横截面调用 \codeinl{factor\_pipeline} 得 \codeinl{monthly\_z}，据此排序建仓，例如
+\begin{lstlisting}[language=Python]
+monthly_z = factor_pipeline(df["mom"], df["ind"], np.log(df["mcap"]))
+\end{lstlisting}
+
+\subsection{如何评估 Alpha（别只看多空曲线）}
+\textbf{1. IC / Rank IC}：每期算 $\operatorname{corr}(z_t,\,r_{t+1})$。
+\textbf{2. 分层回测}：按 z 分十分位，看最高/最低分位差是否单调显著。
+\textbf{3. Fama--MacBeth 因子收益回归}：把组合收益对一系列暴露回归，剔除市场/行业/市值后再看残差 $\alpha$。
+\textbf{4. 信息比率与 t 值}：
+\begin{equation}
+\operatorname{IR}=\frac{\alpha_p}{\sigma(\varepsilon_p)},\qquad
+t_\alpha=\frac{\alpha_p}{\sigma(\varepsilon_p)/\sqrt{T}},
+\end{equation}
+其中下标 $p$ 表示“组合”。任何 Alpha 产出都要附 $\operatorname{IR}$ 与 $t$，并用样本外检验。
+
+\subsection{多头 vs 多空的取舍}
+\begin{itemize}[itemsep=2pt]
+\item \textbf{纯多头}：区分“因子 Alpha”与“市场 Beta + 因子 Alpha”更难，需回归把 $\beta$ 剔出。
+\item \textbf{多空（对冲）}：对市场、行业、市值中性化后，多空收益约等于纯因子 Alpha，最能看见信号本身。
+\item 多空受\textbf{成本与融券限制}（A 股做空难）；务实中间派是“多头为主 + 回归评估”。
+\end{itemize}
+
+\subsection{前视偏差（工程红线）}
+回测最隐蔽的错误：用了“当时尚未知道”的信息。
+\begin{itemize}[itemsep=2pt]
+\item 中性化 $\gamma$ 若用“当月末”行业/市值估、再对当月收益归因，属前视。
+\item 严谨做法：用 $t-1$ 期已知暴露估计、对 $t$ 期应用（$\gamma$ 滞后一期）。
+\item 标准：任何因子值、暴露、成交量在决策时刻必须“可用”。
+\end{itemize}
+
+\section{为什么量化工程师盯着 Alpha}
+
+\subsection{四个理由（第一性原理）}
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{可归因}：绝对收益把“能力、市场、运气”打包成一个数字；Alpha 把它们分开。
+\item \textbf{可检验}：Alpha 有标准误，可做 $t$ / IR 检验。
+\item \textbf{可复用}：Beta 是市场的、可被指数替代；只有 Alpha 是不可替代的可持续能力。
+\item \textbf{可定价}：Alpha 是“工程师自己的产品”——他们卖的不是“市场涨我就赚”，而是剥离所有可定价因子后剩下的部分。
+\end{enumerate}
+
+\subsection{假 Alpha（fake alpha）从哪来}
+\begin{itemize}[itemsep=2pt]
+\item \textbf{未中性化的暴露}：单因子回归估的 Alpha 混进行业/市值/风格暴露（遗漏变量偏差）。
+\item \textbf{调参过拟合}：在历史上反复选因子/参数直到曲线好看。
+\item \textbf{幸存者/前视偏差}：用当前成分股回溯、或偷用未来信息造出“皇帝的新 Alpha”。
+\end{itemize}
+“干净的 Alpha”需满足：\textbf{多因子中性化 + 样本外稳健 + 无前视 + 有显著性（IR、t）}。
+
+\subsection{诚实的边界（反方视角）}
+\begin{itemize}[itemsep=2pt]
+\item \textbf{Alpha 是“评价”透镜，不是“发钱”透镜}：投资人最终拿到的仍是绝对收益；$\alpha=+20\%$ 在 $-40\%$ 市场里体验仍是 $-20\%$。
+\item \textbf{真实 Alpha 极稀缺}：多数策略 Alpha 扣成本后趋于 0，进场越拥挤，衰减越快。
+\item \textbf{回测 Alpha $\neq$ 实盘 Alpha}：赢了归因、输了甩市场是常见修辞病；钉 Alpha 正是为对抗这种自欺。
+\end{itemize}
+
+
+\section*{附录：符号表 / 练习自测 / 参考阅读}
+\addcontentsline{toc}{section}{附录}
+
+\subsection*{A. 符号表}
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}ll@{}}
+\toprule
+符号 & 含义 \\
+\midrule
+$R_i,\,R_m,\,R_f$ & 资产收益、市场收益、无风险利率 \\
+$\alpha$ & 超额能力 / 截距（剥掉市场后的平均超额） \\
+$\beta$ & 系统性风险暴露 / 斜率 \\
+$\varepsilon$ & 随机扰动 / 残差 \\
+$X$ & 设计矩阵（行业哑变量 + $\ln$市值 + 截距） \\
+$P=X(X^{\top}X)^{-1}X^{\top}$ & 正交投影矩阵 \\
+$f_i \to \bar f_i$ & 原始因子 $\to$ 中性化（残差）因子 \\
+$\ln M_i$ & 对数市值 \\
+$z_i$ & 标准化后的因子分数 \\
+$\mathrm{IC}/\mathrm{IR}/t$ & 信息系数 / 信息比率 / $t$ 值 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{B. 练习与自测}
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{概念}：用一句话区分 $\beta$ 与 $\alpha$ 的本质（参考：可复制/可持续）。
+\item \textbf{推导}：写出 $\beta=\operatorname{Cov}/\operatorname{Var}$ 的估计式；说明市场模型与 CAPM 的区别。
+\item \textbf{推演}：为什么用 $\ln M$ 而非 $M$？为什么截距列能保证残差均值为 0？
+\item \textbf{正交性实验}：造一组数据跑 \codeinl{factor\_pipeline}，检验残差与 $\ln$市值、行业哑变量的协方差是否约 0，$z$ 均值 0、方差 1。
+\item \textbf{缺项偏差验证}：分别用“只去市值”“只去行业”“二者都去”三种方式中性化，比较残差与漏掉暴露的相关性。
+\item \textbf{显著性检验}：用月度回测算 $\operatorname{IR}$ 与 $t$，判断多大样本才能“显著”。
+\item \textbf{前视自查}：检查回测里建仓时刻用到的行业/市值/因子是否均为当时已知信息。
+\end{enumerate}
+
+\subsection*{C. 参考阅读（按难度递增）}
+\begin{enumerate}[itemsep=2pt]
+\item Markowitz, H. M. (1952). \emph{Portfolio Selection}.
+\item Sharpe, W. F. (1964). \emph{Capital Asset Prices: A Theory of Market Equilibrium}.
+\item Fama, E. F. \& MacBeth, J. D. (1973). \emph{Risk, Return, and Equilibrium}.
+\item Grinold, R. \& Kahn, R. (2000). \emph{Active Portfolio Management}.
+\end{enumerate}
+
+
+\section*{延伸阅读}
+\addcontentsline{toc}{section}{延伸阅读}
+趋势溢价、趋势跟踪与仓位的专题及其可运行脚本（单品种 / 多品种等权），已独立成篇：\textbf{《趋势跟踪与仓位管理：从趋势溢价到可运行的仓位纪律》}（\texttt{trend\_position\_management.tex} / \texttt{trend\_position\_management.pdf}）。本教程只聚焦 Alpha/Beta 认识论与因子中性化、标准化这条生产线。
+
+\section*{一句话收束}
+\addcontentsline{toc}{section}{一句话收束}
+\textbf{Beta} 衡量你承担多少市场风险（可被替代），\textbf{Alpha} 衡量你在市场已定价之后还剩多少本事（不可替代）；“行业+市值中性化 $\to$ 残差 $\to$ z-score $\to$ 显著性检验”这条流水线，就是把你托付给市场的 Beta、交给运气的 $\varepsilon$ 逐层剥离干净，最后留下那一小撮真正属于你、且经得起统计考验的 Alpha。
+
+\end{document}

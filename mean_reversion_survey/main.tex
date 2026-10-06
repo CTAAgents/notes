@@ -1,0 +1,302 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{titlesec}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=black
+}
+
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+
+\title{\bfseries 均值回归策略研究综述\\\large 有史以来至今的文献证据、评测口径与可复现性}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent 本综述系统梳理自 1930 年代均值回归理论（Ornstein--Uhlenbeck 过程）诞生至今，关于均值回归交易策略的学术论文、预印本、官方仓库与基准报告。我们以“评测维度适配矩阵”替代机器学习模型评测模板：将“预训练数据、预测设定、零样本能力、概率预测、计算成本、许可、公开 benchmark、数据污染”分别映射为“样本数据、信号设定、样本外稳健性、概率/状态预测、计算成本、数据与代码许可、公开基准、数据污染与不可比设定”八维核验口径，对 \textbf{超过 30 篇核心来源} 逐篇核验。综述覆盖五个方法族——经典反转效应、统计套利/配对交易、时序均值回归模型、期货与波动率均值回归、机器学习与强化学习前沿；并单独成章审计评测数据污染（幸存者偏差、look-ahead 偏差、数据窥探、多重检验）与跨论文不可比设定。全部引用均链接原始来源（DOI / arXiv / 官方仓库），结论附置信度分级，文末给出可复现实验路线图。
+\end{abstract}
+
+\tableofcontents
+
+\section{引言与综述口径}\label{sec:intro}
+
+均值回归（mean reversion）是金融研究中与动量（momentum）并行的两大时序事实之一：资产价格在短期呈现正自相关（动量），在更长或极短的特定时间尺度上呈现负自相关（反转）。对“价格会回归其均衡水平”这一信念进行工程化，便构成均值回归交易策略家族——从经典的“买跌卖涨”反向策略，到配对交易（pairs trading）、统计套利（statistical arbitrage）、Ornstein--Uhlenbeck（OU）框架下的最优阈值交易，再到近年来深度学习与强化学习对均值回归信号的再挖掘。
+
+\subsection{综述边界}
+
+\begin{itemize}
+  \item \textbf{时间范围}：自 Uhlenbeck 与 Ornstein（1930）提出 OU 过程算起，至 2026 年 10 月的预印本；覆盖五个方法族并附评测方法论（数据窥探与多重检验）文献。
+  \item \textbf{资产类别}：股票（美国、国际、东京证交所、波兰）、期货与商品、指数与波动率、加密货币。
+  \item \textbf{来源类型}：同行评审期刊论文、工作论文（NBER/SSRN）、arXiv 预印本、官方开源仓库（Microsoft Qlib 等）、复现代码仓库、数据许可说明（CRSP/WRDS）。
+  \item \textbf{排除}：均值回归在宏观计量（如 PPP 汇率检验）中的非交易应用；纯资管产品介绍；无实证或理论贡献的二手转述。
+\end{itemize}
+
+\subsection{检索策略与证据链}
+
+检索采用多源交叉核验，全部元数据来自接口真实返回，未编造 DOI 或年份：
+\begin{enumerate}
+  \item \textbf{OpenAlex API}：按标题检索经典金融期刊文献（\emph{Journal of Finance}、\emph{Review of Financial Studies}、\emph{Journal of Financial Economics} 等），记录 DOI、发表年份、被引数与来源期刊。
+  \item \textbf{arXiv API}：按关键词检索预印本（statistical arbitrage、pairs trading、mean reversion + optimal trading、Ornstein--Uhlenbeck + trading、fractional cointegration、deep learning/reinforcement learning + mean reversion）。
+  \item \textbf{Crossref / Semantic Scholar / Web 检索}：补核验 Crossref 与 OpenAlex 限流时段缺失的条目，以及官方仓库（Microsoft Qlib）与数据许可说明（CRSP 数据与实用协议、WRDS 订阅条款）。
+\end{enumerate}
+核验等级约定：\textbf{已核验}（元数据互证，含 DOI/官方链接）；\textbf{部分核验}（元数据确认，但样本区间、信号参数等细节需全文复核）；\textbf{待复核}（仅能定位来源，数值结论需人工读全文）。
+
+\subsection{从“模型评测模板”到“文献核验矩阵”的适配}\label{sec:mapping}
+
+委托方给定模板包含“预训练数据、预测设定、零样本能力、概率预测、计算成本、许可、公开 benchmark 结果”，并特别要求识别“评测数据污染与不可比设定”。该模板源于大模型评测，直接套用于金融文献会产生失配。本综述采用如下文献学适配映射：
+
+\begin{table}[htbp]
+\centering
+\caption{评测维度适配映射}
+\label{tab:mapping}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{8.2cm}@{}}
+\toprule
+模板维度 & 文献核验维度 & 核验问题 \\
+\midrule
+预训练数据 & 样本数据 & 用哪个市场/区间/频率/标的池？\\
+预测设定 & 信号设定 & 形成期与持有期、进出场阈值、模型参数？\\
+零样本能力 & 样本外稳健性 & 是否做 walk-forward、跨市场、跨资产泛化检验？\\
+概率预测 & 概率/状态预测 & 是否输出参数估计、区间或状态（如 OU 参数、Kalman/HMM）？\\
+计算成本 & 计算成本 & 数据需求、算法复杂度、是否可低成本复现？\\
+许可 & 数据与代码许可 & 数据（CRSP/TAQ）许可、代码与模型许可？\\
+公开 benchmark & 公开基准 & 是否提供可复现基准（Qlib、复现代码、论文复现结果）？\\
+数据污染 & 数据污染与不可比 & look-ahead、幸存者偏差、数据窥探、多重检验、跨论文设定差异？\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{理论根基}\label{sec:theory}
+
+\subsection{Ornstein--Uhlenbeck 过程与均值回归的定义}
+
+Uhlenbeck 与 Ornstein（1930）\cite{uhlenbeck1930} 提出的 OU 过程是均值回归的标准数学载体：
+\begin{equation}
+  dX_t = \theta\,(\mu - X_t)\,dt + \sigma\,dW_t,\qquad \theta>0,
+\end{equation}
+其中 $\theta$ 为回归强度（mean-reversion speed），$\mu$ 为长期均值，$\sigma$ 为波动率。离散化（Euler）后为 AR(1)：
+\begin{equation}
+  X_{t+\Delta t} - \bar X = e^{-\theta\Delta t}\,(X_t-\bar X) + \varepsilon_t.
+\end{equation}
+常用派生量包括 \textbf{半衰期} $H=\ln 2/\theta$（偏离均值一半被“拉回”所需时间），以及 OU 参数的极大似然估计（由离散样本精确 MLE 给出）。Vasicek（1977）\cite{vasicek1977} 将该框架用于利率期限结构均衡模型，是“利率/价差均值回归”文献的源头之一。Elliott 等（2005）\cite{elliott2005} 则用 OU 状态空间形式（Kalman 滤波在线估计）为配对价差建模，属于“概率/状态预测”维度的代表性实现。
+
+\subsection{均值回归的统计检验}
+
+\begin{itemize}
+  \item \textbf{方差比检验}（Lo \& MacKinlay 1988 \cite{lomackinlay1988}）：利用随机游走假设下 $q$ 期收益方差应为单期方差 $q$ 倍的恒等式。作者对 1962--1985 年美国 CRSP 数据检验发现，等权指数的方差比显著偏离 1（正自相关），而单只个股更接近随机游走——即“指数层面反转/动量可检验，个股层面更困难”。
+  \item \textbf{长记忆与负自相关}：Poterba \& Summers（1988）\cite{poterbasummers1988} 对 1871--1986 年美国市场与 17 国 1957--1985 年数据做方差比检验，发现短期正自相关、长期（3--8 年）负自相关，瞬时分量的标准差约占月度收益方差的 15--25\%，并谨慎论证“时变要求收益”难以完全解释该现象。
+  \item \textbf{协整与误差修正}：Engle \& Granger（1987）\cite{englegranger1987} 给出协整的定义与两步估计（回归残差做单位根检验），是配对交易中“价差平稳性”检验的计量基础。
+  \item \textbf{单位根与平稳性检验}：ADF 检验（Augmented Dickey--Fuller）在配对交易文献中被广泛用作价差平稳性的入口门槛。
+\end{itemize}
+
+\subsection{均值回归的微观机制解释}
+
+Summers（1986）\cite{summers1986} 提出“价格泡沫/时尚”（fads）模型：市场价格可以长期偏离基本面价值，理性套利者因噪声交易者风险而不愿完全消除偏离。De Long、Shleifer、Summers 与 Waldmann（1990）\cite{delong1990} 进一步证明噪声交易者风险使基本面套利受限。这两篇构成“均值回归为何存在且长期持续”的行为金融解释，也解释了为何反转策略的利润在扣除成本后常常脆弱。
+
+\section{分方法族综述}\label{sec:survey}
+
+\subsection{经典反转效应（1985--2000）}\label{sec:reversal}
+
+\textbf{长期反转}。De Bondt \& Thaler（1985）\cite{debondt1985} 是“输家赢家反转”的开山之作：以 1926--1982 年 CRSP/NYSE 数据构造形成期 36 个月的赢家/输家组合，持有 36 个月，发现输家组合显著跑赢赢家组合（论文报告持有期累计超额收益差达数十个百分点量级，具体数值需全文复核）。该结果被解释为市场过度反应后的回归。Lakonishok、Shleifer \& Vishny（1994）\cite{lakonishok1994} 用账面市值比与现金流价格比构造“价值策略”，发现 1968--1990 年美国样本中反向投资显著跑赢，并将之归因于投资者对外推性增长的过度反应（而非简单风险补偿）。
+
+\textbf{短期反转}。Lehmann（1990）\cite{lehmann1990} 用 1962--1986 年 NYSE/AMEX 周频数据发现，前一周涨幅最高的股票组合次周显著下跌，形成“周频反转”利润。Jegadeesh（1990）\cite{jegadeesh1990} 在月频层面发现个股收益的负自相关。这些“短反转”利润后来被证明部分来自买卖价差与流动性成本（反转利润在扣除成本后大幅缩水）。
+
+\textbf{方法论警示}。Lo \& MacKinlay（1990）\cite{lomackinlay1990} 指出，许多论文报告的“反转利润”并非来自个股过度反应，而是来自股票之间的交叉自相关（lead--lag 效应）：大市值股票滞后带动小市值股票，使看似反转的组合收益在聚合层面被高估。这是本综述“不可比设定”审计的第一个经典案例：同样的“反转收益”，机制与可持续性完全不同。
+
+\textbf{国际证据}。Balvers、Wu \& Gilliland（2000）\cite{balvers2000} 对 18 国指数 1969--1996 年月度数据做参数化反向策略，发现月度反转系数在多数国家显著，且预测能力在统计上稳健——为“均值回归跨国存在”提供了组合层面的证据。
+
+\subsection{统计套利与配对交易（1987--2012）}\label{sec:statarb}
+
+\textbf{协整与配对}。配对交易的现代形式建立在协整之上（Engle \& Granger 1987 \cite{englegranger1987}）。Vidyamurthy（2004）\cite{vidyamurthy2004} 的专著系统梳理了距离法、协整法与随机价差法的配对选择。Gatev、Goetzmann \& Rouwenhorst（2006）\cite{gatev2006} 提供经典实证：1962--2002 年 CRSP 日数据，以最小化标准化价差平方和的距离法选配对，6 个月形成期 + 6 个月交易期滚动，报告年化超额收益约 11\%（扣除成本前），是最常被引用的“配对交易有效”证据。
+
+\textbf{因子/主成分统计套利}。Avellaneda \& Lee（2010）\cite{avellaneda2010} 用 ETF 与行业 ETF 因子 + 主成分分析（PCA）对美股 1997--2007 年日数据构建残差价差，以 s-score 进出场，报告统计套利组合的夏普比率显著为正，并讨论容量与衰减。该文是“因子剥离式”统计套利的现代范式。
+
+\textbf{利润衰减与成本}。Do \& Faff（2012）\cite{dofaff2012} 将 Gatev 样本延伸至 2009 年，发现配对交易利润存在显著衰减：1962--1988 年高利润，1989 年后明显下降，扣除交易成本后更弱。这直接构成“公开基准的时间不可比”证据——早期样本的高收益不能外推到后期。
+
+\textbf{最优交易}。Boguslavsky \& Boguslavskaya（2004）\cite{boguslavsky2004} 在定价误差服从 OU 的假设下推导对称阈值最优交易带（“只买显著低于均值、卖显著高于均值”的工程化形式）。Martin \& Sch\"oneborn（2011）\cite{martin2011} 的理论与数值研究给出关键词“Mean Reversion Pays, but Costs”：均值回归策略在理论上可盈利，但交易成本会侵蚀大部分利润，并讨论最优交易带对成本的敏感性。
+
+\subsection{时序均值回归模型与最优阈值交易}\label{sec:timemodel}
+
+Cuturi \& d'Aspremont（2013）\cite{cuturi2013} 提出“方差阈值下的最大均值回归”：给定多元过程样本路径，求解线性组合（交易篮子）使均值回归代理指标最大化、同时约束方差高于阈值，问题可化为半定规划（SDP）与 S-lemma 变体精确求解；其动机正是“统计套利篮子需有足够方差以克服市场摩擦”。该文在 \emph{ICML 2013} 发表，代表了从“检验是否均值回归”到“构造均值回归组合”的优化式转向。
+
+Zhang \& Zhang（2010）\cite{zhangzhang2010} 研究单资产 OU 模型下的最优交易规则（“低买高卖”的严格阈值形式）。近年来 OU 框架在配对交易中的工程化应用持续出现，例如基于 OU 状态估计的配对交易（arXiv:2412.12458 \cite{arxiv_ou_pairs}）、超高频数据 OU 估计（arXiv:1811.09312）等。
+
+\textbf{概率/状态预测维度}：Elliott 等（2005）\cite{elliott2005} 用 Kalman 滤波在线估计配对价差的 OU 状态，输出的是“状态后验”而非点预测，属于概率/状态预测的代表。arXiv:2210.15448 \cite{arxiv_neural_kalman} 将神经网络增强的 Kalman 滤波与布林带结合用于配对交易。
+
+\subsection{期货、商品与波动率}\label{sec:futures}
+
+\textbf{商品长期反转}。Erb \& Harvey（2006）\cite{erbharvey2006} 发现商品期货的展期收益（roll return）具有显著的长期均值回归特征：同品种价格序列的负自相关可在多年尺度上被观测到，这对组合配置与 CTA 策略意义重大。Moskowitz、Ooi \& Pedersen（2012）\cite{mom2012} 的时序动量证据（1965--2009 年，涵盖股指/利率/商品/外汇）作为对照——同一批资产上，短周期反转与中长周期动量并存，说明“反转 vs 动量”取决于持有期标尺。
+
+\textbf{波动率均值回归}。波动率本身是高度均值回归的。Carr \& Wu（2009）\cite{carrwu2009} 用股票指数期权定价出“方差风险溢价”（variance risk premium），并实证其与收益的关系——这是“做多/做空波动率均值回归”交易的理论依据。Bollerslev（1986）\cite{bollerslev1986} 的 GARCH 模型则是最被广泛使用的高波动均值回归计量载体（条件方差向长期平均回归）。
+
+\textbf{期货均值回归交易}。arXiv:1601.04210 \cite{arxiv_futures_mr} 将均值回归假设与期货投机交易结合，讨论均值回归强度与最优合约选择；arXiv:2608.00885 \cite{arxiv_microstructure} 研究微结构层面价格均值回归的最优交易（高频反转的执行层面证据）。
+
+\subsection{机器学习与强化学习前沿（2018--2026）}\label{sec:ml}
+
+近十年均值回归研究显著向数据驱动方法迁移：
+
+\begin{itemize}
+  \item \textbf{深度学习统计套利}：Deep Learning Statistical Arbitrage（arXiv:2106.04028 \cite{arxiv_dl_sa}）用深度神经网络从大量特征中学习可交易信号；Detecting data-driven robust statistical arbitrage strategies with DNNs（arXiv:2203.03179 \cite{arxiv_robust_sa}）强调对模型不确定性的稳健化。Polish equities 的深度统计套利研究（arXiv:2512.02037 \cite{arxiv_poland_sa}）提供新兴市场的复现证据。
+  \item \textbf{在线学习与强化学习}：Online Learning Algorithms for Statistical Arbitrage（arXiv:1811.00200 \cite{arxiv_online_sa}）将配对套利转化为在线决策问题；Advanced Statistical Arbitrage with Reinforcement Learning（arXiv:2403.12180 \cite{arxiv_rl_sa}）与 Deep Reinforcement Learning with Function Properties in Mean Reversion Strategies（arXiv:2101.03418 \cite{arxiv_rl_mr}）用 RL 学进出场策略；加密货币多对交易（arXiv:2606.04574 \cite{arxiv_crypto_drl}）与动态协整配对（arXiv:2109.10662 \cite{arxiv_crypto_coint}）将上述方法迁移到新兴市场。
+  \item \textbf{信号融合}：Slow Momentum with Fast Reversion（arXiv:2105.13727 \cite{arxiv_slowfast}）用 changepoint 检测融合“慢动量 + 快反转”，是组合两种时序事实的代表作。
+  \item \textbf{大规模实证}：东京证交所全配对研究（arXiv:1412.7269 \cite{arxiv_tse}）给出 2005--2014 年约数万对配对的系统实证，说明配对交易利润在不同市场结构下的差异。
+\end{itemize}
+
+这些工作的“样本外稳健性”普遍弱于经典文献：多数只报告单一市场单一区间的回测，且公开 benchmark 与数据污染审计几乎缺位——这正是本综述第 \ref{sec:audit} 节强调的风险。
+
+\input{evidence}
+\input{matrix}
+
+\section{结论置信度分级}\label{sec:confidence}
+
+我们将主要结论按证据强度分级（高/中/低），并给出边界条件：
+
+\begin{table}[htbp]
+\centering
+\caption{结论置信度分级}
+\label{tab:confidence}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{8.2cm}@{}}
+\toprule
+结论 & 置信度 & 依据与边界 \\
+\midrule
+股票指数存在长期负自相关（3--8 年） & 高 & 多国多期方差比证据（\cite{poterbasummers1988,lomackinlay1988}）一致；但时变风险收益解释未完全排除 \\
+输家--赢家长期反转在早期样本显著 & 高 & 经典证据充分（\cite{debondt1985,lakonishok1994}）；现代样本的稳健性存疑 \\
+短期反转利润部分来自流动性/价差而非过度反应 & 高 & \cite{lehmann1990,jegadeesh1990,lomackinlay1990} 交叉印证 \\
+配对交易（距离法）利润随样本推进衰减 & 中--高 & \cite{gatev2006,dofaff2012} 前高后低，成本敏感 \\
+统计套利（因子/PCA 剥离）可产生显著夏普 & 中 & \cite{avellaneda2010} 及复现；容量与衰减限制明确 \\
+OU 阈值交易理论最优解存在且依赖参数/成本 & 高（理论） & \cite{boguslavsky2004,martin2011}；实践参数估计误差大 \\
+方差风险溢价长期为负（波动率均值回归可交易） & 高 & \cite{carrwu2009} 等一致证据 \\
+商品展期收益存在长期反转 & 中 & \cite{erbharvey2006}；品种差异大 \\
+深度/强化学习统计套利超越传统基线 & 低--中 & arXiv 证据为主（\cite{arxiv_dl_sa,arxiv_rl_sa} 等），缺独立复现与 OOS 审计 \\
+\textbf{注意}：文献中绝大多数“高收益”声明未做多重检验校正 & 高（方法论） & \cite{white2000,sullivan1999,harveylz2016,bailey2014pbo} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+置信度说明：\textbf{高} = 多源独立证据 + 跨样本稳健；\textbf{中} = 单一权威来源或存在明确边界条件；\textbf{低} = 预印本、单一样本或缺乏独立复现。
+
+\section{评测数据污染与不可比设定审计}\label{sec:audit}
+
+本综述的最终目标是识别“哪些公开结果可信、哪些结果只是样本内产物”。审计围绕五类风险展开。
+
+\subsection{幸存者偏差与上市偏差}
+
+- 早期反转与动量研究多使用 CRSP 数据库（含退市股），幸存者偏差相对可控；但若使用今天的“存活成分股”回溯，则高估反转利润。CRSP 的价值恰在于其 1925 年起的完整退市记录 \cite{crsp_wrds}。
+- 配对交易实证（如 \cite{gatev2006}）若只用现存股票配对，会高估样本内收益。
+
+\subsection{Look-ahead 偏差}
+
+- 形成期/持有期窗口的错位是常见失误：信号在 $t$ 期收盘计算、却按 $t$ 期开盘价成交，即引入 look-ahead。Gatev 等（2006）\cite{gatev2006} 与 Do \& Faff（2012）\cite{dofaff2012} 在方法上对交易日对齐有明确说明，属较干净样本；而部分 arXiv 预印本未披露成交时点，需全文复核。
+
+\subsection{数据窥探与多重检验}
+
+- White（2000）\cite{white2000} 提出 Reality Check：对大量候补规则做 bootstrap 检验，避免“测一万条规则总能找到一条赚钱的”。Sullivan、Timmermann \& White（1999）\cite{sullivan1999} 对 7846 条技术交易规则做 Reality Check，结论是“规则集合整体的绩效不显著优于无规则”。
+- Harvey、Liu \& Zhu（2016）\cite{harveylz2016} 给出截面因子研究的多重检验修正：在数百个被发表因子面前，新因子的 $t$ 统计量阈值应从 2 提高到约 3。
+- Bailey 等（2014/2016）\cite{bailey2014pbo} 提出“回测过拟合概率”（PBO）与组合对称交叉验证（CSCV）；Bailey \& L\'opez de Prado（2014）\cite{bailey2014dsr} 提出“缩水夏普比率”（DSR），将选择偏差、过拟合与非正态收益纳入显著性判断。
+- \textbf{审计结论}：均值回归文献中，上述多重检验工具在 2010 年后才被系统性引入；2010 年前的“高收益声明”普遍未做任何校正，直接可比性存疑。
+
+\subsection{跨论文不可比设定}
+
+\begin{table}[htbp]
+\centering
+\caption{跨论文不可比设定的典型来源}
+\label{tab:incomparable}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.8cm}>{\raggedright\arraybackslash}p{11.0cm}@{}}
+\toprule
+设定维度 & 差异举例 \\
+\midrule
+频率与持有期 & 周反转（\cite{lehmann1990}）vs 月反转（\cite{jegadeesh1990}）vs 3--8 年反转（\cite{poterbasummers1988}）是不可比的三种“反转” \\
+样本区间 & \cite{gatev2006}（1962--2002）与 \cite{dofaff2012}（至 2009）显示利润随时间衰减 \\
+标的池 & 指数（\cite{balvers2000}）vs 全个股（\cite{debondt1985}）vs 配对（\cite{gatev2006}）不可比 \\
+成本口径 & 是否计交易成本、冲击成本模型差异巨大；\cite{martin2011} 显示成本可吞噬全部利润 \\
+因子剥离 & \cite{avellaneda2010} 用 PCA/ETF 剥离市场因子；早期文献仅用价格动量，风险暴露不可比 \\
+市场结构 & 发达市场（\cite{gatev2006,avellaneda2010}）vs 新兴市场（\cite{arxiv_tse,arxiv_crypto_coint,arxiv_poland_sa}） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{公开基准（benchmark）的可用性审计}
+
+\begin{itemize}
+  \item \textbf{学术基准数据}：CRSP（经 WRDS 订阅，含完整退市记录）是最干净的学术数据基准；其“CRSP Data and Utilities Agreement”明确要求数据不可转售、仅限订阅机构使用，商业用途受限 \cite{crsp_wrds,crsp_license}。
+  \item \textbf{开源量化平台}：Microsoft Qlib \cite{qlib} 提供完整的 AI 量化研究管线（数据、训练、回测），其 \emph{Benchmarks} 页公开 CSI300 上 Alpha158/Alpha360 各模型的 IC/IR、年化收益、回撤等指标 \cite{qlib_benchmarks}，是目前最透明的“公开基准”之一；但 Qlib 基准聚焦动量/截面因子而非纯反转策略。
+  \item \textbf{复现代码仓库}：david-alber/Pairs-Trading-as-application-to-the-Ornstein--Uhlenbeck-Process \cite{repo_ou_pairs}、cantaro86/Financial-Models-Numerical-Methods \cite{repo_fmnm}、esvhd/pypbo（PBO 参考实现）\cite{repo_pypbo}、hudson-and-thames/mlfinlab（多重检验与标记方法库）\cite{repo_mlfinlab} 是均值回归与评测方法论的可复现资产。\emph{警示}：这些仓库多数未声明数据许可与回测细节，复现结果不能直接视为论文结论的独立验证。
+\end{itemize}
+
+\section{可复现实验建议}\label{sec:reproduce}
+
+基于上述审计，给出分优先级的可复现实验路线（每项均给出成功标准）：
+
+\subsection{P0：把经典结果钉死在同一个口径下}
+
+\begin{enumerate}
+  \item \textbf{统一数据层}：固定使用 CRSP（或等权退市记录完整的替代源）与明确交易时点（收盘信号、次日开盘成交），禁止盘中 look-ahead。
+  \item \textbf{统一成本层}：至少报告“零成本 / 固定佣金 / 含冲击成本”三档收益；冲击成本采用绝对参与率模型并限定参与率上限。
+  \item \textbf{统一评价层}：对每类策略报告年化、夏普、最大回撤、换手率、月胜率与 PBO/DSR 指标。
+  \item \textbf{成功标准}：能复现 \cite{gatev2006} 与 \cite{dofaff2012} 的利润衰减曲线形态；无法复现时记录偏差来源。
+\end{enumerate}
+
+\subsection{P1：跨市场与样本外泛化}
+
+\begin{enumerate}
+  \item 将同一套配对/统计套利管线跑在 A 股、加密货币与商品期货上（可参考 \cite{arxiv_tse,arxiv_crypto_coint,arxiv_poland_sa} 的设定），报告“跨市场迁移分数”。
+  \item 用 walk-forward（滚动 6 个月形成期）而非单次全样本拟合，报告参数稳定性。
+  \item \textbf{成功标准}：同一策略在 $\geq 3$ 个市场的 OOS 结果同号且不显著恶化。
+\end{enumerate}
+
+\subsection{P2：多重检验纪律}
+
+\begin{enumerate}
+  \item 参数搜索全部纳入 DSR 的试验次数统计；对多市场多参数结果做 Benjamini--Hochberg 校正。
+  \item 对最终候选策略计算 PBO（CSCV），要求 PBO $<0.2$ 才允许进入模拟盘。
+  \item \textbf{成功标准}：报告“试验次数 $M$、观察数 $T$、缩水夏普 DSR、过拟合概率 PBO”四项，缺一不可。
+\end{enumerate}
+
+\subsection{P3：前沿方法对照}
+
+\begin{enumerate}
+  \item 以 \cite{arxiv_dl_sa,arxiv_rl_sa} 为基线，在相同数据与成本口径下与 P0 的经典策略对照，明确“增量”来自模型还是设定。
+  \item 使用 Qlib \cite{qlib} 复现 benchmark 管线以对齐报告口径。
+  \item \textbf{成功标准}：深度/强化学习方法的 OOS 夏普超过经典 OU/距离法基线且 DSR 通过，否则结论为“无可复现增益”。
+\end{enumerate}
+
+\section{结论与边界}\label{sec:conclusion}
+
+\noindent\textbf{核心结论}（附置信度）：
+\begin{enumerate}
+  \item 均值回归在理论上是“被付钱的统计事实”：OU 框架给出清晰的最优交易结构，而方差比/协整检验给出了可检验性（高置信度）。
+  \item 实证上，反转与配对利润在 20 世纪更显著、进入 21 世纪后衰减，且对交易成本高度敏感（中--高置信度）。
+  \item 文献最大的系统性风险不是模型错误，而是评测污染：数据窥探、幸存者偏差与不可比设定使大量“高收益声明”无法互证（高置信度）。
+  \item 深度学习/强化学习方法的增量仍缺乏独立复现与 OOS 审计（低置信度，建议按第 \ref{sec:reproduce} 节路线验证）。
+\end{enumerate}
+
+\noindent\textbf{诚实边界}：本综述的八维核验矩阵中，“样本数据”“信号设定”“概率/状态预测”等维度依赖论文元数据与摘要，部分论文的精确参数（阈值、持有期天数、成本模型）需要人工读全文复核，已在证据表中以“待全文复核”标注。引用计数与链接核验截止于 2026-10-06 检索当日。
+
+\input{checklist}
+\input{limitations}
+\input{future}
+
+\section*{主要来源索引}
+\noindent 全部来源见第 \ref{sec:evidence} 章证据表与第 \ref{sec:matrix} 章比较矩阵；完整参考文献列表见文末，均附 DOI/arXiv/官方仓库链接。
+
+\newpage
+\input{references}
+
+\end{document}

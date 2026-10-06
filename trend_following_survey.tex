@@ -1,0 +1,404 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,longtable,array}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\hypersetup{colorlinks=true, urlcolor=blue, linkcolor=black, citecolor=blue}
+\setlength{\parindent}{2em}
+\setlength{\emergencystretch}{3em}
+\setlength{\tabcolsep}{4pt}
+\setlist{nosep}
+
+\newcommand{\confhigh}{\textbf{高}}
+\newcommand{\confmid}{中}
+\newcommand{\conflow}{低}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries 趋势跟踪策略研究综述\\[6pt]}
+{\large 从经典动量到时间序列基础模型：证据、批判与可复现性审计}
+\end{center}
+
+\vspace{1em}
+\noindent\textbf{说明}：本文为基于公开可核验来源的证据型综述。全部引用均链接原始来源（期刊 DOI、SSRN、NBER、arXiv 或作者主页）。每条证据标注核验状态与结论置信度；未能全文复核的具体数字明确标注，不臆造。
+
+\tableofcontents
+
+\section{引言与研究方法}
+
+\subsection{研究问题与边界}
+本综述系统梳理\textbf{有史以来至今}关于趋势跟踪（trend following）策略的研究论文与工程工作，回答六个子问题：(1) 学术谱系与关键里程碑；(2) 机制解释之争（行为 vs.\ 风险）；(3) 实证设置的不可比来源如何扭曲结论；(4) 机器学习如何改变趋势信号的构建与评估；(5) 时间序列基础模型在金融趋势预测上的零样本/概率预测能力与评测污染；(6) 可复现性现状（代码、数据、许可）。
+
+边界：\textbf{主线}为量化金融文献，从截面动量（Jegadeesh--Titman 1993）到时间序列动量/TsMOM（Moskowitz--Ooi--Pedersen 2012）再到 CTA/期货趋势跟踪与波动率目标（Hurst--Ooi--Pedersen 2017 等），覆盖批判性文献（Harvey--Liu--Zhu 2016；McLean--Pontiff 2016；Huang--Li--Wang--Zhou 2020）以及容量与拥挤度文献（Stein 2009；Khandani--Lo 2011；Baltas 2019；Lou--Polk 2022）。\textbf{附录}为时间序列基础模型（Chronos、TimesFM、MOIRAI、Lag-Llama、TimeGPT、PatchTST、Time-LLM、FinCast）用于趋势/动量信号的表现与可比性对比。
+
+\subsection{核验维度与证据纪律}
+用户要求的评测维度与趋势跟踪语境的映射见表~\ref{tab:mapping}。这些映射构成全文证据表的统一核验框架。
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{评测维度到趋势跟踪语境的映射}\label{tab:mapping}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{6.9cm}>{\raggedright\arraybackslash}p{6.5cm}@{}}
+\toprule
+\textbf{评测维度} & \textbf{趋势跟踪语境核验项} & \textbf{典型证据来源} \\
+\midrule
+预训练数据 & 样本期、资产类别范围、数据频率 & MOP12（58 期货）；HOP17（1880--2016 全年份） \\
+预测设定 & 形成期/持有期、持仓频率、进出场规则、成本假设 & JT93；MOP12；KT-W16；BK-Improving13 \\
+零样本能力 & 跨市场/跨资产外推、未重估参数稳定性 & MOP12 全 58 个合约；HOP17 十年切片 \\
+概率预测 & 波动率目标、信号置信区间、方差状态依赖 & BSC15；DM16；Harvey18；KT-W16 \\
+计算成本 & 数据需求、重估频率、算力 & GKX20；附录基础模型 \\
+许可 & 代码/数据可得性 & AQR 数据页；GitHub 仓库（附录） \\
+公开 benchmark 结果 & 公开指数/组合对比、论文复现结果 & SG CTA 指数对比（BK13）；HOP17；附录 Monash/ETT \\
+数据污染与不可比 & look-ahead bias、数据窥探、多重检验、不可比回测 & HLZ16；MP16；HLLWZ20 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{检索与核验渠道}
+候选论文检索：插件 giiisp 论文检索接口因无鉴权 token（\texttt{GIIISP\_AUTH\_TOKEN} 未配置）返回受限，按技能规范记录为\textbf{接口受限}，改用开放源回退（期刊官网、Wiley/OUP、Elsevier/ScienceDirect、RePEc/Ideas、NBER、SSRN、Semantic Scholar、arXiv、作者主页）。关键论文逐篇以 WebSearch/WebFetch 核验题名、作者、年份、期刊卷期与 DOI。giiisp 受限的具体记录见第~\ref{sec:audit}~节复核清单。
+
+\section{学术谱系：从截面动量到时间序列动量}
+
+\subsection{先声：过度反应与反转}
+De Bondt \& Thaler (1985) 提出 3--5 年窗口的过度反应假设：长期输家随后跑赢长期赢家，构成对趋势逻辑的\textbf{反向}先声\footnote{\url{https://doi.org/10.1111/j.1540-6261.1985.tb05004.x}，\emph{Journal of Finance} 40(3): 793--805。}。该文确立了"过去收益预测未来收益"的经验研究范式，是后来动量文献的理论起点（其结论与短中期动量相反，二者共同刻画了收益的 U 形自相关结构）。
+
+\subsection{截面动量：奠基与复现}
+\textbf{Jegadeesh \& Titman (1993)} 以 CRSP 美股 1965--1989 月频数据发现：买入过去 3--12 个月赢家、卖空输家的组合在随后 3--12 个月获得约每月 1\%--1.5\% 的显著超额收益，且不能被系统性风险或公共因子延迟反应解释；收益在形成后 1 年内部分反转\footnote{\url{https://doi.org/10.1111/j.1540-6261.1993.tb04702.x}，\emph{Journal of Finance} 48(1): 65--91。}。\textbf{Jegadeesh \& Titman (2001)} 用 1990s 数据证实动量持续存在（1965--1998 全样本 1.23\%/月，$t=6.46$），排除"数据窥探产物"的解释，并支持行为模型（延迟过度反应）而非横截面分散假设\footnote{\url{https://doi.org/10.1111/0022-1082.00342}，\emph{Journal of Finance} 56(2): 699--720；NBER WP7159：\url{https://www.nber.org/papers/w7159}。}。\textbf{Rouwenhorst (1998)} 将动量推广到 12 个欧洲市场\footnote{\url{https://ideas.repec.org/a/bla/jfinan/v53y1998i1p267-284.html}，\emph{Journal of Finance} 53(1): 267--284。}；\textbf{Moskowitz \& Grinblatt (1999)} 发现行业动量解释了大部分个股动量收益\footnote{\url{https://ideas.repec.org/a/bla/jfinan/v54y1999i4p1249-1290.html}，\emph{Journal of Finance} 54(4): 1249--1290。}。
+
+\subsection{CTA 与期货趋势跟踪的风险模型}
+\textbf{Fung \& Hsieh (1997)} 提出动态交易策略的实证刻画框架\footnote{\url{https://doi.org/10.1093/rfs/10.2.275}，\emph{Review of Financial Studies} 10(2): 275--302。}；\textbf{Fung \& Hsieh (2001)} 以"回溯跨式"（lookback straddle）期权组合复制趋势跟踪者收益，指出趋势策略在极端市场中呈现凸性（crisis alpha），是最早把 CTA 趋势收益"风险因子化"的工作\footnote{\url{https://doi.org/10.1093/rfs/14.2.313}，\emph{Review of Financial Studies} 14(2): 313--341。}。
+
+\subsection{时间序列动量：趋势跟踪的学术化}
+\textbf{Moskowitz, Ooi \& Pedersen (2012)} 提出"时间序列动量"（TsMOM）：在 1960s--2009 的 58 个期货/远期合约（股指、货币、商品、债券）上，过去 12 个月超额收益是未来收益的正向预测因子；约 25 年数据中\textbf{每个合约}的 12 个月 TsMOM 均盈利；收益在约一年后部分反转，与"初始反应不足+延迟过度反应"的行为理论一致；跨资产组合在极端市场中表现最佳，投机者以对冲者受损为代价获利\footnote{\url{https://doi.org/10.1016/j.jfineco.2011.11.003}，\emph{Journal of Financial Economics} 104(2): 228--250；作者主页 PDF：\url{https://static.twentyoverten.com/593e8a9e7299b471eaecf644/rJ7DvLpXz/Time-series-momentum.pdf}。}。\textbf{Asness, Moskowitz \& Pedersen (2013)} 在 8 个市场/资产类别上证明价值与动量普遍存在且存在共同因子结构，全球融资流动性风险是部分来源\footnote{\url{https://doi.org/10.1111/jofi.12021}，\emph{Journal of Finance} 68(3): 929--985。}。\textbf{Hurst, Ooi \& Pedersen (2017)} 手工收集 CBOT 年报数据把趋势跟踪回溯到 1880 年：67 个市场（29 商品、11 股指、15 债券、12 货币），组合 1/3/12 个月 TsMOM、10\% 波动率目标、月度调仓；138 年中每个十年均正收益，在 60/40 组合 10 次最大回撤中 8 次为正，且在各种宏观环境下表现良好\footnote{\url{https://doi.org/10.3905/jpm.2017.44.1.015}，\emph{Journal of Portfolio Management} 44(1): 15--29；作者 PDF：\url{https://fairmodel.econ.yale.edu/ec439/hurst.pdf}。}。该文是"趋势跟踪=稳健因子"叙事最常引用的证据。
+
+\subsection{跨资产实现与容量研究}
+\textbf{Erb \& Harvey (2006)} 在商品期货上验证动量作为战术/战略配置信号\footnote{\emph{Financial Analysts Journal} 62(2): 69--97，DOI 10.2469/faj.v62.n2.4084（标准引用，待全文复核）。}。\textbf{Menkhoff, Sarno, Schmeling \& Schrimpf (2012)} 系统化检验外汇动量策略\footnote{\url{https://doi.org/10.1016/j.jfineco.2012.06.009}，\emph{Journal of Financial Economics} 106(3): 660--684。}。\textbf{Baltas \& Kosowski (2013)} 以 71 个期货合约构建时间序列动量基准组合，证明 CTA 指数收益显著暴露于月/周/日动量因子，且未发现统计显著的容量约束\footnote{\url{https://doi.org/10.2139/ssrn.1968996}，SSRN 1968996。}。\textbf{Baltas \& Kosowski（Improving TsMOM，2013）} 以 12 个期货日内数据（1999--2009）比较信号与波动率估计量：线性趋势拟合信号在样本外表现最优且换手最低，Yang--Zhang 区间估计量在效率与偏差间最优\footnote{\url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2140091}，SSRN 2140091。}。\textbf{Georgopoulou \& Wang (2017)} 在股票与商品市场（1969--2015）确认 TsMOM 的持续性与时长/频率依赖\footnote{\url{https://doi.org/10.1093/rof/rfw048}，\emph{Review of Finance} 21(4): 1557--1592。}。\textbf{Kim, Tse \& Wald (2016)} 在 \emph{Journal of Financial Markets} 检验时间序列动量与波动率缩放，讨论结果对波动率估计与成本设定的敏感性\footnote{\url{https://doi.org/10.1016/j.finmar.2016.05.003}，\emph{Journal of Financial Markets} 30: 103--124；SSRN 2786955。}。
+
+\section{机制解释之争}
+\subsection{行为解释}
+行为派以"保守主义→反应不足""自我归因/有偏注意→过度反应""异质信息扩散"解释短期动量与长期反转（Barberis--Shleifer--Vishny 1998；Daniel--Hirshleifer--Subrahmanyam 1998；Hong--Stein 1999 等经典模型，见 MOP12 第 1 节综述）。MOP12 强调其 TsMOM 证据与这些单资产行为模型"初始反应不足+延迟过度反应"的直接匹配。\textbf{Kelly, Moskowitz \& Pruitt (2021)} 以高维框架区分动量与反转的时变来源，进一步厘清"预测性来自成分分解"的机制\footnote{\url{https://faculty.som.yale.edu/tobymoskowitz/research/}（作者主页），\emph{Journal of Financial Economics} 140(3): 726--743，2021。}。
+
+\subsection{风险解释与动量崩溃}
+\textbf{Daniel \& Moskowitz (2016)} 指出动量存在罕见但持久的负收益串（动量崩溃）：崩溃部分可预测，发生在"恐慌状态"（市场下跌后、波动率高企）并伴随市场反弹；过去输家的期权式尾部收益在恐慌状态获得条件高溢价。1927--2013 美股样本中 1932 年 7--8 月与 2009 年 3--5 月为最剧烈崩溃。基于均值与方差预测的\textbf{动态动量}策略约\textbf{加倍}静态动量的 alpha 与 Sharpe 比\footnote{\url{https://doi.org/10.1016/j.jfineco.2015.12.002}，\emph{Journal of Financial Economics} 122(2): 221--247；作者 PDF：\url{https://www.kentdaniel.net/papers/published/jfe_16.pdf}；NBER WP20439：\url{https://www.nber.org/papers/w20439}。}。这构成对"趋势=稳健正收益"叙事的核心风险修正。
+
+\subsection{公共成分与因子动量}
+\textbf{Ehsani \& Linnainmaa (2022)} 发现因子收益本身存在动量：多数因子正自相关，亏损年后月均 6bp、盈利年后月均 51bp；因子动量集中于解释截面能力强的因子，且独立于个股动量\footnote{\url{https://doi.org/10.1111/jofi.13131}，\emph{Journal of Finance} 77(3): 1877--1919。}。\textbf{Zhang (2022)} 在汇率市场证明因子动量解释了截面与时间序列货币动量，并受套利限制与时变风险溢价驱动\footnote{\url{https://doi.org/10.1016/j.jfineco.2021.05.035}，\emph{Journal of Financial Economics} 144(1): 154--173。}。这些工作把"趋势"从单资产现象提升为\textbf{因子层}的普遍结构。
+
+\section{批判性审视：数据窥探、样本外衰减与不可比设置}
+\subsection{多重检验与更高的显著性门槛}
+\textbf{Harvey, Liu \& Zhu (2016)} 梳理 1967 年以来 316 个被发表因子，指出多重检验下常规 $t>2$ 门槛过低，新因子应至少达到 $t>3.0$；"金融经济学中大多数宣称的研究发现可能是错的"是其标志性结论\footnote{\url{https://doi.org/10.1093/rfs/hhv059}，\emph{Review of Financial Studies} 29(1): 5--68。}。该文要求动量/趋势类证据必须接受更严格的事后多重检验审查。
+
+\subsection{发表后衰减}
+\textbf{McLean \& Pontiff (2016)} 对 97 个预测因子（79 篇论文）比较样本内、样本外-发表前、发表后收益：样本内月均 0.582\%，样本外-发表前 0.402\%，发表后 0.264\%；组合收益样本外下降 26\%，发表后累计下降 58\%，其中约 32pp 归因于"知情交易"（投资者从发表学习并套利）\footnote{\url{https://doi.org/10.1111/jofi.12365}，\emph{Journal of Finance} 71(1): 5--32。}。对趋势跟踪的直接含义：公开后的超额收益预期应打折扣。
+
+\subsection{对 TsMOM 本身的再检验}
+\textbf{Huang, Li, Wang \& Zhou (2020)} 逐资产回归显示 TsMOM 的证据在样本内外均薄弱；池回归 $t$ 统计量虽大但不稳健（低于参数与非参数 bootstrap 临界值）；从投资视角 TsMOM 策略盈利，但其表现与基于历史样本均值的简单策略几乎相同，不要求可预测性\footnote{\url{https://doi.org/10.1016/j.jfineco.2019.08.004}，\emph{Journal of Financial Economics} 135(3): 774--794。}。这是对 MOP12 最直接的方法论挑战，是"趋势溢价是否真实存在"争论的关键反方证据。
+
+\subsection{不可比设置审计}
+综合第 2--4 节证据，趋势跟踪文献的\textbf{不可比设置}主要来自四类：(1) 样本期与资产范围（MOP12 用 1960s--2009 58 合约 vs.\ HOP17 用 1880--2016 67 市场 vs.\ GW17 用 1969--2015）；(2) 波动率缩放是否启用（MOP12 原始设定 vs.\ BSC15/DM16/Harvey18 的缩放设定）；(3) 成本与费用假设（HOP17 计入 2/20 费与滚动成本；部分复现研究忽略）；(4) 频率（BK13 月/周/日；BK-Improving13 日内）。这些差异使"某策略年化 X\%"的跨文献比较必须标注条件，否则即为不可比设定。
+
+\section{波动率目标与风险管理}
+\textbf{Barroso \& Santa-Clara (2015)}：动量风险随时间高度可变且可预测（自身已实现方差），风险管理的动量几乎消除崩溃：Sharpe 0.53$\to$0.97，超额峰度 18.2$\to$2.7，左偏 -2.5$\to$-0.4；1927--2011 样本，目标波动率 12\%\footnote{\url{https://doi.org/10.1016/j.jfineco.2014.11.010}，\emph{Journal of Financial Economics} 116(1): 111--120。}。\textbf{Harvey, Hoyle, Korgaonkar, Rattray, Sargaison \& van Hemert (2018)} 在 60+ 资产（1926--2017）上检验波动率目标：风险资产（股票、信用）与 60/40、风险平价组合的 Sharpe 显著提升，债券/货币/商品影响可忽略；一致降低极端收益概率与"波动率的波动率"；风险资产的杠杆效应使波动率缩放内嵌了时间序列动量成分\footnote{\url{https://doi.org/10.3905/jpm.2018.45.1.014}，\emph{Journal of Portfolio Management} 45(1): 14--33；作者 PDF：\url{https://people.duke.edu/~charvey/Research/Published_Papers/P135_The_impact_of.pdf}。}。\textbf{Kim, Tse \& Wald (2016)} 与 \textbf{Daniel \& Moskowitz (2016)} 分别从波动率缩放与动态均值-方差角度补充了风险管理路径。
+
+\section{容量、拥挤度与因子生命周期}
+
+\subsection{概念界定与度量框架}
+\begin{quote}\footnotesize
+\textbf{拥挤（crowding）}指多个投资者在相同或高度相关的头寸/信号上集中建仓，使单边交易的"集体规模"超过其"私人规模"；\textbf{容量（capacity）}指策略在收益不显著衰减的前提下可容纳的资金上限。两者是同一枚硬币的两面：拥挤抬升同步风险，容量约束决定可管理规模。
+\end{quote}
+度量方法可按信息时序分为三类：(1) \textbf{领先（ex ante）代理}——策略资金流、期货持仓集中度、CTA 敞口统计，先于价格呈现；(2) \textbf{同步代理}——已实现波动、因子收益相关、换手与异常量能；(3) \textbf{滞后代理}——事后收益/相关结构（如 comomentum）。领先代理预测性强但数据可得性差，滞后代理可计算但只能"事后确认"，这一取舍是拥挤度量的核心张力（Baltas19 的框架综述；Lou--Polk22 属滞后/相关类）。
+
+\subsection{理论机制：未锚定策略的协调失败与杠杆外溢}
+\textbf{Stein (2009)} 的 AFA 主席演讲给出拥挤的理论核心，两条机制缺一不可：其一，对广泛的\textbf{未锚定}策略（如动量），套利者无法知道多少同行在同时进场，存在协调问题——价格偏离不会自我修正，反而被"同向进入"强化；其二，\textbf{杠杆外溢}——套利者选择私有最优杠杆率，会制造火售（fire-sale）外部性，提高严重崩溃概率；两者叠加意味着"越多聪明钱进入"未必让市场更有效率\footnote{\url{https://doi.org/10.1111/j.1540-6261.2009.01472.x}，\emph{Journal of Finance} 64(4): 1517--1548。}。该理论脉络可追溯至正反馈交易与同步风险模型（De Long et al., 1990；Abreu \& Brunnermeier, 2002；均见 Stein09 内引综述）：正反馈交易使动量具备自我强化结构，同步风险使套利者难以择时退出。对本文主线而言，这一框架是把动量崩溃（第~3.2~节）从"风险溢价"重新解释为"拥挤+杠杆外溢"的理论基础。
+
+\subsection{经验证据 I：量化崩溃与去杠杆级联}
+\textbf{Khandani \& Lo (2011)} 用因子模拟与交易数据解剖 2007 年 8 月"量化崩溃"。方法上分两层：以五个估值因子构造多空股票组合模拟因子策略收益，再用 TAQ 高频交易数据模拟做市策略。主要发现：(1) 多空组合的平仓始于 2007 年 7 月并延续至年底，说明崩盘是\textbf{渐进去杠杆}而非单日事件；(2) 8 月 6 日当周做市策略显著亏损、前后均盈利，指向\textbf{做市风险资本的暂时撤回}；(3) 识别出两次平仓事件（8 月 1 日 10:45--11:30 与 8 月 6 日开盘至 13:00），起始头寸集中于金融股、多账面市值比、空盈利动量——动量拥挤交易一旦反转，去杠杆会引发系统性级联\footnote{期刊版：\url{https://ideas.repec.org/a/eee/finmar/v14y2011i1p1-46.html}，\emph{Journal of Financial Markets} 14(1): 1--46；NBER WP14465：\url{https://www.nber.org/papers/w14465}。}。与第~3.2~节的\textbf{Daniel \& Moskowitz (2016)} 互补：DM16 刻画动量自身崩溃的\textbf{可预测性}（恐慌状态、波动率状态），KL11 刻画因子拥挤在\textbf{事件层面}的去杠杆传导；两者共同构成"拥挤→崩溃"的完整图景。
+
+\subsection{经验证据 II：拥挤度量与因子表现}
+\textbf{Baltas (2019)} 提出替代风险溢价（ARP）拥挤框架，核心是把系统性策略分为\textbf{发散型}（divergence）与\textbf{收敛型}（convergence）溢价：动量属于发散型——缺乏基本面锚、内嵌"买涨卖跌"的自我强化机制，且同类资金不可观察，因而拥挤期后动量更易跑输；价值属于收敛型——有估值锚，资金流入阶段反而表现更好\footnote{\url{https://doi.org/10.1080/0015198X.2019.1600955}，\emph{Financial Analysts Journal} 75(3): 89--104。}。该分类直接继承 Stein09 的"未锚定"概念，并给出了可操作的拥挤代理（策略资金流、波动率、相关等）。\textbf{Lou \& Polk (2022)} 提供一种基于收益相关结构的\textbf{拥挤反推}：动量组合间的"共同动量"（comomentum）越高，套利活动越集中；相关结构本身承载拥挤信息，可作先验拥挤度量\footnote{\url{https://doi.org/10.1093/rfs/hhab117}，\emph{Review of Financial Studies} 35(7): 3272--3302。}。对趋势跟踪的直接含义：TsMOM 属于发散型溢价，其拥挤风险不亚于截面动量——因子层动量（EL22、Zhang22，第~3.3~节）进一步表明同类信号在因子之间也会聚集，放大拥挤面。
+
+\subsection{趋势跟踪特有的容量问题}
+\textbf{Baltas \& Kosowski (2013)}（见第~2.5~节）基于 71 个期货合约做首次严格的趋势跟踪容量检验：CTA 指数收益对月/周/日动量基准组合暴露显著，但未发现统计显著的"收益--资金流"负相关，即无显著容量约束；同时指出农产品等浅市场的容量风险\footnote{\url{https://doi.org/10.2139/ssrn.1968996}，SSRN 1968996。}。\textbf{Avramov, Cheng, Schreiber \& Shemer (2017)} 从另一角度量化\textbf{规模侵蚀}：异常策略随 AUM 扩张的收益缩放（scaling up）存在边界，规模越大、单位 alpha 越低\footnote{\emph{Journal of Investing} 26(3): 89--105，DOI 10.3905/joi.2017.26.3.089（标准引用，待全文复核）。}。对趋势跟踪的三条结构结论：（本文推断，非单一文献结论）(1) 规则复制本身几乎零边际成本，容量约束主要在冲击成本与展期成本（对应第~10~节实验建议第 2 条）；(2) 波动率目标使名义敞口随波动率状态缩放，因而容量与波动率水平耦合——低波时期名义杠杆更高、容量更紧；(3) 拥挤风险放大尾部（与 DM16/BSC15 的崩溃管理互补），是趋势策略"收益--风险"之外必须计入的第三维度。
+
+\subsection{实践含义与监测框架}
+综合本章文献，给出面向策略研发的监测与约束建议：(1) \textbf{领先监测}：跟踪 CTA 行业 AUM、期货持仓集中度、策略资金流（Baltas19 代理）作为拥挤先行指标；(2) \textbf{同步监测}：计算动量/TsMOM 基准组合的 comomentum 与相关结构（Lou--Polk22），高相关即高拥挤预警；(3) \textbf{容量预算}：对每条趋势信号做冲击成本--规模敏感性曲线（第~10~节实验建议第 2 条），设定容量上限而非仅波动率上限；(4) \textbf{事件预案}：参照 KL11 的去杠杆传导与 DM16 的动态减仓，为"拥挤反转"预置减杠杆纪律。以上 (1)(2) 为文献支持的建议，(3)(4) 为本文基于第~4/5/6~章证据的综合推断。
+
+\section{机器学习与因子工程}
+\textbf{Gu, Kelly \& Xiu (2020)} 在约 3 万只美股（1957--2016，94 个特征$\times$8 个条件变量+74 行业哑变量）上系统比较机器学习方法：树与神经网络最优，收益来自线性方法遗漏的非线性交互；所有方法一致的\textbf{主导预测信号集合包含动量、流动性、波动率}；神经网络股票多空十分位组合样本外 Sharpe 达 1.35，约为领先回归策略的两倍；神经网络对 S\&P 500 择时的样本外 Sharpe 0.77 vs.\ 买入持有 0.51\footnote{\url{https://doi.org/10.1093/rfs/hhaa009}，\emph{Review of Financial Studies} 33(5): 2223--2273。}。这为"动量仍是预测性最强的特征家族"提供 ML 时代证据，同时提示 ML 信号的实现依赖高换手与成本控制。
+
+\section{统一比较矩阵}
+表~\ref{tab:matrix} 给出主线文献的统一比较矩阵。设定列标注了第~4.4~节讨论的不可比维度。
+
+\begin{table}[htbp]
+\centering\scriptsize
+\caption{主线文献统一比较矩阵}\label{tab:matrix}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{1.5cm}@{}}
+\toprule
+\textbf{文献} & \textbf{类型} & \textbf{样本/数据} & \textbf{设定要点} & \textbf{核心结论} & \textbf{置信度} \\
+\midrule
+JT93 & 截面动量 & CRSP 美股 1965--1989 & 3--12 月形成/持有，忽略成本 & 动量盈利约 1\%--1.5\%/月 & \confhigh \\
+JT01 & 截面动量 & CRSP 1965--1998 & 6/6 重叠组合 & 动量持续，非数据窥探 & \confhigh \\
+Rouwenhorst98 & 截面动量 & 12 欧洲市场 & 3--12 月形成/持有 & 动量国际普适 & \confhigh \\
+MG99 & 截面动量 & CRSP 1963--1995 & 行业动量 & 行业动量解释个股动量 & \confhigh \\
+FH97/FH01 & CTA 风险因子 & 对冲基金/CTA 数据库 & 回溯跨式复制 & 趋势凸性、极端市场正收益 & \confhigh \\
+MOP12 & TsMOM & 58 期货 1960s--2009 & 12 月回看/1 月持有，58 合约 & 每合约均盈利；1 年后部分反转 & \confhigh \\
+AMP13 & 价值+动量 & 8 市场/资产类别 & 跨资产共同因子 & 全球价值/动量普适 & \confhigh \\
+HOP17 & TsMOM & 1880--2016，67 市场 & 1/3/12 月组合，10\% 波动率目标 & 138 年十年皆正；危机 8/10 为正 & \confmid \\
+BK13 & TsMOM+CTA & 71 期货 & 月/\allowbreak 周/\allowbreak 日动量组合 & CTA 暴露于动量；\allowbreak 无显著容量约束 & \confhigh \\
+GW17 & TsMOM & 1969--2015 股/商 & 多回看时长 & 持续性+频率依赖 & \confhigh \\
+KT-W16 & TsMOM+波动率缩放 & 期货 & 波动率缩放敏感性 & 结果对设定敏感（全文待复核） & \confmid \\
+BSC15 & 风险管理 & 1927--2011 美股 & 12\% 波动率目标 & Sharpe 0.53$\to$0.97 & \confhigh \\
+DM16 & 风险管理 & 1927--2013 美股+国际 & 动态均值-方差 & 崩溃可预测；动态策略加倍 Sharpe & \confhigh \\
+HLZ16 & 多重检验 & 316 因子（1967--2014） & $t>3.0$ 门槛 & 多数发现可能是错的 & \confhigh \\
+MP16 & 发表后衰减 & 97 因子/79 论文 & 三阶段收益比较 & 发表后 -58\% & \confhigh \\
+Harvey18 & 波动率目标 & 60+ 资产 1926--2017 & 10\% 目标波动率 & 风险资产 Sharpe 提升、尾部减薄 & \confhigh \\
+GKX20 & ML 资产定价 & 3 万美股 1957--2016 & 94 特征 NN/GBM & NN 多空 Sharpe 1.35；动量主导 & \confhigh \\
+HLLWZ20 & TsMOM 再检验 & 多资产大截面 & 逐资产+bootstrap & TsMOM 证据弱；约等于均值策略 & \confhigh \\
+EL22 & 因子动量 & 因子组合（美股） & 因子自相关 & 因子层动量独立于个股动量 & \confhigh \\
+KMP21 & 动量/反转机制 & 高维股票截面 & 成分分解 & 动量与反转来源分离 & \confhigh \\
+Stein09 & 拥挤理论 & 理论（无新数据） & 未锚定+杠杆 & 拥挤造成协调失败与崩溃 & \confhigh \\
+KL11 & 拥挤经验 & 因子模拟+TAQ 2007 & 多空组合去杠杆 & 量化崩溃=同步平仓级联 & \confhigh \\
+Baltas19 & 拥挤实证 & ARP 组合 & 发散/收敛分类 & 动量拥挤后跑输 & \confhigh \\
+LouPolk22 & 拥挤度量 & 美股动量组合相关 & comomentum & 相关结构承载拥挤信息 & \confmid \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{证据表（39 个来源）}\label{sec:evidence}
+表~\ref{tab:evidence} 为全部证据表。核验状态：\textbf{已核验}=题名/作者/年份/期刊卷期与链接在本次检索中逐一对上；\textbf{待全文复核}=元数据已核验但关键数字来自二手综述或未逐页核对；\textbf{标准引用}=规范引文但本次未逐项打开原文页。
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.5cm}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{4.1cm}>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{1.2cm}@{}}
+\caption{证据表}\label{tab:evidence}\\
+\toprule
+\textbf{No.} & \textbf{文献（作者，期刊/年份）} & \textbf{类别} & \textbf{关键贡献} & \textbf{原始链接} & \textbf{状态} \\
+\midrule
+\endfirsthead
+\multicolumn{6}{@{}l}{\footnotesize 续表：证据表}\\
+\toprule
+\textbf{No.} & \textbf{文献} & \textbf{类别} & \textbf{关键贡献} & \textbf{原始链接} & \textbf{状态} \\
+\midrule
+\endhead
+\midrule \multicolumn{6}{r}{续表下页}\\
+\endfoot
+\bottomrule
+\endlastfoot
+1 & De Bondt \& Thaler, JF 40(3), 1985 & 过度反应 & 3--5 年反转效应，动量文献先声 & \url{https://doi.org/10.1111/j.1540-6261.1985.tb05004.x} & 标准引用 \\
+2 & Jegadeesh \& Titman, JF 48(1), 1993 & 截面动量 & 美股动量约 1\%--1.5\%/月奠基 & \url{https://doi.org/10.1111/j.1540-6261.1993.tb04702.x} & 已核验 \\
+3 & Rouwenhorst, JF 53(1), 1998 & 截面动量 & 国际动量普适 & \url{https://ideas.repec.org/a/bla/jfinan/v53y1998i1p267-284.html} & 已核验 \\
+4 & Moskowitz \& Grinblatt, JF 54(4), 1999 & 截面动量 & 行业动量主导个股动量 & \url{https://ideas.repec.org/a/bla/jfinan/v54y1999i4p1249-1290.html} & 已核验 \\
+5 & Jegadeesh \& Titman, JF 56(2), 2001 & 截面动量 & 动量持续、支持行为解释 & \url{https://doi.org/10.1111/0022-1082.00342} & 已核验 \\
+6 & Fung \& Hsieh, RFS 10(2), 1997 & CTA 因子 & 动态交易策略实证刻画 & \url{https://doi.org/10.1093/rfs/10.2.275} & 已核验 \\
+7 & Fung \& Hsieh, RFS 14(2), 2001 & CTA 因子 & 回溯跨式复制趋势收益、凸性 & \url{https://doi.org/10.1093/rfs/14.2.313} & 已核验 \\
+8 & Erb \& Harvey, FAJ 62(2), 2006 & 商品动量 & 商品期货动量策略价值 & \url{https://doi.org/10.2469/faj.v62.n2.4084} & 标准引用 \\
+9 & Moskowitz, Ooi \& Pedersen, JFE 104(2), 2012 & TsMOM & 58 期货每合约 12 月 TsMOM 盈利 & \url{https://doi.org/10.1016/j.jfineco.2011.11.003} & 已核验 \\
+10 & Menkhoff, Sarno, Schmeling \& Schrimpf, JFE 106(3), 2012 & 货币动量 & 外汇动量策略系统化 & \url{https://doi.org/10.1016/j.jfineco.2012.06.009} & 已核验 \\
+11 & Asness, Moskowitz \& Pedersen, JF 68(3), 2013 & 跨资产因子 & 价值/动量处处存在、共同因子 & \url{https://doi.org/10.1111/jofi.12021} & 已核验 \\
+12 & Baltas \& Kosowski, SSRN 1968996, 2013 & TsMOM+CTA & CTA 暴露于动量；无容量约束 & \url{https://doi.org/10.2139/ssrn.1968996} & 已核验 \\
+13 & Baltas \& Kosowski, SSRN 2140091, 2013 & 信号工程 & 线性趋势信号最优；YZ 波动率估计 & \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2140091} & 已核验 \\
+14 & Barroso \& Santa-Clara, JFE 116(1), 2015 & 风险管理 & 风险管理的动量：Sharpe 近翻倍 & \url{https://doi.org/10.1016/j.jfineco.2014.11.010} & 已核验 \\
+15 & Daniel \& Moskowitz, JFE 122(2), 2016 & 风险管理 & 动量崩溃可预测；动态加倍 & \url{https://doi.org/10.1016/j.jfineco.2015.12.002} & 已核验 \\
+16 & Harvey, Liu \& Zhu, RFS 29(1), 2016 & 多重检验 & $t>3.0$；多数发现可能为假 & \url{https://doi.org/10.1093/rfs/hhv059} & 已核验 \\
+17 & Kim, Tse \& Wald, JFM 30, 2016 & TsMOM+缩放 & 波动率缩放敏感性检验 & \url{https://doi.org/10.1016/j.finmar.2016.05.003} & 已核验 \\
+18 & McLean \& Pontiff, JF 71(1), 2016 & 衰减 & 发表后收益 -58\% & \url{https://doi.org/10.1111/jofi.12365} & 已核验 \\
+19 & Hurst, Ooi \& Pedersen, JPM 44(1), 2017 & TsMOM & 1880--2016 十年皆正、危机 alpha & \url{https://doi.org/10.3905/jpm.2017.44.1.015} & 已核验 \\
+20 & Georgopoulou \& Wang, RevFin 21(4), 2017 & TsMOM & 1969--2015 股/商市场持续性 & \url{https://doi.org/10.1093/rof/rfw048} & 已核验 \\
+21 & Harvey, Hoyle, Korgaonkar, Rattray, Sargaison \& van Hemert, JPM 45(1), 2018 & 波动率目标 & 风险资产 Sharpe 提升、尾部减薄 & \url{https://doi.org/10.3905/jpm.2018.45.1.014} & 已核验 \\
+22 & Gu, Kelly \& Xiu, RFS 33(5), 2020 & ML 资产定价 & NN 多空 Sharpe 1.35；动量主导 & \url{https://doi.org/10.1093/rfs/hhaa009} & 已核验 \\
+23 & Huang, Li, Wang \& Zhou, JFE 135(3), 2020 & TsMOM 批判 & 逐资产证据弱；bootstrap 不可靠 & \url{https://doi.org/10.1016/j.jfineco.2019.08.004} & 已核验 \\
+24 & Kelly, Moskowitz \& Pruitt, JFE 140(3), 2021 & 机制 & 动量/反转高维分解 & \url{https://faculty.som.yale.edu/tobymoskowitz/research/} & 已核验 \\
+25 & Ehsani \& Linnainmaa, JF 77(3), 2022 & 因子动量 & 因子自相关（6bp vs.\ 51bp） & \url{https://doi.org/10.1111/jofi.13131} & 已核验 \\
+26 & Zhang, JFE 144(1), 2022 & 货币因子动量 & 因子动量解释 CSM+TSM & \url{https://doi.org/10.1016/j.jfineco.2021.05.035} & 已核验 \\
+27 & Ansari et al., arXiv 2403.07815, 2024 (TMLR) & 时序基础模型 & Chronos：T5 架构、概率预测、零样本 & \url{https://arxiv.org/abs/2403.07815} & 已核验 \\
+28 & Das, Kong, Sen \& Zhou, arXiv 2310.10688, 2024 (ICML) & 时序基础模型 & TimesFM：解码器、$\sim$100B 点预训练 & \url{https://arxiv.org/abs/2310.10688} & 已核验 \\
+29 & Woo et al., arXiv 2402.02592, 2024 & 时序基础模型 & MOIRAI：LOTSA $>$27B 观测、任意变量 & \url{https://arxiv.org/abs/2402.02592} & 已核验 \\
+30 & Rasul et al., arXiv 2310.08278, 2023 & 时序基础模型 & Lag-Llama：概率预测、Monash 预训练 & \url{https://arxiv.org/abs/2310.08278} & 已核验 \\
+31 & Garza, Challu \& Mergenthaler-Canseco, arXiv 2310.03589, 2023 & 时序基础模型 & TimeGPT-1：$>$100B 点、闭源 API & \url{https://arxiv.org/abs/2310.03589} & 已核验 \\
+32 & Nie, Nguyen, Sinthong \& Kalagnanam, arXiv 2211.14730, 2023 (ICLR) & 时序模型 & PatchTST：patch+通道独立、非预训练 & \url{https://arxiv.org/abs/2211.14730} & 已核验 \\
+33 & Jin et al., arXiv 2310.01728, 2024 (ICLR) & 时序模型 & Time-LLM：冻结 LLM 重编程 & \url{https://arxiv.org/abs/2310.01728} & 已核验 \\
+34 & Zhu et al., arXiv 2508.19609, 2025 (CIKM) & 金融时序 FM & FinCast：首个金融时序基础模型 & \url{https://arxiv.org/abs/2508.19609} & 已核验 \\
+35 & Stein, JF 64(4), 2009 & 拥挤理论 & 未锚定策略协调问题+杠杆外溢 & \url{https://doi.org/10.1111/j.1540-6261.2009.01472.x} & 已核验 \\
+36 & Khandani \& Lo, JFM 14(1), 2011 & 拥挤经验 & 2007 量化崩溃：去杠杆级联 & \url{https://ideas.repec.org/a/eee/finmar/v14y2011i1p1-46.html} & 已核验 \\
+37 & Baltas, FAJ 75(3), 2019 & 拥挤实证 & 发散型（动量）拥挤后跑输 & \url{https://doi.org/10.1080/0015198X.2019.1600955} & 已核验 \\
+38 & Lou \& Polk, RFS 35(7), 2022 & 拥挤度量 & 共同动量反推套利活动 & \url{https://doi.org/10.1093/rfs/hhab117} & 已核验 \\
+39 & Avramov, Cheng, Schreiber \& Shemer, JOI 26(3), 2017 & 容量 & 异常随规模扩张的收益缩放 & \url{https://doi.org/10.3905/joi.2017.26.3.089} & 标准引用 \\
+\end{longtable}
+\endgroup
+
+\section{结论置信度}
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{核心结论与置信度}\label{tab:conf}
+\begin{tabular}{@{}p{7.2cm}p{1.2cm}p{5.2cm}@{}}
+\toprule
+\textbf{结论} & \textbf{置信度} & \textbf{依据与边界} \\
+\midrule
+趋势/动量溢价在多数资产、多数时期显著存在 & \confhigh & MOP12、HOP17、AMP13 等多源一致；但 HLLWZ20 对统计可靠性提出挑战 \\
+动量/趋势具有左偏、崩溃与危机凸性 & \confhigh & DM16、BSC15、FH01 独立支撑 \\
+波动率目标与风险管理显著改善风险调整后收益 & \confhigh & BSC15、DM16、Harvey18 一致 \\
+发表后的因子收益普遍衰减 & \confhigh & MP16（97 因子三阶段证据） \\
+多重检验要求 $t>3$ 门槛 & \confhigh & HLZ16 方法学被广泛接受 \\
+趋势跟踪百年证据（1880--2016 十年皆正） & \confmid & 单一团队（AQR）数据与设定；数字来自二手综述，待全文复核 \\
+动量在 ML 时代仍是最重要预测特征 & \confhigh & GKX20 大样本 ML 比较 \\
+时间序列基础模型金融零样本表现 & \confmid & 各模型官方 benchmark 自我报告，跨模型不可比、易受污染（见附录） \\
+TsMOM 逐资产统计证据强 & \conflow & HLLWZ20 的反方证据削弱；结论翻转风险高 \\
+动量在拥挤期后更易跑输 & \confhigh & Baltas19+LouPolk22+KL11 一致；发散型无基本面锚 \\
+量化拥挤崩溃由去杠杆级联触发 & \confhigh & KL11 事件解剖 + Stein09 理论框架 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{可复现实验建议}
+基于第 4 节的不可比设置审计，提出以下可复现实验框架（与第 4.4 节映射一一对应）：
+\begin{enumerate}
+\item \textbf{固定数据契约}：明确样本期（建议 1985--2015 与 2016--今分窗）、资产清单（58 个 MOP 期货子集或 67 个 HOP 子集）、滚动规则（主力连续 vs.\ 展期组合）、资金利率。
+\item \textbf{成本与费用双假设}：至少报告（a）无成本、（b）含滚动+换手成本、（c）含 2/20 费用三档；冲击成本按参与率模型 $impact=K\sqrt{participation}$ 并在 10\% 参与率上限截断。
+\item \textbf{波动率目标开关}：同一信号分别跑固定名义敞口与目标波动率（10\%/12\%）两版，报告两者差异，复现 BSC15/DM16/Harvey18 的可比条件。
+\item \textbf{多重检验纪律}：对每个新信号报告经 HLZ16 框架校正的 $t$ 值；对信号族做 bootstrap 临界值检验（复现 HLLWZ20 的批判路线）。
+\item \textbf{样本外与发表后衰减检验}：设定 cut-off 日期，报告 MP16 式三阶段收益；公开后 2 年窗口做敏感性。
+\item \textbf{零样本外推测试}：在 MOP12 的 58 合约中留出一半国家/资产类别作为"未参与设定"市场，检验参数不经重估的跨市场稳健性（对应基础模型零样本测试的经典设定）。
+\item \textbf{基础模型对照}：对同一金融时序数据集同时跑经典 TsMOM、PatchTST（监督基线）与 Chronos/MOIRAI（零样本），统一评测窗口、数据划分与随机种子，报告 MASE/CRPS 与策略化后 Sharpe，避免各模型自带 benchmark 的不可比。
+\item \textbf{开源与许可}：优先选用 Apache-2.0 实现（Chronos、Lag-Llama、PatchTST）以规避 MOIRAI 权重 cc-by-nc 与 TimeGPT 闭源 API 的许可/可复现性约束；记录数据许可（CRSP/Commodity 数据库通常不公开）。
+\end{enumerate}
+
+\section{研究现状、遗留课题与未来方向}
+
+\subsection{当前研究现状}
+综合第 2--6 章证据，趋势跟踪研究处于\textbf{"内核共识、边界争论"的状态}：
+\begin{enumerate}
+\item \textbf{已收敛的内核}：趋势/动量溢价的跨资产普适性（MOP12、HOP17、AMP13）、崩溃与危机凸性（DM16、FH01）、波动率目标与风险管理对风险调整收益的改进（BSC15、DM16、Harvey18）、发表后超额衰减（MP16）已形成多源一致的证据链，属于低争论区域。
+\item \textbf{仍在争论的边界}：TsMOM 的\textbf{统计本质}尚未定论——HLLWZ20 的逐资产+bootstrap 批判与 MOP12 的池回归证据至今没有公认裁决；趋势跟踪的拥挤状态（Baltas19 的发散型预言）与过去十余年管理期货行业的低波动/平台期之间的关联仍是开放判断（业界观察，需独立数据核验，不在本文证据表范围内）。
+\item \textbf{工具正在迁移}：信号构建从固定规则向机器学习（GKX20）与时间序列基础模型（附录）迁移，但金融领域的\textbf{独立样本外验证仍缺}——大多数模型官方基准以能源/交通/天气为主。
+\item \textbf{复现生态改善}：SSRN 预印本、作者公开数据（AQR 系列、AQR 数据页）与 ReplicationWiki 降低了复现门槛；但 CRSP 与商品数据库的许可仍构成硬约束（对应第~10~节实验建议第 8 条）。
+\item \textbf{实践界与学术界的口径割裂}：学术界以规则基准研究机制与显著性，业界以费用后净收益评估可投资性——两者在成本、频率、规模上的口径差异正是第~4.4~节不可比审计的对象，也是"研究结论→落地"最大的翻译成本。
+\end{enumerate}
+
+\subsection{遗留的课题（Open Questions）}
+以下问题至今没有公认答案，是综述读者的主要检索与再研究入口：
+\begin{enumerate}
+\item \textbf{趋势溢价的统计本质}：逐资产证据弱（HLLWZ20）与组合层面强（MOP12、HOP17）如何调和？聚合 $t$ 的 bootstrap 临界值构造是否公允？——回答将决定趋势溢价是"真实但稀薄"还是"聚合偏差"。
+\item \textbf{前瞻拥挤度量缺失}：Baltas19 的领先代理数据难获得，Lou--Polk22 的 comomentum 属后视确认；尚无统一的、可在事前验证并接入决策的拥挤指数。
+\item \textbf{容量曲线形状与动态}：趋势跟踪容量上限的精确冲击成本参数化仍缺；容量随波动率状态与市场深度如何动态变化（第~6.5~节推断）缺乏系统实证。
+\item \textbf{基础模型的金融外推真实性}：预训练语料污染使零样本结果被高估（第~12.4~节），独立的金融白名单评估协议尚未建立。
+\item \textbf{ML 信号的现实含量}：GKX20 的高样本外 Sharpe（1.35）在扣除真实成本、且暴露于拥挤后还剩多少？已有讨论文献（Avramov--Cheng--Metzker，经 GKX20 讨论渠道转述）质疑其集中于微盘与受限套利时段——该质疑本身也待独立复现。
+\item \textbf{动量崩溃频率的结构性变化}：Stein09+KL11 预言"拥挤+杠杆"时代崩溃更频繁，但 2007 之后的系统性检验尚未给出明确时间趋势。
+\item \textbf{展期/冲击成本的时变建模}：滚动成本随市场深度变化，是趋势跟踪容量的第一约束（第~6.5~节），却缺少标准化的时变成本模型与公开基准。
+\end{enumerate}
+
+\subsection{未来可重点关注的研究方向}
+以下方向为\textbf{本文基于第 2--10 章证据链的综合推断}（非单一文献结论），按可落地性与证据缺口排序：
+\begin{enumerate}
+\item \textbf{可验证的前瞻拥挤指数}：融合 CTA 持仓集中度、策略资金流、comomentum 与期权隐含波动率，构造可事前检验的拥挤信号，并接入 DM16 式动态减仓（衔接第~6.6~节）。
+\item \textbf{动态容量模型}：把冲击成本--规模敏感性曲线与波动率目标耦合，建立"容量随波动率状态变化"的可估模型（承接第~6.5~节推断）。
+\item \textbf{基础模型金融评估协议}：语料污染审计 + 白名单独立金融数据集 + MASE/CRPS 与策略化 Sharpe 双重标准，使零样本结论可被第三方复现（呼应第~12.4~节）。
+\item \textbf{拥挤感知的崩溃管理}：将前瞻拥挤指标作为 DM16 动态均值--方差模型的协变量，检验其样本外增量价值。
+\item \textbf{因子生命周期模型}：以 EL22/Zhang22 的因子动量为基础，建模"拥挤→衰减→退出"的可检验生命周期，统一因子动量与拥挤文献。
+\item \textbf{ML 特征与趋势信号的融合优化}：在 GKX20 框架内联合优化换手、冲击成本与容量预算，回答"扣除摩擦后 ML 动量的净优势"。
+\item \textbf{发散/收敛溢价的组合级配置}：把 Baltas19 的分类落地为组合构建规则（趋势=发散、价值/carry=收敛），利用两类溢价对资金流的非对称反应做互补配置。
+\item \textbf{复现基础设施}：开放时变冲击成本模型库、标准化趋势基准（58/67 市场子集）与许可友好的公开数据层，直接降低第~10~节实验建议的执行成本。
+\end{enumerate}
+
+\section{附录：时间序列基础模型与金融趋势预测}\label{sec:appendix}
+\subsection{背景与分类}
+2023--2025 年出现一批"时间序列基础模型"（TSFM），按架构与预训练策略可分三类：预训练概率生成模型（Chronos、Lag-Llama）、通用预训练回归模型（TimesFM、MOIRAI）、复用冻结 LLM 的重编程方法（Time-LLM、TimeGPT 类）；另有监督非预训练强基线（PatchTST）与金融专精模型（FinCast）。其相对经典 TsMOM 的差异在于：把"信号函数"从固定规则（过去 12 月收益符号）替换为在大规模多域语料上预训练的参数化映射，并声称零样本迁移与概率预测。
+
+\subsection{各模型核验要点}
+\begin{itemize}
+\item \textbf{Chronos}（Ansari et al., 2024, TMLR）：T5 骨干（20M--710M），将时序分桶为 token 做概率生成；预训练语料含大量公开数据集+高斯过程合成数据（KernelSynth）；官方 42 数据集基准上显著优于基线，新数据集零样本相当或更优。GitHub：amazon-science/chronos-forecasting（Apache-2.0）。\url{https://arxiv.org/abs/2403.07815}
+\item \textbf{TimesFM}（Das, Kong, Sen \& Zhou, 2024, ICML）：纯解码器，$\sim$200M 参数，在谷歌搜索查询/维基百科浏览量等真实+合成语料（约 100B 时序点）上预训练；公共数据集零样本接近各数据集专用监督 SOTA，可微调；MOIRAI 对比表标注其\textbf{不支持概率预测}。GitHub：google-research/timesfm。\url{https://arxiv.org/abs/2310.10688}
+\item \textbf{MOIRAI}（Woo et al., 2024）：统一训练通用变换器，LOTSA 语料 $>$27B 观测、九大领域；支持任意协变量数与概率预测；声称零样本可匹敌/超越 full-shot 模型。GitHub：SalesforceAIResearch/uni2ts；HF 权重 cc-by-nc-4.0（\textbf{许可受限}）。\url{https://arxiv.org/abs/2402.02592}
+\item \textbf{Lag-Llama}（Rasul et al., 2023）：单变量概率预测，Monash 语料（$<$1B 观测）预训练，零样本+few-shot 微调优于数据集专用模型。GitHub：time-series-foundation-models/lag-llama（Apache-2.0）。\url{https://arxiv.org/abs/2310.08278}
+\item \textbf{TimeGPT-1}（Garza, Challu \& Mergenthaler-Canseco, 2023/2024）：Nixtla 出品，$>$100B 数据点预训练（构成未披露）；零样本推理+微调+预测区间；模型本体闭源 API，GitHub 仅客户端（Apache-2.0）；其官方对比声称零样本准确率与推理速度领先 Chronos/TimesFM/MOIRAI/Lag-Llama。\url{https://arxiv.org/abs/2310.03589}
+\item \textbf{PatchTST}（Nie et al., 2023, ICLR）：patch 化+通道独立；官方 README 报告相对 Transformer 基线 MSE $-21.0\%$、MAE $-16.7\%$；是\textbf{监督基线}而非预训练基础模型。GitHub：yuqinie98/PatchTST（Apache-2.0）。\url{https://arxiv.org/abs/2211.14730}
+\item \textbf{Time-LLM}（Jin et al., 2024, ICLR）：复用冻结预训练 LLM、以提示重编程做时序回归；自身无时序预训练；few-shot/zero-shot 表现强。GitHub：KimMeen/Time-LLM。\url{https://arxiv.org/abs/2310.01728}
+\item \textbf{FinCast}（Zhu et al., 2025, CIKM）：悉尼大学，宣称首个专为金融时序预测设计的基础模型，零样本无需领域微调、超越 SOTA；GitHub/许可证未核验。\url{https://arxiv.org/abs/2508.19609}
+\end{itemize}
+
+\subsection{与经典趋势跟踪的可比性对比}
+\begin{table}[htbp]
+\centering\scriptsize
+\caption{时间序列基础模型 vs.\ 经典 TsMOM 的可比性映射}\label{tab:fm}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{3.0cm}@{}}
+\toprule
+\textbf{维度} & \textbf{经典 TsMOM（MOP12/HOP17）} & \textbf{Chronos/TimesFM/\allowbreak MOIRAI} & \textbf{TimeGPT（闭源）} & \textbf{评测污染/\allowbreak 不可比风险} \\
+\midrule
+预训练/样本 & 58--67 个期货，1960s/\allowbreak 1880--2016 & 多域公开语料（$>$27B 观测） & $>$100B 点（未披露构成） & 语料含金融数据时零样本结果被高估 \\
+预测设定 & 固定 12 月回看+符号信号 & 预训练 token/回归映射 & 闭源推理 & 训练/测试窗口重叠（look-ahead） \\
+零样本 & 跨市场外推（58 合约内验证） & 官方声称跨域零样本 & 官方声称零样本 & 官方 benchmark 自报，第三方复现少 \\
+概率预测 & 无（波动率目标代理） & Chronos/Lag-Llama/MOIRAI 支持 & 支持预测区间 & 概率输出被当作点预测比较时失真 \\
+计算成本 & 极低（月频规则） & 预训练昂贵、推理中等 & API 调用 & 成本未计入 benchmark \\
+许可 & 数据（CRSP 等）受限 & Apache-2.0（除 MOIRAI cc-by-nc） & 闭源 API & 许可阻断复现与商用 \\
+公开 benchmark & 论文内部组合 & Monash/ETT 等多数据集 & 官方对比页 & 数据集/度量不统一不可比 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{评测污染与不可比设置识别}
+TSFM 评测的已知风险：(1) \textbf{语料污染}：预训练语料（TimesFM 的搜索/维基、MOIRAI 的 LOTSA）可能含被评测数据集（如 ETT、电力、Monash 子集）的区间，零样本表现因而被系统性高估；(2) \textbf{官方基准自报}：各模型使用不同训练/测试切分、度量（MSE/MAE/MASE/CRPS）与基线版本，跨论文直接比大小不可比；(3) \textbf{金融数据缺失审计}：除 FinCast 外，多数模型未报告在金融时序上的独立样本外测试，官方基准以能源/交通/天气为主。对趋势策略研究者：TSFM 目前更适合作为"信号生成器"，且必须在其训练语料之外构造金融测试集复验，否则零样本结论不可采信。
+
+\section{引用核验清单}\label{sec:audit}
+\textbf{giiisp 检索状态}：接口受限（无 \texttt{GIIISP\_AUTH\_TOKEN}，HTTP 未授权），已按技能规范记录并回退开放源。
+
+\begin{itemize}
+\item \textbf{已核验（元数据+链接逐一对上，32 项）}：证据表 No.2--7、9--22、25--38。
+\item \textbf{标准引用（规范引文，本次未逐项打开原文页，3 项）}：No.1 De Bondt--Thaler 1985；No.8 Erb--Harvey 2006；No.39 Avramov et al. 2017。
+\item \textbf{待全文复核（关键数字来自二手综述或摘要截断，4 项）}：HOP17 净收益/Sharpe 具体数值（~11\%/0.76，来自 etf.com 与 AlphaArchitect 二手综述，两者有 11.0\% vs.\ 11.2\% 微小出入）；KT-W16 具体结论细节；MOP12 的 58 合约细节；FH01 的回溯跨式复制细节。
+\item \textbf{需人工核对全文的主张}：MOP12 "投机者获利源于对冲者"；HOP17 "8/10 危机正收益"；GKX20 "Sharpe 1.35"；BSC15 各高阶矩数字；TimeGPT 官方对比排名。
+\end{itemize}
+
+\section*{参考文献}
+\begin{enumerate}[label={[\arabic*]},itemsep=2pt]
+\sloppy
+\item De Bondt, W. F. M., \& Thaler, R. H. (1985). Does the stock market overreact? \emph{Journal of Finance}, 40(3), 793--805. \url{https://doi.org/10.1111/j.1540-6261.1985.tb05004.x}
+\item Jegadeesh, N., \& Titman, S. (1993). Returns to buying winners and selling losers. \emph{Journal of Finance}, 48(1), 65--91. \url{https://doi.org/10.1111/j.1540-6261.1993.tb04702.x}
+\item Rouwenhorst, K. G. (1998). International momentum strategies. \emph{Journal of Finance}, 53(1), 267--284. \url{https://ideas.repec.org/a/bla/jfinan/v53y1998i1p267-284.html}
+\item Moskowitz, T. J., \& Grinblatt, M. (1999). Do industries explain momentum? \emph{Journal of Finance}, 54(4), 1249--1290. \url{https://ideas.repec.org/a/bla/jfinan/v54y1999i4p1249-1290.html}
+\item Jegadeesh, N., \& Titman, S. (2001). Profitability of momentum strategies. \emph{Journal of Finance}, 56(2), 699--720. \url{https://doi.org/10.1111/0022-1082.00342}
+\item Fung, W., \& Hsieh, D. A. (1997). Empirical characteristics of dynamic trading strategies. \emph{Review of Financial Studies}, 10(2), 275--302. \url{https://doi.org/10.1093/rfs/10.2.275}
+\item Fung, W., \& Hsieh, D. A. (2001). The risk in hedge fund strategies: Theory and evidence from trend followers. \emph{Review of Financial Studies}, 14(2), 313--341. \url{https://doi.org/10.1093/rfs/14.2.313}
+\item Erb, C. B., \& Harvey, C. R. (2006). The strategic and tactical value of commodity futures. \emph{Financial Analysts Journal}, 62(2), 69--97. \url{https://doi.org/10.2469/faj.v62.n2.4084}
+\item Moskowitz, T. J., Ooi, Y. H., \& Pedersen, L. H. (2012). Time series momentum. \emph{Journal of Financial Economics}, 104(2), 228--250. \url{https://doi.org/10.1016/j.jfineco.2011.11.003}
+\item Menkhoff, L., Sarno, L., Schmeling, M., \& Schrimpf, A. (2012). Currency momentum strategies. \emph{Journal of Financial Economics}, 106(3), 660--684. \url{https://doi.org/10.1016/j.jfineco.2012.06.009}
+\item Asness, C. S., Moskowitz, T. J., \& Pedersen, L. H. (2013). Value and momentum everywhere. \emph{Journal of Finance}, 68(3), 929--985. \url{https://doi.org/10.1111/jofi.12021}
+\item Baltas, A.-N., \& Kosowski, R. (2013). Momentum strategies in futures markets and trend-following funds. SSRN 1968996. \url{https://doi.org/10.2139/ssrn.1968996}
+\item Baltas, A.-N., \& Kosowski, R. (2013). Improving time-series momentum strategies. SSRN 2140091. \url{https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2140091}
+\item Barroso, P., \& Santa-Clara, P. (2015). Momentum has its moments. \emph{Journal of Financial Economics}, 116(1), 111--120. \url{https://doi.org/10.1016/j.jfineco.2014.11.010}
+\item Daniel, K., \& Moskowitz, T. J. (2016). Momentum crashes. \emph{Journal of Financial Economics}, 122(2), 221--247. \url{https://doi.org/10.1016/j.jfineco.2015.12.002}
+\item Harvey, C. R., Liu, Y., \& Zhu, H. (2016) ... and the cross-section of expected returns. \emph{Review of Financial Studies}, 29(1), 5--68. \url{https://doi.org/10.1093/rfs/hhv059}
+\item Kim, A. Y., Tse, Y., \& Wald, J. K. (2016). Time series momentum and volatility scaling. \emph{Journal of Financial Markets}, 30, 103--124. \url{https://doi.org/10.1016/j.finmar.2016.05.003}
+\item McLean, R. D., \& Pontiff, J. (2016). Does academic research destroy stock return predictability? \emph{Journal of Finance}, 71(1), 5--32. \url{https://doi.org/10.1111/jofi.12365}
+\item Hurst, B., Ooi, Y. H., \& Pedersen, L. H. (2017). A century of evidence on trend-following investing. \emph{Journal of Portfolio Management}, 44(1), 15--29. \url{https://doi.org/10.3905/jpm.2017.44.1.015}
+\item Georgopoulou, A., \& Wang, J. G. (2017). The trend is your friend. \emph{Review of Finance}, 21(4), 1557--1592. \url{https://doi.org/10.1093/rof/rfw048}
+\item Harvey, C. R., Hoyle, E., Korgaonkar, R., Rattray, S., Sargaison, M., \& van Hemert, O. (2018). The impact of volatility targeting. \emph{Journal of Portfolio Management}, 45(1), 14--33. \url{https://doi.org/10.3905/jpm.2018.45.1.014}
+\item Gu, S., Kelly, B., \& Xiu, D. (2020). Empirical asset pricing via machine learning. \emph{Review of Financial Studies}, 33(5), 2223--2273. \url{https://doi.org/10.1093/rfs/hhaa009}
+\item Huang, D., Li, J., Wang, L., \& Zhou, G. (2020). Time series momentum: Is it there? \emph{Journal of Financial Economics}, 135(3), 774--794. \url{https://doi.org/10.1016/j.jfineco.2019.08.004}
+\item Kelly, B. T., Moskowitz, T. J., \& Pruitt, S. (2021). Understanding momentum and reversals. \emph{Journal of Financial Economics}, 140(3), 726--743. \url{https://faculty.som.yale.edu/tobymoskowitz/research/}
+\item Ehsani, S., \& Linnainmaa, J. T. (2022). Factor momentum and the momentum factor. \emph{Journal of Finance}, 77(3), 1877--1919. \url{https://doi.org/10.1111/jofi.13131}
+\item Zhang, S. (2022). Dissecting currency momentum. \emph{Journal of Financial Economics}, 144(1), 154--173. \url{https://doi.org/10.1016/j.jfineco.2021.05.035}
+\item Ansari, A. F., et al. (2024). Chronos: Learning the language of time series. \emph{TMLR}. arXiv:2403.07815. \url{https://arxiv.org/abs/2403.07815}
+\item Das, A., Kong, W., Sen, R., \& Zhou, Y. (2024). A decoder-only foundation model for time-series forecasting. \emph{ICML}. arXiv:2310.10688. \url{https://arxiv.org/abs/2310.10688}
+\item Woo, G., Liu, C., Kumar, A., Xiong, C., Savarese, S., \& Sahoo, D. (2024). Unified training of universal time series forecasting transformers (MOIRAI). arXiv:2402.02592. \url{https://arxiv.org/abs/2402.02592}
+\item Rasul, K., et al. (2023). Lag-Llama: Towards foundation models for probabilistic time series forecasting. arXiv:2310.08278. \url{https://arxiv.org/abs/2310.08278}
+\item Garza, A., Challu, C., \& Mergenthaler-Canseco, M. (2023). TimeGPT-1. arXiv:2310.03589. \url{https://arxiv.org/abs/2310.03589}
+\item Nie, Y., Nguyen, N. H., Sinthong, P., \& Kalagnanam, J. (2023). A time series is worth 64 words: Long-term forecasting with transformers (PatchTST). \emph{ICLR}. arXiv:2211.14730. \url{https://arxiv.org/abs/2211.14730}
+\item Jin, M., et al. (2024). Time-LLM: Time series forecasting by reprogramming large language models. \emph{ICLR}. arXiv:2310.01728. \url{https://arxiv.org/abs/2310.01728}
+\item Zhu, H., et al. (2025). FinCast: A foundation model for financial time-series forecasting. \emph{CIKM}. arXiv:2508.19609. \url{https://arxiv.org/abs/2508.19609}
+\item Stein, J. C. (2009). Presidential address: Sophisticated investors and market efficiency. \emph{Journal of Finance}, 64(4), 1517--1548. \url{https://doi.org/10.1111/j.1540-6261.2009.01472.x}
+\item Khandani, A. E., \& Lo, A. W. (2011). What happened to the quants in August 2007? Evidence from factors and transactions data. \emph{Journal of Financial Markets}, 14(1), 1--46. \url{https://ideas.repec.org/a/eee/finmar/v14y2011i1p1-46.html}（NBER WP14465：\url{https://www.nber.org/papers/w14465}）
+\item Baltas, N. (2019). The impact of crowding in alternative risk premia investing. \emph{Financial Analysts Journal}, 75(3), 89--104. \url{https://doi.org/10.1080/0015198X.2019.1600955}
+\item Lou, D., \& Polk, C. (2022). Comomentum: Inferring arbitrage activity from return correlations. \emph{Review of Financial Studies}, 35(7), 3272--3302. \url{https://doi.org/10.1093/rfs/hhab117}
+\item Avramov, D., Cheng, S., Schreiber, A., \& Shemer, K. (2017). Scaling up market anomalies. \emph{Journal of Investing}, 26(3), 89--105. \url{https://doi.org/10.3905/joi.2017.26.3.089}
+\end{enumerate}
+
+\vfill
+\begin{center}\footnotesize
+引用状态与复核说明见第~\ref{sec:audit}~节。
+\end{center}
+
+\end{document}

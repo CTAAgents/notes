@@ -1,7 +1,7 @@
 \documentclass[UTF8,11pt]{ctexart}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage[papersize={176mm,250mm},margin=2.2cm]{geometry}
+\usepackage[a4paper,margin=2.2cm]{geometry}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{longtable}
@@ -38,7 +38,7 @@
 \maketitle
 
 \begin{abstract}
-本教程以一条可落地的\textbf{因子生产线}为主线：先分清「市场贡献」与「能力贡献」，再把行业与市值等显性/隐性暴露剥除（中性化），最后把信号标准化并交给回测评估。文中给出完整推导、数字算例、可运行代码与统计检验口径，并把“量化工程师为何盯准 Alpha”这一世界观问题一并收束。
+本教程沿一条\textbf{因子生产线}展开：先分清「市场贡献」与「能力贡献」，再把行业与市值等显性/隐性暴露从因子里剥除（中性化），最后把信号标准化并交给回测评估。文中给出完整推导、数字算例、伪代码与统计检验口径，末尾讨论“量化工程师为何盯准 Alpha”这一实践问题。
 \end{abstract}
 
 \tableofcontents
@@ -165,7 +165,7 @@ E[\tilde b_1] = \beta_1 + \beta_2\,\frac{\operatorname{Cov}(x_1,x_2)}{\operatorn
 \end{equation}
 \textbf{只要因子 $x_1$ 与漏掉的暴露 $x_2$（行业/市值）相关，估计的系数/残差就会被拖偏}，伪装成漂亮的 Alpha，实则是行业或市值的功劳。
 
-\subsection{中性化的目标（一句话）}
+\subsection{中性化的目标}
 让处理后的因子与“行业哑变量、$\ln$ 市值”\textbf{正交}（相关为零，即零显性暴露），从而按该因子排序建仓得到的组合不再隐含行业与市值暴露。
 
 \begin{itemize}[itemsep=2pt]
@@ -233,19 +233,16 @@ E & 制造 & 11.8 & $+5.0$ \\
 直觉：消费均值 $(2+4+6)/3=4$、制造均值 $(3+5)/2=4$，行业均值相等；但 $f$ 随 $\ln$市值上升故\textbf{有市值暴露}。回归去掉“随市值预期的那份”后，残差即中性化动量——你可在练习里验证残差与 $\ln$市值、行业的协方差都约 $0$。
 
 \subsection{代码实现}
-\begin{lstlisting}[language=Python]
-import numpy as np
-import pandas as pd
+\begin{lstlisting}[language={},caption={行业 + 市值中性化（伪代码）}]
+输入：原始因子 f，行业标签 ind，对数市值 lncap（同一横截面、按股票对齐）
+输出：中性化因子 f_clean
 
-def neutralize(raw, industry, ln_cap):
-    """行业 + 市值中性化：横截面 OLS 取残差（均为同一横截面、按 index 对齐）"""
-    X = pd.get_dummies(industry, drop_first=False)   # 行业哑变量
-    X["ln_cap"] = ln_cap.astype(float)               # 市值方向
-    X["intercept"] = 1.0                             # 截距：保证残差均值为 0
-    beta, *_ = np.linalg.lstsq(X.to_numpy(float),
-                               raw.to_numpy(float), rcond=None)  # 最小范数解
-    fitted = X.to_numpy(float) @ beta
-    return pd.Series(raw.to_numpy(float) - fitted, index=raw.index)
+1. 构造设计矩阵 X：
+     X <- [每行业一列哑变量（属于该行业为 1，否则为 0）
+           | lncap 列 | 全 1 截距列]
+2. 解最小二乘：gamma <- lstsq(X, f)     # 最小范数解，规避哑变量共线
+3. 计算拟合：f_hat <- X @ gamma
+4. 返回残差：f_clean <- f - f_hat       # 残差即中性化因子
 \end{lstlisting}
 
 \section{残差 z-score 标准化的具体步骤}
@@ -278,22 +275,20 @@ z_i = \frac{\bar f_i-\mu}{\sigma}.
 
 \subsection{两个必须注意的坑}
 \textbf{坑 1——残差非正态，直接 z-score 会被极端值绑架。}市场残差带长尾，极端值把 $\mu$ 拉离众数、把 $\sigma$ 撑大，少数股垄断排序。惯例是 winsorize 后再标准化：
-\begin{lstlisting}[language=Python]
-def zscore_winsorized(resid, lo=0.01, hi=0.99):
-    lo_q, hi_q = np.quantile(resid, [lo, hi])
-    resid_c = np.clip(resid, lo_q, hi_q)
-    return pd.Series((resid_c - resid_c.mean()) / resid_c.std(ddof=1),
-                     index=resid.index)
+\begin{lstlisting}[language={},caption={截尾 z-score（伪代码）}]
+输入：残差 resid，截尾分位 lo=1%, hi=99%
+输出：z 分数
+
+1. lo_q <- 分位数(resid, lo)；hi_q <- 分位数(resid, hi)
+2. resid_c <- 截断(resid, 下界=lo_q, 上界=hi_q)   # 极端值拉回边界
+3. 返回 (resid_c - 均值(resid_c)) / 标准差(resid_c)
 \end{lstlisting}
 
 \textbf{更稳健口径（可选）}：中位数替代 $\mu$、MAD 替代 $\sigma$：
-\begin{lstlisting}[language=Python]
-def zscore_robust(resid):
-    med = resid.median()
-    mad = (resid - med).abs().median()
-    if mad == 0:
-        mad = resid.std(ddof=1)
-    return (resid - med) / (mad * 1.4826)  # 1.4826 使 MAD 在正态下约等于 sigma
+\begin{lstlisting}[language={},caption={稳健 z-score（伪代码）}]
+1. med <- 中位数(resid)；mad <- 中位绝对偏差(resid)
+2. 若 mad = 0：mad <- 标准差(resid)               # 防除零
+3. 返回 (resid - med) / (mad * 1.4826)             # 1.4826 使 MAD 在正态下约等于 sigma
 \end{lstlisting}
 
 \textbf{坑 2——z 保留多少“量级”取决于怎么用。}只排序则 z 与 rank 基本等价；做加权/多因子合成则 z 保留相对强度、更细，但正因保留尾部，\textbf{才更需要先截尾}。
@@ -305,33 +300,18 @@ z-score 本身不产生 Alpha，但它保证你排序、合成、跨期比较时
 \section{完整信号流水线与 Alpha 评估}
 
 \subsection{完整 pipeline}
-\begin{lstlisting}[language=Python]
-import numpy as np
-import pandas as pd
+\begin{lstlisting}[language={},caption={因子流水线（伪代码）}]
+输入：原始因子 f，行业 ind，市值 mcap（每期一个横截面）
+输出：标准化因子分数 z
 
-def neutralize(raw, industry, ln_cap):
-    X = pd.get_dummies(industry, drop_first=False)
-    X["ln_cap"] = ln_cap.astype(float)
-    X["intercept"] = 1.0
-    beta, *_ = np.linalg.lstsq(X.to_numpy(float), raw.to_numpy(float), rcond=None)
-    fitted = X.to_numpy(float) @ beta
-    return pd.Series(raw.to_numpy(float) - fitted, index=raw.index)
-
-def standardize(resid, win=(0.01, 0.99)):
-    lo_q, hi_q = np.quantile(resid, win)
-    resid_c = np.clip(resid, lo_q, hi_q)
-    return pd.Series((resid_c - resid_c.mean()) / resid_c.std(ddof=1),
-                     index=resid.index)
-
-def factor_pipeline(raw, industry, ln_cap):
-    """原始因子 -> 中性化 -> 截尾 + z-score"""
-    resid = neutralize(raw, industry, ln_cap)
-    return standardize(resid)
+1. lncap <- ln(mcap)                        # 对数市值
+2. X <- [行业哑变量 | lncap | 截距]          # 设计矩阵
+3. f_clean <- f - X @ lstsq(X, f)           # 中性化：取残差
+4. 截尾：f_c <- 截断(f_clean, 1%, 99%)
+5. z <- (f_c - 均值(f_c)) / 标准差(f_c)     # 横截面 z-score
+6. 返回 z
 \end{lstlisting}
-月度口径：每个月底对当期横截面调用 \codeinl{factor\_pipeline} 得 \codeinl{monthly\_z}，据此排序建仓，例如
-\begin{lstlisting}[language=Python]
-monthly_z = factor_pipeline(df["mom"], df["ind"], np.log(df["mcap"]))
-\end{lstlisting}
+月度口径：每个月底对当期横截面执行上述流程得 z 分数，据此排序建仓。输入为原始因子、行业标签与对数市值（\codeinl{f}、\codeinl{ind}、\codeinl{ln(mcap)}）。
 
 \subsection{如何评估 Alpha（别只看多空曲线）}
 \textbf{1. IC / Rank IC}：每期算 $\operatorname{corr}(z_t,\,r_{t+1})$。
@@ -343,6 +323,16 @@ monthly_z = factor_pipeline(df["mom"], df["ind"], np.log(df["mcap"]))
 t_\alpha=\frac{\alpha_p}{\sigma(\varepsilon_p)/\sqrt{T}},
 \end{equation}
 其中下标 $p$ 表示“组合”。任何 Alpha 产出都要附 $\operatorname{IR}$ 与 $t$，并用样本外检验。
+
+\textbf{IC 多大才算显著（数字判据）}：把每期横截面的 IC 视为一个时间序列 $\{\mathrm{IC}_t\}$，其显著性用
+\begin{equation}
+t_{\mathrm{IC}} \;=\; \frac{\overline{\mathrm{IC}}}{\operatorname{sd}(\mathrm{IC}_t)/\sqrt{T}},
+\end{equation}
+其中 $T$ 为期数。\textbf{数字例}：月度 IC 均值 $0.05$、IC 序列标准差 $0.30$、样本 $T=100$ 个月：$t=0.05/(0.30/10)=1.67$——勉强接近显著；若 $T=200$：$t=0.05/(0.30/14.1)=2.36$，显著。\textbf{结论}：月度 IC $0.03$--$0.05$ 是"真有信号"的常见区间，但要显著通常需要 $3$--$5$ 年数据；任何"IC 高但只有一两年"的因子都要打问号（与 Alpha 显著性同理）。
+\begin{itemize}[itemsep=2pt]
+\item 若用横截面期望 \codeinl{sd(IC)} 较小（如 $0.10$），$T=60$ 个月即可显著——\textbf{低波动的 IC 比高 IC 更可信}。
+\item 分层回测的单调性（第 2 点）与 IC 显著要\textbf{同时满足}才认定因子成立：IC 显著但分层不单调，说明信号只在两端有效。
+\end{itemize}
 
 \subsection{多头 vs 多空的取舍}
 \begin{itemize}[itemsep=2pt]
@@ -431,10 +421,10 @@ $\mathrm{IC}/\mathrm{IR}/t$ & 信息系数 / 信息比率 / $t$ 值 \\
 
 \section*{延伸阅读}
 \addcontentsline{toc}{section}{延伸阅读}
-趋势溢价、趋势跟踪与仓位的专题及其可运行脚本（单品种 / 多品种等权），已独立成篇：\textbf{《趋势跟踪与仓位管理：从趋势溢价到可运行的仓位纪律》}（\texttt{trend\_position\_management.tex} / \texttt{trend\_position\_management.pdf}）。本教程只聚焦 Alpha/Beta 认识论与因子中性化、标准化这条生产线。
+趋势溢价、趋势跟踪与仓位的专题及其可运行脚本（单品种 / 多品种等权），已独立成篇：\textbf{《趋势跟踪与仓位管理：从趋势溢价到可运行的仓位纪律》}（源文件 \texttt{trend\_position\_management.tex}，编译产物 \texttt{trend\_position\_management.pdf}）。本教程只聚焦 Alpha/Beta 认识论与因子中性化、标准化这条生产线。
 
-\section*{一句话收束}
-\addcontentsline{toc}{section}{一句话收束}
-\textbf{Beta} 衡量你承担多少市场风险（可被替代），\textbf{Alpha} 衡量你在市场已定价之后还剩多少本事（不可替代）；“行业+市值中性化 $\to$ 残差 $\to$ z-score $\to$ 显著性检验”这条流水线，就是把你托付给市场的 Beta、交给运气的 $\varepsilon$ 逐层剥离干净，最后留下那一小撮真正属于你、且经得起统计考验的 Alpha。
+\section*{总结}
+\addcontentsline{toc}{section}{总结}
+\textbf{Beta} 衡量你承担多少市场风险（可被替代），\textbf{Alpha} 衡量你在市场已定价之后还剩多少本事（不可替代）。中性化、z-score 与显著性检验这条流水线，逐层剥离掉市场 Beta 与运气 $\varepsilon$，留下的才是经得起统计考验的 Alpha。
 
 \end{document}

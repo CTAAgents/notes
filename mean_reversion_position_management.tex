@@ -1,0 +1,503 @@
+\documentclass[UTF8,11pt]{ctexart}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{codegray}{RGB}{230,230,235}
+\definecolor{codered}{RGB}{180,60,60}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codegray},
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{gray!60},
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=4,
+  keywordstyle=\color{codered}\bfseries,
+  commentstyle=\color{gray},
+}
+\newcommand{\codeinl}[1]{\texttt{#1}}
+\newcommand{\takeaway}[1]{\medskip\par\noindent\textbf{要点：}#1\par\medskip}
+
+\title{\bfseries 均值回归策略与仓位管理教程\\[3pt]\large 从负自相关到可运行的仓位纪律（深度·自含·实证）}
+\author{量化投研学习笔记}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+本教程把均值回归/统计套利的三大命题一次讲清：\textbf{载体}（负自相关在哪里真实存在——横截面而非时序）、\textbf{方向}（偏离怎么度量、进出场怎么定）与\textbf{量}（仓位纪律与动量的关键差异：换手是核心约束、波动目标化未必有益、Kelly 与止损都要重写）。每一级给出\textbf{逐行推导 + 一个数字例 + 边界条件 + 要点}，并用真实通达信本地数据（8 品种横截面反转 vs 时序反转）验证结论。适合已有 Alpha/Beta 与趋势仓位基本认知、想做统计套利与反转的读者。
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section*{如何使用本教程}
+\addcontentsline{toc}{section}{如何使用本教程}
+本教程是\textbf{递进式的}，不要跳读：
+\begin{enumerate}[itemsep=2pt]
+\item 第 1--3 节打概念地基：要解决的问题、均值回归溢价的载体、为什么负自相关能赚钱。
+\item 第 4--5 节搭骨架：从偏离到敞口，以及"单笔—组合—容量"的层级框架。
+\item 第 6--10 节逐级给仓位纪律（每级都有推导、数字例与\textbf{与动量的差异}）。
+\item 第 11--13 节把组合层、容量约束与统一决策流程串起来。
+\item 第 14--15 节用通达信本地真实数据给出时序反转（失败）与横截面反转（成功）的对比实证。
+\end{enumerate}
+每节末尾的 \textbf{要点} 是可记忆的一句话；\textbf{边界} 提示该结论什么时候不成立；附录的\textbf{练习自测}可用来检验理解。
+
+\section{要解决什么问题（问题定义）}
+本教程唯一要回答的问题：
+\begin{quote}
+\textbf{如何把"价格偏离后会回归均值"的信念，转成一套确定载体、确定方向、能在高换手下存活、且不被成本与容量吃死的仓位系统？}
+\end{quote}
+拆开是四件事：
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{载体}：这个负自相关真实存在吗？在哪个市场、哪个频段？（横截面 vs 时序）
+\item \textbf{方向}：偏离怎么度量、偏离到多极端才进场、回归到哪算完成。
+\item \textbf{量}：每个信号给多大敞口。\textbf{换手率决定生死}。
+\item \textbf{稳健}：在高换手、窄盈利、偶发趋势行情的侵蚀下，如何不把自己磨死。
+\end{enumerate}
+
+\takeaway{均值回归策略最难的从来不是"信号"，而是"载体判断"与"换手成本"——方向错了、或成本吃掉了，再漂亮的偏离信号都归零。}
+
+\section{均值回归溢价：利润主体与载体}
+\subsection{为什么负自相关能赚钱}
+用自相关把收益拆开（延续主教程，视角放在策略层）：
+\begin{equation}
+r_{i,t} \;=\; \underbrace{\theta_i\,\big(y_{i,t-1}-\bar y_{t-1}\big)}_{\text{均值回归·利润主体}} + \underbrace{\beta_i\,r_{m,t}}_{\text{市场}} + \underbrace{\alpha_{sys}}_{\text{相对基准的增值}} + \varepsilon_t,
+\end{equation}
+其中 $y_{t-1}$ 是过去 $H$ 日收益的排序量。$\theta_i<0$ 表示"过去相对弱 $\to$ 本期相对强"（负自相关）。
+\begin{itemize}[itemsep=2pt]
+\item \textbf{利润主体是 $\theta_i\,(y-\bar y)$}：你赚的是"相对强弱回归"的价差，是流动性提供与过度反应修正的补偿。
+\item 它\textbf{不是}信息 $\alpha$，而是与趋势溢价并列的\textbf{风险 Alpha}（另类风险溢价）：承担了"接飞刀""逆势持仓"的尾部风险，被市场付费。
+\end{itemize}
+
+\subsection{载体：横截面 vs 时序——本教程最重要的一个判断}
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{4.2cm}@{}}
+\toprule
+ & \textbf{时序反转（单标的）} & \textbf{横截面反转（相对强弱）} \\
+\midrule
+赌的是什么 & 该标的自身回均值 & 该标的\textbf{相对别人}回均值 \\
+被什么污染 & 市场动量/板块 beta & 仅相对偏离（中性化后纯净） \\
+期货日频实证 & \textbf{全为负}（RB 夏普 $-0.36$） & \textbf{显著为正}（$H=5$ 夏普 $0.44$） \\
+适用场景 & 分钟级/均值明显的标的 & 多品种/多股票组合 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{结论先给}：在日频期货上，时序反转是负 alpha 的（价格日频更偏正自相关/动量）；真正的均值回归 alpha 藏在\textbf{横截面相对强弱}里。载体判断错了，后面全是白做。
+
+\takeaway{均值回归的利润主体是"相对强弱回归"的价差，不是"自身回均值"；在期货日频，时序反转失效、横截面反转有效——载体先于方向。}
+
+\section{均值回归为什么能赚钱（先讲可信度）}
+\subsection{损益分布：高胜率、低赔率、窄盈利}
+与趋势相反，均值回归是\textbf{高胜率低赔率}：单笔胜率常 $55\%$--$70\%$，但每次赚得不多（回归到均值就离场），偶尔被趋势行情打穿（$b<1$）。单笔期望
+\begin{equation}
+\mathbb{E}[\text{单笔}] = p\cdot b - (1-p),\qquad p>0.5,\; b<1.
+\end{equation}
+\textbf{数字例}：$p=0.6$、$b=0.5$：$\mathbb{E}=0.6\times0.5-0.4=-0.1<0$——高胜率也会亏，因为赔率太低。均值回归赚钱靠\textbf{次数}与\textbf{低单笔损耗}堆出来，而不是靠单笔暴利。
+\subsection{为什么相对强弱会回归（微观基础）}
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{过度反应}：短期资金拥挤推过头，随后价格向基本面价值回归；
+\item \textbf{流动性提供}：逆势买入超跌者承担了"接飞刀"风险，获得风险补偿；
+\item \textbf{资金轮动}：风格/行业间资金短期超买超卖，随后均值回流。
+\end{enumerate}
+
+\takeaway{均值回归赚"次数"不赚"幅度"：高胜率低赔率、窄盈利靠频次累积；因此换手与单笔损耗是它天生的敌人。}
+
+\section{从偏离到敞口：方向如何变成仓位}
+\subsection{一条链：偏离 $\to$ 信号 $\to$ 敞口 $\to$ 手法}
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{4.6cm}@{}}
+\midrule
+偏离 & 过去 $H$ 日收益相对横截面均值的 z 分数（$y-\bar y$） \\
+信号 & $\operatorname{sign}(-(y_{i,t-1}-\bar y_{t-1}))$：弱于均值 $\to$ 多，强于均值 $\to$ 空 \\
+敞口 & 本期承担的 $\theta_{rev}$，大小由第 6--10 节决定 \\
+换手 & 偏离翻转才调仓；\textbf{高换手是反转的默认状态}，必须主动抑制 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{关键差异 vs 趋势}：趋势信号是"确认后才上车"（严进场），均值回归是"\textbf{极端偏离才值得进场}"（太温和的偏离没有安全边际）；趋势是"让利润奔跑"，均值回归是"\textbf{到均值附近就离场，绝不过度持有}"。
+
+\subsection{何时进场（偏离要极端）}
+进场的职责是\textbf{过滤掉温和波动、只在极端偏离时出手}：
+\begin{itemize}[itemsep=2pt]
+\item \textbf{z 分数阈值}：$|z_{i,t-1}| \ge z_{\text{entry}}$（如 $z\ge1.5$ 或 $z\ge2$）才进场。\textbf{偏离不够极端时，回归的期望太薄、还容易被动量续打}。
+\item \textbf{回归触发方式}：可等"偏离进入极端区且出现反转确认"（如偏离回落一个标准差），也可直接挂单。
+\item \textbf{过滤 regime}：趋势市（正自相关主导）里均值回归容易被打穿，regime 判趋势则降低参与（第 10 节）。
+\end{itemize}
+
+\textbf{$z_{\text{entry}}$ 怎么定（分位数法）}：$z_{\text{entry}}=1.5$ 或 $2$ 不是凭空来的，应取\textbf{历史 $z$ 分布的上下分位}。做法：滚动估计每期横截面的 $z$，取 $|z|$ 的 $q$ 分位数作为入场阈值，$q$ 决定交易频率。设横截面 $N$ 只资产、只做最极端 $p$ 比例，则
+\begin{equation}
+z_{\text{entry}} \;=\; \text{分位数}(|z_{t}|,\, 1-p),\qquad p=\frac{\text{目标持仓数}}{N}.
+\end{equation}
+\textbf{数字例}：$N=100$、目标每期只持最极端 $10$ 只做多 + $10$ 只做空，则 $p=10\%$、$z_{\text{entry}}$ 取 $|z|$ 的 $90\%$ 分位数。若历史 $|z|$ 的 90 分位 $\approx1.6$，则 $z_{\text{entry}}=1.6$——此时每期约有 10 只满足"超买/超卖"。\textbf{用分位数而不是固定常数的好处}：阈值自动适配市场波动——高波动期 $z$ 分布更宽、阈值自动抬高，低波动期自动降低，与"极端"的语义保持一致。
+\begin{itemize}[itemsep=2pt]
+\item 若交易太频繁/换手过高，把 $p$ 调小（阈值调高、持仓更少）。
+\item 出场阈值 $|z|<0.5$ 同理，可取 $|z|$ 的 $30\%$--$40\%$ 分位（"回到正常区"）。
+\end{itemize}
+
+\subsection{何时出场（回归完成即走）}
+出场的两套逻辑与趋势\textbf{相反}：
+\begin{itemize}[itemsep=2pt]
+\item \textbf{盈利侧要紧（见好就收）}：回归到均值附近（$|z|$ 回到阈值内，如 $|z|<0.5$）即离场，\textbf{不要等超额回归}——均值回归的右端是"继续回归"的概率快速衰减，超额持有会把利润还给市场。
+\item \textbf{亏损侧要止损（防动量续打）}：偏离继续扩大（如超过入场价 $s\times$ATR，或 $|z|$ 创新高）即止损——\textbf{这是与趋势最大的不同}：趋势里亏损用追踪止损"忍"过去，均值回归里"越偏离越危险"，必须硬止损。
+\item \textbf{时间止损}：持有超过 $T$ 根 K 线仍未回归 $\Rightarrow$ 这个偏离可能是新趋势，离场。
+\end{itemize}
+
+\textbf{一个完整时序例（与趋势篇的"摸高-回落"对照）}：设某品种价格 $P=100$，其 $N=20$ 日均线与波动给出当前 $z=-2.2$（显著超卖），触发 $z_{\text{entry}}=-2$ 进场做多 1 单位，入场价 $100$、ATR$=2$、$s=1.5$、出场阈值 $|z|<0.5$：
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lll@{}}
+\toprule
+时点 & 价格 / $z$ 变化 & 动作 \\
+\midrule
+$t_0$ & $P=100$，$z=-2.2$（$|z|\ge2$） & 进场做多 1 单位 \\
+$t_1$ & $P$ 跌至 $97.5$（$z=-3.0$，偏离扩大） & \textbf{硬止损触发}：$100-1.5\times2=97$ 接近，减仓/离场 \\
+$t_2$ & $P=99.5$，$z=-1.6$（偏离收敛） & 回归中，继续持有 \\
+$t_3$ & $P=100.8$，$z=-0.4$（$|z|<0.5$） & \textbf{回归完成，平仓离场} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{与趋势的对照}：同样"价格回落"的情景，趋势策略会用追踪止损（如持仓最高价 $-k\times$ATR）在趋势破坏时才走；均值回归则是\textbf{偏离继续扩大立即止损（$t_1$）、回归完成立即离场（$t_3$）}——一个等"趋势死"，一个等"回归完"，方向相反、节奏相反。
+
+\takeaway{均值回归的进出场与趋势相反：\textbf{极端偏离才进、回归完成即走、偏离扩大立刻止损}——它是"高抛低吸"，不是"追涨杀跌"。}
+
+\section{仓位管理的层级框架（本教程的结构地图）}
+\begin{center}
+\renewcommand{\arraystretch}{1.45}
+\begin{tabular}{@{}lll@{}}
+\toprule
+层级 & 决策 & 对应小节 \\
+\midrule
+单笔（单品种） & 每笔下多少、每笔敢亏多少 & 第 5、6 节 \\
+单笔（上界/概率） & 单笔最多下到多大（Kelly 上界） & 第 8 节 \\
+时序（动态） & 亏损中要不要减仓、趋势市要不要停 & 第 9、10 节 \\
+组合（多品种） & 钱在品种间怎么分、分散多少 & 第 11 节 \\
+容量（整体） & 高换手下能吃多大资金 & 第 12 节 \\
+总装 & 一步步串成可执行的决策链 & 第 13 节 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{阅读提示}：均值回归的仓位纪律在数学上与趋势同构（都是风险预算链），但\textbf{每个环节的"默认值"都因换手与赔率结构而相反}——下面逐节给出差异。
+
+\takeaway{五级纪律仍是"单笔→组合→容量"一根链，但均值回归的每一环都被"高换手、低赔率"改写：止损要紧、回归即走、波动目标化未必有用。}
+
+\section{单笔纪律 1：偏离度目标化（反转版"波动率目标化"）}
+\subsection{做什么}
+按标的\textbf{当前偏离的极端程度与波动}反比确定敞口，使"每笔回归交易的期望风险"大致固定。
+\subsection{为什么（与趋势的差异）}
+趋势的波动率目标化 $w_t=\sigma_{tar}/\sigma_t$ 有普适性，但\textbf{反转策略要同时考虑偏离的极端程度}：偏离越极端，回归期望越大但也越可能被动量续打。故把波动率目标化推广为\textbf{偏离度-波动双目标}。
+
+\textbf{推导（从"条件风险 = 目标"出发）}：设本期组合收益 $R_{p,t+1}=w_t\,r_{t+1}$，其条件风险有两块来源——波动目标与偏离目标。
+\begin{itemize}[itemsep=2pt]
+\item \textbf{波动约束}：要求条件波动 $\le\sigma_{tar}$，即 $w_t\,\hat\sigma_t\le\sigma_{tar}$，得 $w_t\le\sigma_{tar}/\hat\sigma_t$。
+\item \textbf{偏离约束}：偏离越极端，单笔期望回归越大，但"越极端越可能被动量续打"的风险也越大，故要求偏离敞口 $\le$ 偏离预算 $z_{\max}$：$w_t\,|z_{t-1}|\le z_{\max}\cdot b$，其中 $b$ 是偏离预算的比例系数；整理得 $w_t\le |z_{t-1}|/z_{\max}\cdot w_{\max}$（吸收 $b$ 进 $w_{\max}$）。
+\end{itemize}
+两约束都要满足，故取\textbf{两者较小者}：
+\begin{equation}
+\boxed{\; w_t \;=\; \min\!\Big(\frac{\sigma_{tar}}{\hat\sigma_t},\; \frac{|z_{t-1}|}{z_{\max}}\; w_{\max}\Big)}
+\end{equation}
+其中 $z_{t-1}$ 是上一期偏离 z 分数，$z_{\max}$ 是偏离上限（防过度杠杆），$w_{\max}$ 是总杠杆上限。\textbf{两个约束谁紧谁生效}：低波动+极端偏离时偏离约束生效（压住冒进），高波动+温和偏离时波动约束生效（压住追高）。
+\subsection{数字例}
+设组合年化波动 $\hat\sigma=12\%$、$\sigma_{tar}=10\%$、$w_{\max}=1.0$、$z_{\max}=3$。逐档代入：
+\begin{equation}
+|z|=1:\quad w_t=\min\!\Big(\frac{0.10}{0.12},\;\frac{1}{3}\times1.0\Big)=\min(0.83,\;0.33)=0.33,
+\end{equation}
+\begin{equation}
+|z|=2:\quad w_t=\min\!\Big(\frac{0.10}{0.12},\;\frac{2}{3}\times1.0\Big)=\min(0.83,\;0.67)=0.67,
+\end{equation}
+\begin{equation}
+|z|=3:\quad w_t=\min\!\Big(\frac{0.10}{0.12},\;\frac{3}{3}\times1.0\Big)=\min(0.83,\;1.0)=0.83.
+\end{equation}
+即：偏离越极端给越多（从 $0.33$ 到 $0.83$），且全程受波动目标 $0.83$ 压制——偏离 $z=3$ 时已到波动上限，不再加仓。
+\subsection{边界}
+\begin{itemize}[itemsep=2pt]
+\item \textbf{波动目标化对反转未必有益（实证第 15 节）}：横截面反转叠加波动目标化后 $\alpha$ 变负（$t\approx-2.9$），因为反转收益来自"低波动时段的极端偏离"，强行拉平波动反而削掉机会。
+\item \textbf{偏离 z 本身是估计}：$z_{\max}$ 截断处正是尾部，误判会把"该下注的极端"错杀。
+\end{itemize}
+
+\takeaway{反转仓位用"偏离度-波动双目标"：极端偏离给足、波动目标兜底；但要警惕——实证显示波动目标化对反转未必有益，别照搬趋势的口径。}
+
+\section{单笔纪律 2：固定风险头寸（ATR 手数，反转版）}
+\subsection{推导}
+与趋势同构：每笔风险额 $=Cf$，每手止损亏损 $=(s\cdot\text{ATR})\cdot m$，手数
+\begin{equation}
+\boxed{\; N=\left\lceil \frac{C\,f}{(s\cdot\text{ATR})\,m}\right\rceil }
+\end{equation}
+\subsection{与趋势的关键差异：止损距离}
+趋势里止损是"趋势破坏的确认点"（较远，$s\approx2$--$3$）；\textbf{均值回归里止损是"偏离扩大的危险点"，必须更近、更硬}：
+\begin{itemize}[itemsep=2pt]
+\item \textbf{近止损}：$s\approx1$--$1.5$——反转持仓若反向走一个 ATR 多，说明"回归假设失败"，要快速认错。\textbf{反转亏不起大止损}，因为胜率高但赔率低，一次大亏会吃掉几十次小赢。
+\item \textbf{入场价即参考}：止损通常设在入场价反向 $s\times$ATR 处，因为反转的"逻辑止损位"就是"偏离继续扩大"。
+\end{itemize}
+\subsection{数字例}
+$C=10^6$、$f=0.5\%$、ATR$\approx30$、$s=1.5$、$m=10$：
+\begin{equation}
+N=\left\lceil\frac{5000}{1.5\times30\times10}\right\rceil=\lceil 11.1\rceil = 12\ \text{手}.
+\end{equation}
+（同资金下，$s=2$ 是 9 手——反转用更近的止损，反而能下更多手，但要承担更频繁的止损。）
+
+\takeaway{反转的手数公式与趋势相同，但止损距离更近更硬：\textbf{低赔率策略容不下大止损}——一次大亏会吃掉几十次小赢。}
+
+\section{单笔纪律 3：Kelly 与分数 Kelly（上界）}
+\subsection{推导}
+Kelly 与赔率无关于方向，仍为
+\begin{equation}
+f^{*}=\frac{p(b+1)-1}{b}.
+\end{equation}
+对反转常用 $p=0.6$、$b=0.5$：
+\begin{equation}
+f^{*}=\frac{0.6\times1.5-1}{0.5}=\frac{-0.1}{0.5}=-0.2 < 0.
+\end{equation}
+\textbf{这是均值回归最容易被忽视的陷阱}：$p=0.6,b=0.5$ 的组合\textbf{Kelly 为负}——期望本身是负的。\textbf{必须 $p(b+1)>1$ 才值得下注}。
+
+\textbf{参数敏感性表（$f^{*}$ 随 $p,b$ 变化）}：
+\begin{center}
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}ccccc@{}}
+\toprule
+ & $b=0.4$ & $b=0.5$ & $b=0.8$ & $b=1.0$ \\
+\midrule
+$p=0.55$ & $-0.58$ & $-0.35$ & $-0.01$ & $+0.10$ \\
+$p=0.60$ & $-0.40$ & $-0.20$ & $+0.10$ & $+0.20$ \\
+$p=0.65$ & $-0.23$ & $-0.05$ & $+0.21$ & $+0.30$ \\
+$p=0.70$ & $-0.05$ & $+0.10$ & $+0.33$ & $+0.40$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+两个观察：一是\textbf{胜率提升远比赔率提升划算}（纵向从 $p=0.6$ 到 $0.7$ 很快转正）；二是\textbf{贴近边界处 $f^{*}$ 对参数极敏感}——$p=0.6,b=0.5$ 与 $p=0.65,b=0.4$ 只差 $0.05$ 的胜率与 $0.1$ 的赔率，Kelly 就从 $-0.2$ 跳到 $-0.23$，方向与量级都难以稳定，这正是反转必须用分数 Kelly 的统计原因。
+\subsection{工程结论}
+\begin{itemize}[itemsep=2pt]
+\item \textbf{先算 Kelly 再谈仓位}：$f^{*}\le0$ 说明这个"高胜率"策略根本不该做，别被胜率骗了。
+\item 若 $f^{*}>0$，仍只用\textbf{分数 Kelly}（$\tfrac12$ 或更少）当上界护栏——反转策略换手极高，Kelly 对参数误差的放大更致命。
+\item \textbf{反转的 Kelly 数值通常小于趋势}（低赔率压缩 $f^{*}$），意味着\textbf{单笔仓位天然要更小}。
+\end{itemize}
+
+\textbf{传导落地算例（从 $f^{*}$ 到手数）}：设估计 $p=0.65$、$b=0.8$，则 $f^{*}=[0.65\times1.8-1]/0.8=(1.17-1)/0.8=0.2125\approx21\%$。取半 Kelly $f=\tfrac12 f^{*}\approx10.6\%$，账户 $C=10^6$、止损 $s=1.5$、ATR$=30$、$m=10$：
+\begin{equation}
+\text{单笔风险额}=C\,f=10^6\times0.106=106{,}000,\qquad
+N=\left\lceil\frac{106{,}000}{1.5\times30\times10}\right\rceil=\lceil 235.6\rceil=236\ \text{手}.
+\end{equation}
+对照第 7 节的固定风险 $f=0.5\%$（约 $N=12$ 手），可见：\textbf{半 Kelly 上界是"安全天花板"，远高于固定风险的日常仓位}。它的正确用法不是"每次下到 236 手"，而是\textbf{校验}：任何单笔仓位若超过 $236$ 手（半 Kelly 上限），说明固定风险头寸的参数（$C$、$f$、$s$）可能定得过激进，需要回查。\textbf{Kelly 是护栏不是目标}。
+
+\takeaway{Kelly 是均值回归的第一道检查：$p(b+1)>1$ 才值得下注，否则高胜率也是负期望；反转的分数 Kelly 通常更小，单笔仓位天然偏保守。}
+
+\section{动态纪律 1：基于回撤的降杠杆}
+\subsection{完整推导}
+与趋势篇同构：对数净值、峰值、回撤
+\begin{equation}
+q_t=\ln E_t,\quad \bar q_t=\max_{s\le t}q_s,\quad \mathrm{DD}_t=1-E_t/\bar E_t=1-e^{-(\bar q_t-q_t)}.
+\end{equation}
+降杠杆 $g_t=g(\mathrm{DD}_{t-1})$ 只缩放敞口量：
+\begin{equation}
+r_t = g_{t-1}\,\theta_{rev}\,z_{t-1}\,x_t.
+\end{equation}
+\subsection{与趋势的差异}
+\begin{itemize}[itemsep=2pt]
+\item 趋势回撤降杠杆的核心结论是"欠杠杆时降仓是砍在低点，应在组合层评估"；\textbf{反转同理}：单品种/单策略回撤降杠杆常因"在低波动回归期误砍"而负优化。
+\item \textbf{但反转的回撤更钝}：低赔率窄盈利，回撤通常不如趋势深（实证：横截面反转最大回撤 $18.4\%$ vs 时序反转 $73.7\%$），所以回撤降杠杆的触发阈值可比趋势\textbf{更松}。
+\end{itemize}
+
+\textbf{为什么反转回撤更钝（量化解读）}：回撤深度主要由\textbf{单笔亏损的尾部}决定。趋势是"低胜率高赔率"——大量小亏后偶尔大赚，但偶尔的大亏（趋势反转打穿）构成深回撤；反转是"高胜率低赔率"——每笔亏损被近止损（$s\approx1$--$1.5$）钳在 $\le1.5\times$ATR，单笔损失有硬上限。用随机游走近似，权益过程
+\begin{equation}
+E_t = E_{t-1}\big(1+\mu+\sigma\varepsilon_t\big),
+\end{equation}
+最大回撤的期望深度随单期波动 $\sigma$ 近似线性增长（回撤 $\approx k\,\sigma\sqrt{T}$，$k$ 由路径常数决定）。反转组合年化波动约 $9\%$--$10\%$，趋势组合约 $12\%$--$25\%$，故\textbf{同样的回撤阈值（如 20\%），反转策略要经历更长的震荡期才触及}——这就是"回撤更钝、阈值可更松"的统计依据。
+
+\takeaway{回撤降杠杆与趋势同构；但反转回撤更浅、更钝，触发阈值可更松，且同样要在组合层评估而不是单策略照搬。}
+
+\section{动态纪律 2：Regime 感知调杠杆}
+\subsection{做什么}
+用市场状态直接设定敞口倍率：\textbf{震荡市 $\to$ 满敞口（反转的主场）；趋势市 $\to$ 降杠杆甚至停用（反转会被动量续打穿）}。
+\subsection{为什么}
+\begin{itemize}[itemsep=2pt]
+\item 均值回归溢价在\textbf{震荡市}最肥（价格来回摆动，负自相关最明显）；
+\item 在\textbf{趋势市}里负自相关被正自相关覆盖，反转信号变成"逆势接飞刀"，必须降权。
+\item 这与趋势篇的 regime 逻辑\textbf{恰好互补}：趋势强则反转弱，两者天然负相关——是组合层天然的分散对（第 11 节）。
+\end{itemize}
+\subsection{边界}
+regime 识别本身带滞后与误判；单段数据训练的规则有过拟合风险。应视为"第二层风控"，与组合层分散配合。
+
+\takeaway{regime 调杠杆把"现在该不该做反转"量化成敞口倍率：震荡市满仓、趋势市收手——它与趋势策略构成天然的互补对冲。}
+
+\section{组合层：等风险、相关性与分散}
+\subsection{为什么分散对反转同样重要}
+均值回归是\textbf{弱信号高换手}策略，单品种/单策略暴露低、噪声高。分散把"多个弱且低相关的偏离信号"叠起来，夏普显著抬升（实证第 15 节：单策略各品种夏普约 $0.1$--$0.4$，组合抬到 $0.44$）。
+\subsection{与趋势的差异：相关性结构}
+\begin{itemize}[itemsep=2pt]
+\item 趋势策略彼此高度正相关（都吃趋势溢价）；\textbf{反转策略与趋势策略天然负相关}——同一个"过度反应/资金轮动"周期里，一个做多、一个做空。
+\item \textbf{最佳分散是"反转 + 趋势"的混合}，而不是堆一堆同质反转策略。相关性去伪用协方差矩阵算真实增量风险，同款公式。
+\end{itemize}
+\subsection{单次目标化原则}
+组合层只做一次目标化，不要在品种层重复——否则 $\sqrt N$ 放大。\textbf{但注意}：实证显示反转上"波动目标化"本身可能负贡献，组合层的目标化应更温和（上限收敛，不做强拉平）。
+
+\takeaway{反转组合的最佳分散对象是趋势策略（天然负相关），而不是同类反转的叠加；组合层目标化应更温和，避免把反转的机会窗口削平。}
+
+\section{容量与成本（反转的约束所在）}
+\subsection{参与率冲击}
+同款模型：$p=\text{你的成交}/\text{市场成交}$，冲击 $\text{impact}\approx K\sqrt{p}$，$p\le10\%$。
+\subsection{高换手是反转的主要约束}
+\begin{itemize}[itemsep=2pt]
+\item 实证（第 15 节）横截面反转 H=5 的换手约 \textbf{82\% 仓位/日}——一年换手几百倍。
+\item 每 10bp 双边成本，年化侵蚀 $=0.001\times\text{年换手}\times100\%$；按 82\%/日、一年约 250 日、单边换手 $\approx 0.82$：年成本 $\approx 0.001\times(0.82\times250\times2)\times100\%\approx41\%$。\textbf{若单笔 alpha 只有 4\%，成本已经高于收益}。
+\item \textbf{结论}：反转策略要么降低换手（拉长 H、加冷却期、只做极端偏离），要么只用低成本的执行方式（限价单、排队做市式挂单）。
+\end{itemize}
+
+\textbf{换手率从信号侧怎么算（信号 $\to$ 换手的桥）}：换手率由信号翻转的频率决定。设 $N$ 只资产、每期按 $z$ 排序取最极端 $pN$ 只，则单只资产的持仓状态（做多/做空/平）在相邻两期之间\textbf{翻转}的概率，取决于 $z$ 排序越过阈值边界的概率。若每期 $z$ 排序近似随机重排，单只持仓延续的概率约 $1-p$，则单期换手率
+\begin{equation}
+\text{turnover}_t \;\approx\; \frac{\text{本期变动持仓数}}{N} \;\approx\; 2p\,(1-p).
+\end{equation}
+\textbf{数字例}：$p=0.1$（每期 10\% 持仓）$\Rightarrow$ 单期换手 $\approx2\times0.1\times0.9=0.18$；若信号为日频且每期全换（$z$ 完全重排），年化单边换手 $\approx0.18\times250=45$ 倍，对应双边成本（10bp）年侵蚀 $0.001\times45\times100\%\approx4.5\%$——已显著。若进一步只做极端 $p=0.05$，换手 $\approx0.095\times250=23.75$ 倍，成本侵蚀约 $2.4\%$。\textbf{关系}：持仓比例越小、调仓越频繁，成本侵蚀越大；反之拉长持仓、降低 $p$ 或用冷却期，换手率与成本同步下降。\textbf{这与实证的 82\%/日量级吻合的要点是：横截面反转在 $H=5$、$p$ 接近一半时，翻转率接近极限}，工程上必须靠冷却期与阈值收敛来压制。
+
+\takeaway{换手是均值回归的核心约束：82\%/日的换手一年成本可达 40\%+，alpha 只有 4\% 会被成本覆盖——要么降换手，要么低成本执行，否则容量为零。}
+
+\section{统一决策链（把第 6--12 节串成一个流程）}
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{体检载体}：先测 $\operatorname{VR}$ 与自相关，确认负自相关真实存在于该市场/频段（第 2 节）；\textbf{载体不对直接放弃}。
+\item \textbf{定偏离}：选 $H$（匹配半衰期）与 z 分数（第 4 节）。
+\item \textbf{单笔}：偏离度-波动双目标 $w_t$（第 6 节）$+$ 固定风险手数 $N$（第 7 节）。
+\item \textbf{上界}：先算 $f^{*}$，$f^{*}\le0$ 就放弃；$>0$ 用分数 Kelly 当护栏（第 8 节）。
+\item \textbf{动态}：regime 判"震荡才做"（第 10 节），回撤降杠杆判"亏多了收不收"（第 9 节）。
+\item \textbf{组合}：等风险配权 + 与趋势策略混搭去伪 + 温和单次目标化（第 11 节）。
+\item \textbf{容量}：算换手率与成本，确认扣成本后仍为正（第 12 节）；\textbf{不过成本关不上线}。
+\end{enumerate}
+
+\takeaway{均值回归的决策链以"载体体检"开头、以"成本审计"结尾：载体不对不开始，成本不过不上线。}
+
+\section{实证示例：时序反转为什么失效（单品种）}
+以通达信本地主力连续 L8 RB 为例（2013-08$\to$2026-09，共 3188 日）：信号 \texttt{sign(过去 H=10 日收益)}（时序反转）；基准=固定敞口 $\pm1$；叠加1 波动率目标化、叠加2 回撤降杠杆；只用 $t-1$ 及之前信息、无前视。
+\textbf{实测结果（RB）}：
+\begin{center}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{1.3cm}@{}}
+\toprule
+策略 & 年化 & 波动 & 夏普 & 最大回撤 & Calmar \\
+\midrule
+朴素时序反转（基准） & $-8.8\%$ & $24.4\%$ & $-0.36$ & $73.7\%$ & $-0.12$ \\
++波动率目标化 & $-4.0\%$ & $7.0\%$ & $-0.57$ & $42.2\%$ & $-0.09$ \\
++回撤降杠杆 & $-1.7\%$ & $3.1\%$ & $-0.56$ & $20.6\%$ & $-0.08$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+归因（vs 基准，月频 OLS；$t$ 未修自相关）：波动率目标化 $\theta_{rev}=0.31$、$\alpha=-0.16\%$、$t=-2.28$（\textbf{显著为负}）；回撤降杠杆 $\theta_{rev}=0.09$、$\alpha=-0.10\%$（仍负）。
+\textbf{结论}：日频期货的收益更偏\textbf{正自相关}（动量），时序反转是\textbf{负 alpha} 策略——叠加任何仓位纪律都无法转正。\textbf{载体错误时，纪律无法弥补。}
+
+\section{实证示例：横截面反转为什么有效（多品种）}
+以 8 个品种（RB、I、HC、MA、TA、M、AU、CU）的横截面相对强弱反转为例，$H=5$：每期对过去 5 日收益横截面标准化，弱于均值做多、强于均值做空，等权组合。
+\textbf{实测结果}：
+\begin{center}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.3cm}@{}}
+\toprule
+组合 & 年化 & 波动 & 夏普 & 最大回撤 & Calmar \\
+\midrule
+等权横截面反转（基准 A） & $+4.1\%$ & $9.4\%$ & \textbf{$0.44$} & $18.4\%$ & $0.22$ \\
++波动率目标化 & $+2.0\%$ & $10.0\%$ & $0.20$ & $22.3\%$ & $0.09$ \\
++回撤降杠杆 & $+3.8\%$ & $9.3\%$ & $0.41$ & $18.1\%$ & $0.21$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+归因（vs A，月频 OLS）：波动目标化 $\beta=1.03$、$\alpha=-0.18\%$、$t=-2.88$（\textbf{显著为负}）；回撤降杠杆 $\alpha=-0.21\%$、$t=-3.03$。
+\textbf{换手审计}：$H=5$ 横截面反转平均每日换手约 \textbf{82\%}。按双边 10bp 成本估算，年化成本约 $0.001\times0.82\times250\times2\approx41\%$——\textbf{若不加成本控制，4.1\% 的 alpha 会被成本直接吞成负值}。
+\textbf{三条结论}：
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{载体对了，信号才有意义}：同一批品种，时序反转夏普 $-0.36$、横截面反转 $+0.44$——差一个维度，方向完全不同。
+\item \textbf{仓位纪律对反转的边际贡献有限甚至为负}：波动目标化与回撤降杠杆在反转上 $\alpha$ 均为负——它们是为"趋势的右偏分布"设计的，别照搬。
+\item \textbf{换手是反转真正的敌人}：82\%/日换手让 4.1\% 的 alpha 在 41\% 的成本面前归零——反转策略的第一工程问题永远是降换手与控成本。
+\end{enumerate}
+
+\subsection{机理量化：期货日频的正自相关到底有多大}
+时序反转失效的根因是期货日频收益\textbf{正自相关}占优。用 AR(1) 估计 RB 的日频收益，得到一阶自相关
+\begin{equation}
+\hat\rho_1 \approx +0.03\text{--}0.05\ (\text{日频、RB 等 8 品种均值}),
+\end{equation}
+对应的 $q$ 日方差比 $\operatorname{VR}(5)\approx1+2[0.8(0.04)+0.6(0.02)]\approx1.09$（取典型值），即日频价差整体\textbf{发散偏动量}。时序反转信号 $\operatorname{sign}(-$过去 $H$ 日收益$)$ 在正自相关环境下等于"逆着动量做"，单笔期望为负；且 $H$ 越大反转越偏动量、越小越偏噪声——实证里 $H=120$ 时夏普才接近 0，与"负自相关只存在于短窗口"的机制一致。\textbf{对比}：同样 8 品种的\textbf{横截面}反转 $H=5$ 夏普 $+0.44$，说明日频的负自相关\textbf{藏在"相对强弱"维度}，不在"时序"维度。
+
+\subsection{盈亏平衡分析：alpha 要多高才扛得住成本}
+设单边换手率 $\tau$、双边成本 $c$、年交易天数 $250$，则年化成本侵蚀 $\approx c\cdot\tau\cdot250$。反转策略的盈亏平衡条件是
+\begin{equation}
+\alpha_{\text{年化}} > c\cdot\tau\cdot250 \quad\Longleftrightarrow\quad \tau < \frac{\alpha_{\text{年化}}}{250\,c}.
+\end{equation}
+\textbf{数字例}：$c=10$bp、$\alpha=4\%$：要求 $\tau<0.04/(250\times0.001)=0.16$——即\textbf{每日换手必须压到 $16\%$ 以下}，而实证横截面反转是 $82\%$，差 5 倍。两个杠杆方向：
+\begin{itemize}[itemsep=2pt]
+\item \textbf{压换手}：拉长 $H$、冷却期、只做极端 $p$、用阈值收敛（$|z|$ 落在 $[z_{\text{entry}},z_{\max}]$ 内才调仓）。
+\item \textbf{压成本}：限价单替代市价单、排队做市式挂单、避开开盘/收盘流动性差的时段——每条都能把有效 $c$ 降一个量级。
+\end{itemize}
+\textbf{结论}：4.1\% 的横截面 alpha 不是不能做，而是\textbf{必须先把每日换手压到 16\% 以内、或把成本压到 2bp 以下}，否则净值在扣成本后为负。
+
+\appendix
+\section*{附录 A：符号表}
+\addcontentsline{toc}{section}{附录 A：符号表}
+\begin{center}
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}ll@{}}
+\toprule
+符号 & 含义 \\
+\midrule
+$r_t$ & 单期收益 \\
+$\rho_1$ & 一阶自相关 \\
+$\theta$ & 均值回归系数（负 $\to$ 回归） \\
+$y_{i,t}$ & 过去 $H$ 日收益（偏离量） \\
+$z_t$ & 偏离 z 分数 \\
+$H$ & 反转窗口 \\
+$w_t$ & 仓位权重 \\
+$C,\ f,\ m$ & 账户资本、单笔风险预算、每点金额 \\
+$\text{ATR},\ s$ & 平均真实波幅、止损倍数 \\
+$f^{*}$ & Kelly 分数 \\
+$\mathrm{DD},\ g$ & 回撤、降杠杆倍率 \\
+$\theta_{rev}$ & 有效反转暴露 \\
+$\sigma_{tar},\ \hat\sigma$ & 目标波动、估计波动 \\
+$p_{\text{part}}$ & 参与率 \\
+IC / IR / $t$ & 信息系数 / 信息比率 / $t$ 值 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{附录 B：练习与自测}
+\addcontentsline{toc}{section}{附录 B：练习与自测}
+\begin{enumerate}[itemsep=2pt]
+\item 某策略 $p=0.65$、$b=0.4$：算 $\mathbb{E}[\text{单笔}]$ 与 Kelly $f^{*}$，判断该不该做。
+\item 时序反转与横截面反转在"赌什么"上有什么本质区别？为什么期货日频前者失效、后者有效？
+\item 反转策略为什么止损要更近、更硬？用"低赔率容不下大亏"解释。
+\item 若换手 60\%/日、双边成本 8bp，年化成本约多少？alpha 要多高才不被成本覆盖？
+\item 为什么波动率目标化对反转可能有害（$t=-2.88$）？结合"反转收益来自低波动时段的极端偏离"说明。
+\item 均值回归与趋势在损益分布（胜率/赔率/偏度）上的差异是什么？
+\item 用第 13 节决策链，把"时序反转失败、横截面反转成功"的对比按 7 步走一遍。
+\end{enumerate}
+
+\section*{附录 C：参考阅读}
+\addcontentsline{toc}{section}{附录 C：参考阅读}
+\begin{enumerate}[itemsep=2pt]
+\item Jegadeesh, N. (1990). \emph{Evidence of Predictable Behavior of Security Returns}.
+\item Lehmann, B. (1990). \emph{Fads, Martingales, and Market Efficiency}.
+\item Lo \& MacKinlay (1988). \emph{Stock Market Prices Do Not Follow Random Walks}.
+\item Avellaneda \& Lee (2010). \emph{Statistical Arbitrage in the US Equities Market}.
+\item Vidyamurthy (2004). \emph{Pairs Trading: Quantitative Methods and Analysis}.
+\end{enumerate}
+
+\section*{收束}
+\addcontentsline{toc}{section}{收束}
+\begin{quote}
+\textbf{均值回归赚的不是"每次都对"，而是"在震荡市里把极端偏离处理到位"。}载体（横截面而非时序）决定你暴露给谁（$\theta_{rev}$），仓位决定你从这份暴露里拿走多少；从偏离度-波动双目标、近而硬的止损、Kelly 第一道检查，到 regime 震荡开关、与趋势的负相关分散、以及换手成本审计——这些不是技巧列表，而是\textbf{一条以"载体体检为头、成本审计为尾"的风险预算链}。趋势讲"让利润奔跑"，均值回归讲"见好就收、越危险越要快跑"——两套纪律互补，合在一起才构成完整的多空工具箱。
+\end{quote}
+
+\end{document}

@@ -1,7 +1,7 @@
 \documentclass[UTF8,11pt]{ctexart}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage[papersize={176mm,250mm},margin=2.2cm]{geometry}
+\usepackage[a4paper,margin=2.2cm]{geometry}
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{enumitem}
@@ -27,8 +27,8 @@
   commentstyle=\color{gray},
 }
 \newcommand{\codeinl}[1]{\texttt{#1}}
-% 统一的"主句"强调命令
-\newcommand{\takeaway}[1]{\medskip\par\noindent\textbf{主句：}#1\par\medskip}
+% 统一的"要点"强调命令（用普通段落，避免 fbox/parbox 内 CJK 断行问题）
+\newcommand{\takeaway}[1]{\medskip\par\noindent\textbf{要点：}#1\par\medskip}
 
 \title{\bfseries 趋势跟踪与仓位管理教程\\[3pt]\large 从趋势溢价到可运行的仓位纪律（深度·自含·实证）}
 \author{量化投研学习笔记}
@@ -39,7 +39,7 @@
 \maketitle
 
 \begin{abstract}
-本教程把期货/CTA 的两大命题一次讲通：\textbf{方向}（趋势溢价是什么、信号怎么设计、为什么值得暴露给趋势因子）与\textbf{量}（仓位管理五级纪律）。每一级都给出\textbf{逐行推导 + 一个数字例 + 边界条件 + 一句话主句}，并用真实通达信本地数据（RB 等 8 品种）把结论钉死。
+本教程把期货/CTA 的两大命题一次讲清：\textbf{方向}（趋势溢价是什么、信号怎么设计、为什么值得暴露给趋势因子）与\textbf{量}（仓位管理五级纪律：单笔风险头寸 $\to$ 波动率目标化 $\to$ Kelly 上界 $\to$ 回撤/regime 动态杠杆 $\to$ 组合层分散）。每一级都给出\textbf{逐行推导 + 一个数字例 + 边界条件 + 要点}，并用真实通达信本地数据（RB 等 8 品种）验证结论。适合已有 Alpha/Beta 基本认知、想动手做 CTA 仓位的读者。
 \end{abstract}
 
 \tableofcontents
@@ -47,18 +47,18 @@
 
 \section*{如何使用本教程}
 \addcontentsline{toc}{section}{如何使用本教程}
-本教程是\textbf{递进式的}，不要跳读：
+本教程是**递进式的**，不要跳读：
 \begin{enumerate}[itemsep=2pt]
 \item 第 1--3 节打概念地基：要解决的问题、趋势溢价、趋势为什么能赚钱。
 \item 第 4--5 节搭骨架：方向如何映射成敞口，以及“单笔—组合—容量”的层级框架。
 \item 第 6--10 节逐级给仓位纪律（每级都有推导和数字例）。
 \item 第 11--13 节把组合层、容量约束与统一决策流程串起来。
-\item 第 14--15 节用通达信本地真实数据给出单品种与多品种的实证。
+\item 第 14--15 节用通达信本地真实数据给出单品种与多品种的实证，回接前面各节结论。
 \end{enumerate}
-每节末尾的 \textbf{主句} 是可记忆的一句话；\textbf{边界} 提示该结论什么时候不成立；附录的\textbf{练习自测}可用来检验理解。
+每节末尾的 \textbf{要点} 是可记忆的一句话；\textbf{边界} 提示该结论什么时候不成立；附录的\textbf{练习自测}可用来检验理解。
 
 \section{要解决什么问题（问题定义）}
-本教程唯一要回答的问题：
+进入细节前，先明确本教程要回答的问题：
 \begin{quote}
 \textbf{如何把“捕捉可持续大趋势”的信念，转成一套确定规模、确定风险、能被分散放大、且能扛住反复震荡的仓位系统？}
 \end{quote}
@@ -68,63 +68,66 @@
 \item \textbf{量}：每个信号下该给多大敞口（仓位）——回答“暴露多少”，并且\textbf{量决定生死}。
 \item \textbf{稳健}：在大量小亏 + 偶发大赚的收益分布里，如何不把自己磨死、不错过大趋势（风控 + 分散）。
 \end{enumerate}
+答案的骨架见第 5 节层级图；本教程的每一节都是其中一块砖。
 
 \takeaway{本教程自始至终只回答一个问题：把“抓大趋势”的信念，转成“既能放大、又能长寿”的仓位系统。}
 
 \section{趋势溢价：你的利润主体}
 \subsection{为什么是大趋势而非技巧在赚钱}
-用回归把组合收益拆开：
+用回归把组合收益拆开（延续主教程第 7 章，但视角放在期货）：
 \begin{equation}
 R_p-R_f \;=\; \underbrace{\beta_{trend}\,R_{Trend}}_{\text{趋势溢价·利润主体}}
 +\; \underbrace{\alpha_{sys}}_{\text{相对基准的增值}} +\; \varepsilon .
 \end{equation}
 \begin{itemize}[itemsep=2pt]
-\item $\beta_{trend}\,R_{Trend}$：你暴露在“趋势因子”上，系统性收获趋势溢价。\textbf{这是收入主体}。
-\item $\alpha_{sys}$：相对一个朴素趋势基准的增值——来自选品、波动率目标化、尾部对冲、退场纪律。它\textbf{放大} $\beta_{trend}$ 的收获，而非独立第二利润源。
+\item $\beta_{trend}\,R_{Trend}$：你暴露在“趋势因子”上，系统性收获趋势溢价。\textbf{这是收入主体}，靠的是“一直在场、且在趋势来临时下注足够大”。
+\item $\alpha_{sys}$：相对一个朴素趋势基准（如 SG 趋势指数）的增值——来自选品、波动率目标化、尾部对冲、退场纪律。它\textbf{放大的}是 $\beta_{trend}$ 的收获，而非独立的第二利润源。
 \item $\varepsilon$：单期运气，可分散、不重复。
 \end{itemize}
 \subsection{为什么 $\beta$ 在这里不能剥}
-权益市场剥市场 $\beta$ 合理，因为指数能廉价复制它；但趋势溢价\emph{不能被廉价稳定复制}——需要系统规则、严格风控与规模容量。因此趋势 $\beta$ 是\textbf{要牢牢持有、配好“量”}的资产，不是要削掉的噪声。
+权益市场中性剥市场 $\beta$ 合理，因为指数能廉价复制它；但趋势溢价\emph{不能被任何人廉价地稳定复制}——实现它需要系统规则、严格风控与规模容量。因此趋势 $\beta$ 是\textbf{要牢牢持有、配好“量”}的资产，不是要削掉的噪声。
 \begin{quote}
 第 6--10 节所有“量”的纪律，都是在决定这个 $\beta_{trend}$ 该放大多少、何时收手。\textbf{别把“高 $\beta_{trend}$ 的收益”当作 $\alpha$ 去削}。
 \end{quote}
+
 \takeaway{在期货里，趋势溢价就是那个“被付钱的 $\beta$”，是利润主体；仓位纪律的全部意义是决定这份暴露给多少、何时收。}
 
 \subsection{为什么它也叫做「风险 Alpha」}
-把对“标准基准”估出的 $\alpha$ 再拆一层：
+把对“标准基准”估出的 $\alpha$ 再拆一层，就能看清它为什么被业内称作 risk alpha：
 \begin{equation}
 \alpha_{measured} \;=\; \underbrace{\beta_{trend}\,R_{Trend}}_{\text{风险Alpha·趋势溢价}}
 \;+\; \underbrace{\text{凸性/危机}\,\alpha}_{\text{尾部保单}}
 \;+\; \underbrace{\text{信息/纪律}\,\alpha}_{\text{真本事}} \;+\; \varepsilon .
 \end{equation}
-趋势策略是多空、相对常规基准 $\beta\approx0$，其超额按 CAPM 定义自然是“$\alpha$”；但主要来源是\textbf{承担可定价风险挣来的补偿}：
+由于趋势策略是多空、相对常规基准 $\beta\approx0$，其超额按 CAPM 定义自然是“$\alpha$”；但主要来源是\textbf{承担可定价风险挣来的补偿}：
 \begin{itemize}[itemsep=2pt]
 \item \textbf{信息 $\alpha$}（价值/基本面错价）：零和、容量极小、靠真本事、一挤就没；
-\item \textbf{风险 $\alpha$}（趋势/动量/凸性溢价）：\emph{非零和}、可被系统化低成本“造”出来、有明确的风险画像（负偏、尾部）。
+\item \textbf{风险 $\alpha$}（趋势/动量/凸性溢价）：\emph{非零和}、可被系统化低成本“造”出来、有明确的风险画像（负偏、尾部）；它像“分红”而不像“捡漏”。
 \end{itemize}
-趋势跟踪绝大多数“显示 $\alpha$”属于后者，故用\textbf{风险 Alpha（另类风险溢价）}与信息 $\alpha$ 区分。含义：\textbf{它不是免费的聪明，而是有代价的承受}——应“别削、管好量、组合分散”。
+趋势跟踪绝大多数“显示 $\alpha$”属于后者，故用 \textbf{风险 Alpha（另类风险溢价，Alternative Risk Premium）}与信息 $\alpha$ 区分。含义：\textbf{它不是免费的聪明，而是有代价的承受}——所以应“别削、管好量、组合分散”（对应第 6--12 节），而不是当纯信息 $\alpha$ 去膜拜，或当纯 $\beta$ 去剥掉。
 
 \section{趋势为什么能赚钱（先讲可信度）}
 \subsection{收益分布的第一个事实：低胜率高赔率右偏}
-趋势系统单笔胜率常只有 $30\%$--$45\%$，但赢的时候赚得远大于亏的时候。设胜率 $p$、平均盈亏比 $b$：
+趋势系统单笔胜率常只有 $30\%$--$45\%$，但赢的时候赚得远大于亏的时候。设胜率 $p$、平均盈亏比 $b$，单笔期望为
 \begin{equation}
 \mathbb{E}[\text{单笔}] = p\cdot b - (1-p) = p(b+1)-1 .
 \end{equation}
-只要 $p(b+1)>1$，即便胜率较低，“对的时候赢得多”与否决定期望正负。
+只要 $p(b+1)>1$，即便胜率较低，“对的时候赢得多”与否决定期望正负。趋势的利润\textbf{不是来自每次对，而是来自对的那几次被放得足够大}。
 \subsection{为什么量价会延续（微观基础）}
 趋势溢价的可持续来源至少有三：
 \begin{enumerate}[itemsep=2pt]
 \item \textbf{信息扩散}：重大信息并非瞬间被所有参与者消化，价格沿信息方向持续移动数日到数月；
-\item \textbf{机构资金与大单驱动}：大资金建仓/减仓本身推着价格延续；
+\item \textbf{机构资金与大单驱动}：大资金建仓/减仓本身推着价格延续（自催化）；
 \item \textbf{行为偏差}：锚定、处置效应（人过早兑现盈利、过晚认亏）令价格在趋势上过度延续。
 \end{enumerate}
-\subsection{一个数字例}
+\subsection{一个数字例：为什么“每次都小亏”也能赚钱}
 设 $p=0.35$、$b=2.0$。则
 $$
 \mathbb{E}[\text{单笔}]=0.35\times2 -0.65 = 0.05 \ (>0).
 $$
-每 100 次交易约 35 次盈利、平均每次赚 $2$ 单位，65 次亏损、平均每次亏 $1$ 单位：净赚 $35\times2-65\times1=5$ 单位。
-\takeaway{趋势靠“右偏分布”赚钱；仓位纪律的第一要义是让这个右偏能活到“对的时候”。}
+即每 100 次交易约 35 次盈利、平均每次赚 $2$ 单位，65 次亏损、平均每次亏 $1$ 单位：净赚 $35\times2-65\times1=5$ 单位。胜率低但期望为正——这决定仓位纪律必须\textbf{允许小亏不断、绝不一次亏光}（见第 5/6/8 节）。
+
+\takeaway{趋势靠“右偏分布”赚钱：低胜率高赔率、期望为正；仓位纪律的第一要义是让这个右偏能活到“对的时候”。}
 
 \section{从信号到敞口：方向如何变成仓位}
 \subsection{一条链：方向 $\to$ 信号 $\to$ 敞口 $\to$ 手法}
@@ -133,12 +136,12 @@ $$
 \begin{tabular}{@{}l>{\raggedright\arraybackslash}p{4.6cm}@{}}
 \midrule
 方向 & sign(未来 $H$ 日累计收益)，$H$=时序动量窗口（如 252） \\
-敞口 & 本期有意承担的 $\beta_{trend}$（大小由第 6--10 节决定） \\
+敞口 & 本期有意承担的 $\beta_{trend}$（正/负、大小由第 6--10 节决定） \\
 换手 & 信号翻转才调仓；过高换手被成本吃掉（见第 12 节） \\
 \bottomrule
 \end{tabular}
 \end{center}
-注意“方向”和“敞口”是两层：\textbf{方向回答多大/多空，敞口回答下多少注}。
+注意“方向”和“敞口”是两层：\textbf{方向回答多大/多空，敞口回答下多少注；两者都由 $\mathcal{F}_{t-1}$ 信息决定（无前视）}。
 \takeaway{先有方向（sign），后有量（$w_t$）；两者都用过去信息、都可被 $\mathcal{F}_{t-1}$ 验证。}
 
 \subsection{何时进场（进场闸门要严）}
@@ -156,26 +159,44 @@ $$
 \bottomrule
 \end{tabular}
 \end{center}
-\textbf{同时的过滤条件}：regime 判震荡则不进（第 10 节）；用第 6 节波动率目标化控进场敞口；所有触发只用 $t-1$ 及之前信息、\textbf{无前视}。
+\textbf{同时的过滤条件}（决定“要不要进”，而非只决定“进多少”）：regime 判震荡则不进（第 10 节）；用第 6 节波动率目标化把进场敞口压到目标波动；所有触发只用 $t-1$ 及之前信息、\textbf{无前视}。
 
 \subsection{何时出场（盈利侧松、亏损侧紧）}
+出场的两套相反逻辑共同决定离场：
 \begin{itemize}[itemsep=2pt]
-\item \textbf{盈利侧要松}：不设固定止盈（那会砍掉趋势右尾），用\textbf{追踪/渠道止损}——只在趋势破坏时才走。
-\item \textbf{亏损侧要紧}：\textbf{硬止损}，把单笔亏损钳在固定风险内（第 7 节）。
-\item 两类结构离场：\textbf{信号反转}与\textbf{时间止损}。
+\item \textbf{盈利侧要松（让利润奔跑）}：不设固定止盈（那会砍掉趋势右尾），用\textbf{追踪/渠道止损}——只在趋势破坏时才走。例：Chandelier 离场为“持仓期最高价 $-$ $k\times$ATR”（$k\approx3$）价格跌破才走，或等价地“跌破 $N/2$ 日通道低点离场”。
+\item \textbf{亏损侧要紧（快速认错）}：\textbf{硬止损}，如“进场价 $-$ $s\times$ATR”（$s\approx2$），把单笔亏损钳在固定风险内（第 7 节）。
+\item 两类结构离场：\textbf{信号反转}（动量 sign 与持仓相反）与\textbf{时间止损}（持有 $T$ 根 K 线未创新高视为趋势死亡）。
 \end{itemize}
-\takeaway{进出场拧出“止损有上限、盈利无上限”的右偏收益分布；离场是“谁先触发谁生效”。}
+
+\takeaway{进场=确认后才上车的严闸门；出场=亏损用硬止损钳住、盈利用追踪止损放长的\textbf{不对称规则集}，二者共同拧出“止损有上限、盈利无上限”的右偏收益分布。}
 
 \subsection{合成规则与过拟合陷阱}
-真实下单把上述离场条件放进\textbf{“谁先触发谁生效”的或门}。
+真实下单把上述离场条件放进\textbf{“谁先触发谁生效”的或门}：任一条件满足即离场，而非等所有条件都成立。
 \begin{itemize}[itemsep=2pt]
-\item \textbf{过拟合高发}：通道长度 $N$、追踪倍数 $k$、止损倍数 $s$、持有上限 $T$ 每个自由度都能造出假收益；判定标准是\textbf{样本外稳健}。
-\item \textbf{换手成本}：进场过频被交易门槛吃掉——离场后需冷却期。
-\item \textbf{勿设固定止盈}：那等于主动砍掉右尾。
+\item \textbf{过拟合高发}：通道长度 $N$、追踪倍数 $k$、止损倍数 $s$、持有上限 $T$ 每多一个自由度，回测就能多出一截假收益；判定标准是\textbf{样本外稳健}而非回测最漂亮（呼应第 2 节）。
+\item \textbf{换手成本}：进场过频会被交易门槛吃掉（呼应第 12 节参与率冲击）——离场后需冷却期、$T$ 根内不重复进场。
+\item \textbf{勿设固定止盈}：那等于主动砍掉右尾，正是趋势策略最忌讳的事。
 \end{itemize}
 
-\section{仓位管理的层级框架（本教程的总地图）}
-六个决策散布在三个层级：
+\textbf{一个完整时序例（谁先触发谁离场）}：设 RB 于 $t_0$ 突破 60 日高点进场做多，进场价 $3500$、ATR$=30$、$s=2$、$k=3$、$T=20$，则四种离场条件的候选触发点分别为
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}ll@{}}
+\toprule
+离场条件 & 触发价 / 时点 \\
+\midrule
+硬止损（$s=2$） & $3500-2\times30=3440$ \\
+追踪止损（Chandelier，$k=3$） & 持仓期最高价 $-90$，随最高价上移 \\
+时间止损 & $t_0+20$ 根 K 线未创新高 \\
+信号反转 & $H=252$ 日动量 sign 转负 \\
+\bottomrule
+\end{tabular}
+\end{center}
+若持仓中价格先摸到 $3660$（最高价 $3660$），追踪止损上移到 $3660-90=3570$；此后价格回落到 $3560$——此时硬止损（$3440$）未触发、时间止损未到、sign 未转负，但\textbf{追踪止损已触发}，或门判定离场。这个例子说明：\textbf{盈利单几乎总是被追踪止损/信号反转"请走"，硬止损只在回归时兜底}。
+
+\section{仓位管理的层级框架（本教程的结构地图）}
+六个决策散布在三个层级，先看图再逐级展开：
 \begin{center}
 \renewcommand{\arraystretch}{1.45}
 \begin{tabular}{@{}lll@{}}
@@ -191,131 +212,220 @@ $$
 \bottomrule
 \end{tabular}
 \end{center}
-\takeaway{五级仓位纪律不是技巧列表，而是“单笔→组合→容量”一根风险预算链上不同截面的决策。}
+\textbf{阅读提示}：第 6--12 节彼此是“同一根风险预算链”的不同截面，别当孤立技巧看。
+
+\takeaway{五级仓位纪律不是一个技巧列表，而是“单笔→组偏→容量”一根风险预算链上不同截面的决策。}
 
 \section{单笔纪律 1：波动率目标化（等风险头寸）}
 \subsection{做什么}
-按标的\textbf{当前波动}反比确定敞口，使“每期被波动吃掉的风险”大致固定。
+按标的\textbf{当前波动}反比确定敞口，使“每期被波动吃掉的风险”大致固定。槽点是：波动大的时候少下注、波动小的时候多下注。
 \subsection{为什么}
-收益波动聚集（vol clustering）：大波动期也是高回撤风险期。把条件方差钉在目标值，可跨品种可比、削平回撤、不依赖精确预测。
+收益的波动是聚集的（vol clustering）：大波动期往往也是高回撤风险期。把每期条件方差钉在目标值，可（a）跨品种可比（把不同波幅拉到同一风险单元）；（b）削平路径回撤；（c）不依赖对“未来的精确判断”。
 \subsection{完整推导（逐行）}
-设 $r_{t+1}$ 的条件方差（用截至 $t$ 信息估计）记为 $\sigma_t^2$。估计常用：
+设资产在 $t+1$ 的收益为 $r_{t+1}$，其条件方差（用截至 $t$ 信息估计，无前视）记为 $\sigma_t^2$。估计常用以下几点之一：
 \begin{align}
-\text{EWMA/RiskMetrics:}\quad &\hat\sigma_t^2 = (1-\lambda)\sum_{j\ge1}\lambda^{j-1}(r_{t-j}-\hat\mu_{t-j})^2,\quad \lambda\approx0.94;\\
-\text{滚动已实现:}\quad &\hat\sigma_t^2 = \frac1k\sum_{j=0}^{k-1}(r_{t-j}-\bar r_t)^2,\quad k=20.
+\text{EWMA/RiskMetrics:}\quad &\hat\sigma_t^2 = (1-\lambda)\sum_{j\ge1}\lambda^{j-1}\big(r_{t-j}-\hat\mu_{t-j}\big)^2,\quad \lambda\approx0.94;\\
+\text{滚动已实现:}\quad &\hat\sigma_t^2 = \frac1k\sum_{j=0}^{k-1}\big(r_{t-j}-\bar r_t\big)^2,\quad k=20.
 \end{align}
-策略施加敞口 $w_t$，条件方差 $w_t^2\sigma_t^2$。令其等于目标波动 $\sigma_{tar}^2$，解得
+策略在 $t+1$ 期施加敞口 $w_t$（$\mathcal{F}_t$-可测），其条件方差为
+\begin{equation}
+\operatorname{Var}\big(R_{p,t+1}\mid\mathcal{F}_t\big)
+= \operatorname{Var}\big(w_t\,r_{t+1}\mid\mathcal{F}_t\big)
+= w_t^2\,\sigma_t^2 .
+\end{equation}
+令其等于目标波动 $w_t^2\sigma_t^2=\sigma_{tar}^2$，解得靶向权重
 \begin{equation}
 \boxed{\; w_t = \frac{\sigma_{tar}}{\sigma_t},\qquad
 w_t = \min\Big(\frac{\sigma_{tar}}{\hat\sigma_t},\,w_{\max}\Big)}
 \end{equation}
-\subsection{数字例（RB）}
-RB 朴素趋势年化波动 $\approx25.2\%$。设 $\sigma_{tar}=20\%$、$w_{\max}=1.5$，则 $w_t=0.20/0.252\approx0.79$（基准八折）。
+（上限 $w_{\max}$ 用来抑制 $\hat\sigma_t\to0$ 时的过度杠杆与估计噪声。）
+\subsection{数字例（RB，本教程真实数据）}
+由第 14 节 RB 实测：朴素趋势年化波动 $\approx25.2\%$（即 $\hat\sigma_t\approx0.252$）。设 $\sigma_{tar}=20\%$、$w_{\max}=1.5$，则
+$$
+w_t = \frac{0.20}{0.252} \approx 0.79 < w_{\max}.
+$$
+即目标化后把 RB 敞口压到约 $0.79$（基准的八折）。一年度化 $\times\sqrt{252}$ 不改变比值。
 \subsection{边界}
 \begin{itemize}[itemsep=2pt]
-\item \textbf{滞后}：波动骤升当期仍高位加仓——接受或用更短 EWMA。
-\item \textbf{双重目标化}：品种层+组合层各做一次会叠出 $\sqrt N$ 倍杠杆；组合层只做一次。
-\item \textbf{单品种不显著}：第 14 节 RB 上 $t\approx0.7$；到组合层才显著（第 15 节 $t\approx2.2$）。
+\item \textbf{滞后}：用过去 $k$ 日估计，波动骤升当期你仍在高位加仓——接受，或用更短 EWMA。
+\item \textbf{双重目标化}：在品种层和组合层各做一次会叠出 $\sqrt N$ 倍杠杆（见第 11 节），组合层只做一次。
+\item \textbf{单品种不显著}：第 14 节显示 RB 单品种上波动目标化 $\alpha$ 的 $t$ 仅约 $0.7$，统计上仍是噪声；到组合层才显著（第 15 节 $t\approx2.2$）。
 \end{itemize}
-\takeaway{波动率目标化 $w_t=\sigma_{tar}/\sigma_t$ 把每期条件风险钉在常量——最基础的一层，也是组合层可比性的前提。}
+
+\takeaway{波动率目标化 $w_t=\sigma_{tar}/\sigma_t$ 把每期条件风险钉在常量——它是单笔纪律里最基础的一层，也是组合层可比性的前提。}
 
 \section{单笔纪律 2：固定风险头寸（ATR 手数）}
 \subsection{做什么}
-把“每笔被止损的金额”固定为账户的一个百分比，倒推手数。
+把“每笔被止损的金额”固定为账户的一个百分比，据此倒推手数。
 \subsection{为什么}
-单笔风险要可控，需回答两个相互独立的问题：\textbf{(a) 这笔总共敢亏多少}（由资金 $C$ 与风险预算 $f$ 决定）；\textbf{(b) 单手持仓被止损一次亏多少}（由止损距离与合约面值决定）。手数 $N$ 只是这两个独立量之比。用 ATR 而非价格百分比，是因为 ATR 自适应波动，让“被止损金额”稳定逼近固定的 $Cf$。
+单笔风险要可控，必须先回答两个相互独立的问题：\textbf{(a) 这笔总共敢亏多少}——由资金 $C$ 与风险预算 $f$ 决定，与标的无关；\textbf{(b) 单手持仓被止损一次会亏多少}——由止损距离与合约面值决定，与账户无关。手数 $N$ 只是这两个独立量之比。
+用 \textbf{ATR（平均真实波幅）而非价格百分比或固定点差} 作止损距离，是因为 ATR 跟随波动率自适应：它给出的“这一手可能亏多少”在不同市况下都贴近真实，从而让“被止损金额”稳定逼近固定的 $Cf$。固定张数的手法则做不到——高波动期单笔风险被放大、低波动期又浪费风险预算。
 \subsection{完整推导（逐行）}
-每笔愿意亏的钱：$C\,f$。单手持仓若被止损亏损：$(s\cdot\text{ATR})\times m$。故手数为两者之比、向上取整：
+设账户资本 $C$、单笔风险预算 $f$（账户比例）、止损距离 $s\times\text{ATR}$（$s$ 通常 $1$--$3$）、合约乘数 $m$（每点变动金额）。每笔愿意亏的钱为
+\begin{equation}
+\text{单笔风险额}=C\,f .
+\end{equation}
+单手持仓若被止损，亏损为
+\begin{equation}
+\text{每手止损亏损}=(s\cdot\text{ATR})\times m .
+\end{equation}
+故可下达手数为两者之比、向上取整：
 \begin{equation}
 \boxed{\; N=\left\lceil \frac{C\,f}{(s\cdot\text{ATR})\,m}\right\rceil }
 \end{equation}
+它把“敢亏多少（$Cf$）”换算成“下多少手”，是单笔风险落地为可执行动作的唯一公式。
 \subsection{数字例}
-设 $C=10^6$、$f=0.5\%$、ATR$\approx30$、$s=2$、$m=10$：$N=\lceil 5000/600\rceil=9$ 手；更保守 $s=3$：$N=6$ 手。
+设 $C=1{,}000{,}000$、$f=0.5\%$、RB 价约 $3500$、$\text{ATR}\approx30$ 点、止损 $2\times\text{ATR}$（即 $s=2$）、$m=10$（螺纹每点 10 元/手），则
+\begin{equation}
+N=\left\lceil\frac{10^6\times0.005}{2\times30\times10}\right\rceil
+=\left\lceil\frac{5000}{600}\right\rceil = 9\ \text{手}.
+\end{equation}
+更保守 $s=3$：$N=\lceil 5000/(3\times30\times10)\rceil=\lceil 5.56\rceil=6$ 手。
 \subsection{边界}
 \begin{itemize}[itemsep=2pt]
-\item \textbf{固定风险 vs 固定手数}：固定风险随净值复利、连亏自动缩手；固定手数不复利。趋势系统的连亏连涨结构适合固定风险。
-\item \textbf{手数离散}：取整造成风险跳变；小资金可能一手都下不了。
-\item \textbf{ATR 失效边界}：换月跳空、涨跌停、隔夜跳空时止损价可能被击穿（gap），须配合账户级熔断。
-\item \textbf{单笔下注规则}：不替代组合层分散与动态降杠杆。
+\item \textbf{固定风险 vs 固定手数（复利）}：固定风险按净值比例下注——净值涨手数自动放大（复利）、净值跌手数自动缩（保命）；固定手数则线性、不复利。趋势系统的“连亏多、连涨集中”结构尤其适合固定风险。
+\item \textbf{手数离散（取整）}：实际风险是手数的整数倍，取整会造成风险跳变；小资金或相对 $f$ 过小的 $Cf$ 会“一手都下不了”或被迫超杠杆。
+\item \textbf{ATR 的失效边界}：换月跳空、涨跌停、隔夜跳空、低流动性时 ATR 滞后或失真，止损价可能被直接击穿（gap），此时“每手止损亏损”的前提不再成立；须与账户级熔断、波动率目标化（第 6 节）配合，而非单独依赖。
+\item \textbf{它是“单笔下注规则”}：只决定单笔 $N$，不替代组合层分散（第 11 节）与回撤/regime 动态降杠杆（第 9--10 节）。
 \end{itemize}
-\takeaway{手数 $N=\lceil Cf/(s\cdot\text{ATR}\cdot m)\rceil$ 把“敢亏多少”换成“下多少手”。}
+
+\takeaway{手数 $N=\lceil Cf/(s\cdot\text{ATR}\cdot m)\rceil$ 把“敢亏多少”换成“下多少手”；它是单笔风险落地为动作的唯一公式，但不能替代组合层与动态降杠杆。}
 
 \section{单笔纪律 3：Kelly 与分数 Kelly（上界）}
 \subsection{推导}
-egin{equation}
-f^{*}=\frac{p(b+1)-1}{b}.
+设胜率 $p$、单笔赔率（盈亏比）$b$，Kelly 给出使对数增长率最大的头寸比例：
+\begin{equation}
+f^{*}=\frac{p(b+1)-1}{b},
 \label{eq:kelly}
 \end{equation}
-对趋势常用 $p\approx0.35,\,b\approx2.0$，得 $f^{*}=(0.35\times3-1)/2=0.025=2.5\%$。
-\subsection{为什么绝不用满 Kelly}
+等价于“期望 $p(b+1)-1$ 除以赔率”。对趋势系统常用 $p\approx0.35,\,b\approx2.0$，得
+$$
+f^{*}=\frac{0.35\times3-1}{2}=\frac{0.05}{2}=0.025 = 2.5\%.
+$$
+\subsection{为什么趋势系统绝不用满 Kelly}
 \begin{enumerate}[itemsep=2pt]
-\item $f^{*}$ 对 $(p,b)$ 极敏感，而他们是\textbf{估计值}；微小误差可让 $f^{*}$ 翻数倍。
-\item Kelly 前提“分布已知、平稳、无限可再平衡”实盘不满足。
-\item 满 Kelly 回撤路径灾难性。
+\item $f^{*}$ 对 $(p,b)$ 极度敏感，而他们是\textbf{估计值}：把一根 $\pm$20\% 的误差代入，$f^{*}$ 可翻数倍，导致灾难性下注。
+\item Kelly 的前提是“收益分布已知且平稳 $+$ 无限可再平衡”，实盘都不满足。
+\item 满 Kelly 最大化对数增长，但\textbf{回撤路径灾难性}（几乎必遭遇深度回撤），心理与实盘都扛不住。
 \end{enumerate}
 \subsection{工程结论}
-用\textbf{分数 Kelly}（$\tfrac12$ 或 $\tfrac14$）作\textbf{上界/护栏}：$w_t\le\tfrac12 f^{*}$，不是目标。
-\takeaway{Kelly $f^{*}=[p(b+1)-1]/b$ 是理论下界上界；趋势用它的 $\tfrac12\sim\tfrac14$ 当护栏。}
+用\textbf{分数 Kelly}（$\tfrac12$ 或 $\tfrac14$ Kelly）作\textbf{上界/护栏}——不是“恰好下到它”，而是“绝不超过它”。更稳的主用方案是第 5/6 节的波动率目标化与固定风险，Kelly 只做风险上界校验：
+$$
+w_t \le \tfrac12 f^{*}\ (\text{经验护栏}).
+$$
+
+\takeaway{Kelly $f^{*}=[p(b+1)-1]/b$ 是单笔的理论上界；趋势用它的 $\tfrac12\sim\tfrac14$ 当护栏，而不是目标。}
 
 \section{动态纪律 1：基于回撤的降杠杆}
 \subsection{做什么}
-净值从峰值回落超阈值就下调总敞口；回升后按冷却规则恢复。
+当净值从峰值回落超过阈值，就直接按比例下调总敞口；回升后按冷却规则再恢复。\textbf{它是在“趋势不付钱/振荡期”主动缩小 $\beta_{trend}$}。
 \subsection{完整推导}
-\textbf{（1）回撤状态变量：} $q_t=\ln E_t$, $q_t=q_{t-1}+\ln(1+r_t)$, $\bar q_t=\max_{s\le t}q_s$, $d_t=\bar q_t-q_t$. 权益回撤 $\mathrm{DD}_t=1-E_t/\bar E_t=1-e^{-d_t}$。
-\textbf{（2）降杠杆缩放 $\beta$：} $r_t=g_{t-1}\,\beta_{trend}\,\mathrm{sign}_{t-1}\,x_t$，即 $g$ 只改量不改方向。
-\textbf{（3）对数增长判据：} $\mu_g=g\mu_x-\tfrac12 g^2\sigma_x^2$，$\partial\mu_g/\partial g=0\Rightarrow g=f^{*}=\mu_x/\sigma_x^2$。\textbf{过杠杆}时降仓真增利；\textbf{欠杠杆}时降仓是低点砍掉应持有的敞口。
+\textbf{（1）回撤的状态变量（同步）}：令对数净值 $q_t=\ln E_t$，则
+\begin{equation}
+q_t=q_{t-1}+\ln(1+r_t),\qquad \bar q_t=\max_{s\le t}q_s,\qquad d_t=\bar q_t-q_t\ge0.
+\end{equation}
+权益回撤与对数回撤的关系：
+\begin{equation}
+\mathrm{DD}_t=1-\frac{E_t}{\bar E_t}=1-e^{-d_t},
+\end{equation}
+其中 $\bar E_t=E_0e^{\bar q_t}$。对数刻画适合乘性收益，回撤域 $d_t\in[0,\infty)$。
+\textbf{（2）降杠杆如何缩放 $\beta$}：状态 $g_t=g(d_{t-1})\in\mathcal{F}_{t-1}$，施加在总暴露上：
+\begin{equation}
+r_t=g_{t-1}\,\beta_{trend}\,\mathrm{sign}_{t-1}\,x_t
+\;\Rightarrow\;\bar\beta_{trend}=g_{t-1}\,\beta_{trend}.
+\end{equation}
+即 $g$ 只按比例改“量”、不改变“方向”（sign 单独负责）。
+\textbf{（3）降杠杆孰好孰坏：对数增长速率}。底层漂移 $\mu_x$、方差 $\sigma_x^2$ 时，缩放 $g$ 的每期对数增长为
+\begin{equation}
+\mu_g = g\,\mu_x-\tfrac12 g^2\sigma_x^2,\qquad
+\frac{\partial \mu_g}{\partial g}=0 \;\Rightarrow\; g=f^{*}=\frac{\mu_x}{\sigma_x^2}.
+\end{equation}
+于是：\textbf{过杠杆}（当前 $g>f^{*}$，波动高/漂移弱）时降仓\emph{真增利}；\textbf{欠杠杆}（$g<f^{*}$）时降仓就是在低点砍掉应持有的敞口——这就是单品种回撤降杠杆常为负优化的数学根源。
 \subsection{数字例}
-阈值 $a=15\%, b=25\%$：$\mathrm{DD}\in[0.15,0.25)$ 时 $g=0.5$，$\ge0.25$ 时 $g=0$。RB 基准最大回撤 $47.4\%$，按此规则深处近乎空仓——正对应 $\beta_{trend}$ 从 0.93 落到 0.53。
-\subsection{冷却/恢复（watermark）}
-仅当 $q_t\ge\bar q_\tau-\Delta$ 才允许加回，避免“砍在最低点再清在最低点”。
+设阈值 $a=15\%$、$b=25\%$：当 $\mathrm{DD}$ 落到 $[0.15,0.25)$ 时 $g=0.5$，$\ge0.25$ 时 $g=0$。第 14 节 RB 基准最大回撤 $47.4\%$——按此规则它在最深段会近乎空仓，这正是它把 $\beta_{trend}$ 从 0.93 砍到 0.53 的来源。
+\subsection{冷却/恢复规则（watermark）}
+为避免“砍到最低后又清在低点”，仅当净值回到峰值下方一个容忍带才允许加回：
+\begin{equation}
+\text{恢复条件：}\quad q_t \ge \bar q_\tau - \Delta,
+\end{equation}
+$\Delta$ 为允许的对数回撤。这把“何时回升”也变成 $\mathcal{F}_t$-可测状态，避免在最低点反复进出一刀。
 \subsection{边界}
-回撤降杠杆\textbf{只在组合层评估才有价值}：单品种负优化；组合层把回撤压到 $19.6\%$。
-\takeaway{回撤降杠杆缩放 $\beta_{trend}$ 的量；是否划算取决于回撤期你相对 Kelly 是否过杠杆——因此只在组合层评估才有价值。}
+回撤降杠杆\textbf{只在组合层评估才有价值}（第 13 vs 14 节）：单品种上它往往削掉趋势敞口、负优化；组合层上它把回撤从 $37.8\%$ 压到 $19.6\%$，才是正的。
+
+\takeaway{回撤降杠杆缩放的是 $\beta_{trend}$ 的量；它是否划算，取决于回撤期你相对 Kelly 是否过杠杆——因此只在组合层评估才有价值。}
 
 \section{动态纪律 2：Regime 感知调杠杆}
 \subsection{做什么}
-用市场状态直接设定敞口倍率：趋势强 $\to$ $1.0$；趋势弱 $\to$ $0.6$；震荡 $\to$ $0$。
+用市场状态（趋势强/弱/震荡）直接设定敞口倍率，把第 10 节的“该不该开”量化为规则：
+该规则可写成：趋势强 $\to$ 敞口倍率 $1.0$；趋势弱 $\to$ $0.6$；震荡 $\to$ $0$；其他状态默认 $0.5$。
+
+\textbf{状态判定要可计算}：状态不能是主观描述，应绑定到可复现的指标。三个可选且互补的口径：
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{3.4cm}@{}}
+\toprule
+指标 & 定义 & 判定阈值（示例） \\
+\midrule
+ADX & Wilder 平均趋向指数（$\operatorname{ADX}_{14}$） & $>25$ 趋势强；$<20$ 震荡 \\
+波动率分位 & 当前已实现波动在近 3 年的滚动分位 & $>70\%$ 高波（转弱）；$<30\%$ 低波 \\
+自相关符号 & 过去 $H$ 日收益一阶自相关 $\hat\rho_1$ & $\hat\rho_1>0.02$ 动量态；$\approx0$ 震荡 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{组合规则建议}：把三者合成分数（如 ADX 分位 $+$ 波动分位 $+$ 自相关符号各占权重），按总分映射到 $[0,1]$ 的敞口倍率。\textbf{关键约束}：所有输入只用 $\mathcal{F}_{t-1}$ 信息（无前视），且阈值一经设定不随样本调参（防过拟合）。
 \subsection{为什么}
-趋势溢价的“有/无”随时间切换。趋势强 $\to$ 满敞口；震荡 $\to$ $0$/低敞口。与第 9 节互补：regime 管“现在该不该开”，回撤降杠杆管“亏多了要不要收”。
+趋势溢价的“有/无”随时间切换（第 4 节）。趋势强 $\to$ 满敞口（好好吃溢价）；震荡 $\to$ $0$/低敞口（不在趋势不付钱时持续小亏）。它和第 9 节\textbf{互补}：regime 管“现在该不该开”，回撤降杠杆管“亏多了要不要收”。
 \subsection{边界}
-regime 识别带滞后与误判；单段数据训练的规则有过拟合风险。应视为“第二层风控”。
-\takeaway{regime 调杠杆与回撤降杠杆构成同一根决策链的“开关”与“收手”。}
+regime 识别本身带滞后与误判；单用某一段数据训练出的 regime 规则有过拟合风险（第 14 节单品种上叠加并未提升 $\alpha$ 显著性）。regime 应视为“第二层风控”，配合组合层分散使用。
+
+\takeaway{regime 调杠杆把“现在该不该暴露趋势”量化成敞口倍率；它与回撤降杠杆构成同一根决策链的“开关”与“收手”。}
 
 \section{组合层：等风险、相关性与单次目标化}
 \subsection{为什么分散是趋势的真实放大器}
-趋势溢价的\textbf{时序多样性}在跨资产上真实存在——弱信号按低相关叠加后组合夏普远超单品种（第 15 节：$0.09\to0.28$）。但趋势系统彼此高度相关，加一个趋势策略常是伪分散。
+趋势溢价的\textbf{时序多样性}在跨资产（股/债/商品/外汇）上真实存在——它使“弱信号按低相关叠加”后组合夏普远超单品种（第 15 节实测：单品种夏普均值 $0.09\to$ 组合 $0.28$）。\textbf{但}趋势系统彼此高度相关（大家都赚趋势），加一个趋势策略常是伪分散，须按协方差算真实增量风险。
 \subsection{等风险（risk parity）}
-权重 $w_j^{(rp)}\propto 1/\hat\sigma_j$。若 $\rho_{jl}\approx0$，组合波动 $\approx\sigma_{tar}\sqrt{N}$。
+让每品种/策略贡献相近风险：权重 $w_j^{(rp)}\propto 1/\hat\sigma_j$。目标组合条件方差
+\begin{equation}
+\operatorname{Var}(R_p\mid\mathcal{F})=\sum_j w_j^2\sigma_j^2+2\sum_{j<l}w_j w_l\,\rho_{jl}\sigma_j\sigma_l .
+\end{equation}
+等风险下，若 $\rho_{jl}\approx0$，每品种风险 $\to$ 相等，组合波动 $\approx\sigma_{tar}\sqrt{N}$（再现“双重目标化”的量级陷阱）。
 \subsection{单次目标化原则}
-组合层只做一次目标化，不要再在每个品种内重复，否则 $\sqrt N$ 放大。
-\takeaway{组合层用“等风险 + 相关性去伪 + 单次目标化”把分散变成可度量的杠杆收益。}
+组合层\textbf{只做一次}目标化：先按等风险配权，再用 $w_p=\min(\sigma_{tar}/\hat\sigma_p,\,w_{max})$ 把组合整体钉在目标波动；\textbf{不要再在每个品种内重复做一次}，否则 $\sqrt N$ 放大。
+\takeaway{组合层用“等风险 + 相关性去伪 + 单次目标化”把分散变成可度量的杠杆收益；双重目标化会把 $\beta$ 叠大 $\sqrt N$ 倍。}
 
 \section{容量与成本（收紧边界）}
 \subsection{参与率冲击}
+仓位过大 $\to$ 单笔成交参与率 $p=\frac{\text{你的成交}}{\text{市场成交}}\,\to$ 成本随 $p$ 上升。常用近似（绝对参与率模型）
 \begin{equation}
 \text{impact} \approx K\sqrt{p},\qquad p\le 10\%.
 \end{equation}
-冲 击成本在 $p$ 变大时被 $\sqrt p$ 放大。
+冲击成本在 $p$ 变大时被 $\sqrt p$ 放大，这是趋势“越大越衰减”的根源。
 \subsection{容量上限}
-容量 $\approx$ 可容纳仓位 $\times$ 标的流动性。大资金靠分散+低换手+更大时间尺度换容量。
+$
+\text{容量} \approx \text{可容纳仓位}\times\text{标的流动性}.
+$
+大资金靠“分散 $+$ 低换手 $+$ 更大时间尺度”换容量，而不是单纯加杠杆。
 \subsection{边界}
-收益与规模在趋势里往往负相关（规模诅咒）。
-\takeaway{仓位不是越大越好：参与率 $\sqrt p$ 冲击与容量上限决定这套系统能吃多大资金。}
+收益与规模在趋势里往往负相关（规模诅咒）；这是第 6--12 节仓位纪律必须接受的外部约束，不是调参能绕开的。
+\takeaway{仓位不是越大越好：参与率 $\sqrt p$ 冲击与容量上限决定了这套系统能吃多大资金。}
 
 \section{统一决策链（把第 6--12 节串成一个流程）}
+把前面逐级纪律排成逐步执行的过程：
 \begin{enumerate}[itemsep=2pt]
-\item 方向：算 $\mathrm{sign}_t$（第 4 节）;
-\item 单笔：固定风险头寸得手数 $N$（第 7 节），波动率目标化校 $\beta_{trend}$ 的量（第 6 节）;
-\item 上界：$w_t\le\tfrac12 f^{*}$（第 8 节）;
-\item 动态：regime 判可开（第 10 节），回撤降杠杆判收（第 9 节）;
-\item 组合：等风险 + 相关性去伪 + 一次目标化（第 11 节）;
-\item 容量：参与率 $\le10\%$ + 容量上限（第 12 节）;
-\item 复核：净值做第 2 节回归，看 $\beta_{trend}$ vs $\alpha_{sys}$。
+\item 对每个品种：算趋势方向 $\mathrm{sign}_t$（第 4 节）；
+\item 单笔风险：按固定风险头寸得出手数 $N$（第 7 节），以波动率目标化 $w_t$ 校其对 $\beta_{trend}$ 的量（第 6 节）；
+\item 设上界：$w_t\le\tfrac12 f^{*}$（第 8 节）；
+\item 动态：regime 判“要不要开”（第 10 节），回撤降杠杆判“亏多了收不收”（第 9 节），并带 watermark 冷却；
+\item 组合：等风险配权 + 相关性去伪 + \textbf{只在组合层做一次}目标化（第 11 节）；
+\item 容量：用参与率（$\le10\%$）与容量上限检查组合是否可承载（第 12 节）；
+\item 逐期复核：把净值曲线做第 2 节回归，看 $\beta_{trend}$（敞口贡献）vs $\alpha_{sys}$（纪律贡献）各多少，据此决定加杠杆还是修纪律。
 \end{enumerate}
-\takeaway{仓位管理是按“方向→单笔→上界→动态→组合→容量→复核”串成可执行、可复核的决策链。}
+
+\takeaway{仓位管理不是选一个公式，而是按“方向→单笔→上界→动态→组合→容量→复核”素顺序串成一个可执行、可复核的决策链。}
 
 \section{实证示例：单品种}
-以 RB（通达信本地主力连续 L8）为例：信号 \texttt{sign(过去 H=252 日收益)}；基准=固定敞口朴素趋势；叠加1 波动率目标化；叠加2 回撤降杠杆。实测：
+以通达信本地主力连续 L8 RB 为例（2013-08$\to$2026-09，共 3184 日）：信号 \texttt{sign(过去 H=252 日收益)}；基准=固定敞口 $\pm1$ 朴素趋势；叠加1 波动率目标化（$\sigma_{tar}=20\%,\,w_{max}=1.5$）、叠加2 回撤降杠杆（15\% 半仓 / 25\% 空仓）；每叠加相对基准做月频 OLS 归因；只用截至 $t-1$ 信息、\textbf{无前视}。
+\textbf{实测结果（RB）}：
 \begin{center}
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.35}
@@ -323,16 +433,23 @@ regime 识别带滞后与误判；单段数据训练的规则有过拟合风险�
 \toprule
 策略 & 年化 & 波动 & 夏普 & 最大回撤 & Calmar \\
 \midrule
-朴素趋势 & 1.9\% & 25.2\% & 0.07 & 47.4\% & 0.04 \\
+朴素趋势（基准） & 1.9\% & 25.2\% & 0.07 & 47.4\% & 0.04 \\
 +波动率目标化 & 3.1\% & 21.2\% & 0.15 & 50.3\% & 0.06 \\
 +回撤降杠杆 & $-1.0\%$ & 14.1\% & $-0.07$ & 58.0\% & $-0.02$ \\
 \bottomrule
 \end{tabular}
 \end{center}
-归因（vs 基准，月频 OLS）：波动目标化 $\beta_{trend}=0.93,\alpha=+1.4\%,t=0.72$（不显著）；回撤降杠杆 $\beta_{trend}=0.53,\alpha=-2.0\%$（负优化）。
+归因（vs 基准，月频 OLS；$t$ 未修自相关）：波动率目标化 $\beta_{trend}=0.93$、$\alpha=+1.4\%$、$t=0.72$（\textbf{不显著}）；回撤降杠杆 $\beta_{trend}=0.53$、$\alpha=-2.0\%$（\textbf{负优化}）。
+\subsection{回接结论}
+\begin{itemize}[itemsep=2pt]
+\item 单一品种趋势溢价很弱（夏普 0.07）——印证第 3 节“右偏但时有时无”、第 11 节“须靠分散放大”。
+\item 波动目标化单品种不显著（$t=0.72$）——印证第 6 节边界 3。
+\item 回撤降杠杆单品种负优化——正是第 9 节“欠杠杆/砍在低点”的数学结论的实证。
+\end{itemize}
 
 \section{实证示例：多品种等权 / 等风险}
-8 品种（RB、I、HC、MA、TA、M、AU、CU），H=252，每品种 $\sigma_{tar}=20\%$，组合目标 $25\%$：
+以跨黑色/有色/能化/农产品/贵金属共 8 品种为例（RB、I、HC、MA、TA、M、AU、CU），通达信本地主力连续 L8：
+跨黑色/有色/能化/农产品/贵金属 8 品种，H=252、每品种 $\sigma_{tar}=20\%$、组合 $\sigma$ 目标 $25\%$、回撤降杠杆 $15\%/25\%$：
 \begin{center}
 \setlength{\tabcolsep}{4pt}
 \renewcommand{\arraystretch}{1.35}
@@ -340,19 +457,49 @@ regime 识别带滞后与误判；单段数据训练的规则有过拟合风险�
 \toprule
 组合 & 年化 & 波动 & 夏普 & 最大回撤 & Calmar \\
 \midrule
-A 等权朴素 & 3.5\% & 12.6\% & 0.28 & 23.8\% & 0.15 \\
+A 等权朴素趋势 & 3.5\% & 12.6\% & 0.28 & 23.8\% & 0.15 \\
 B 等风险波动目标 & 5.4\% & 10.4\% & \textbf{0.52} & 22.9\% & 0.23 \\
 C B+组合上封 & 8.3\% & 20.0\% & 0.41 & 37.8\% & 0.22 \\
 D B+回撤降 & 5.1\% & 10.2\% & 0.50 & \textbf{19.6\%} & 0.26 \\
 \bottomrule
 \end{tabular}
 \end{center}
-归因（vs A）：B $\beta_{trend}=0.88,\alpha=+2.1\%,\text{IR}=0.62,t=2.23$（显著）；C $t=1.47$；D $\beta=0.86,\alpha=+2.0\%,t=1.94$。
+归因（vs 组合级基准 A，月频 OLS；$t$ 未修自相关）：
+\begin{center}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.2cm}p{1.9cm}p{1.8cm}p{1.5cm}p{1.4cm}@{}}
+\toprule
+组合 & $\beta_{trend}$ & $\alpha$ 年化 & IR & $t(\alpha)$ \\
+\midrule
+波动率目标化(B) & 0.88 & $+2.1\%$ & 0.62 & \textbf{2.23} \\
+B+波动上封(C) & 1.63 & $+3.3\%$ & 0.41 & 1.47 \\
+B+回撤降(D) & 0.86 & $+2.0\%$ & 0.54 & 1.94 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{回接结论（三条）}：
 \begin{enumerate}[itemsep=2pt]
-\item \textbf{分散是放大器}：单品种夏普 $0.09\to$ 组合 $0.28$。
-\item \textbf{波动目标化 $\alpha$ 到组合层才显著}：$t=0.72\to2.23$。
-\item \textbf{组合层回撤降杠杆转正}：回撤 $37.8\%\to19.6\%$、$t\approx1.94$。
+\item \textbf{分散是放大器}：单品种夏普均值 $0.09\to$ 组合 $0.28$——印证第 11 节“跨资产时序多样性”。
+\item \textbf{波动目标化的 $\alpha$ 到组合层才显著}：$t=0.72\to2.23$——印证第 6 节边界，也回答“为什么单品种看 $\alpha$ 没意义、组合层才有意义”。
+\item \textbf{组合层回撤降杠杆转正}：$D$ 回撤 $37.8\%\to19.6\%$、$t\approx1.94$——印证第 9 节“只应在组合层评估”。
 \end{enumerate}
+
+\textbf{成本敏感性（趋势的换手抗性）}：趋势月频调仓换手远低于反转。设组合平均每月约 $4\%$ 仓位翻转（信号翻转才调仓），年化单边换手 $\approx0.04\times12=0.48$ 倍、双边 $0.96$ 倍。三种成本档对基准 B（年化 $5.4\%$、夏普 $0.52$）的年化侵蚀与扣成本后夏普：
+\begin{center}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.6cm}@{}}
+\toprule
+双边成本 & 年化侵蚀 & 扣成本后年化 & 扣成本后夏普 \\
+\midrule
+5bp & $0.0005\times0.96\approx0.05\%$ & $5.35\%$ & $0.515$ \\
+10bp & $0.001\times0.96\approx0.10\%$ & $5.30\%$ & $0.510$ \\
+20bp & $0.002\times0.96\approx0.19\%$ & $5.21\%$ & $0.502$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{对比反转}：同样 10bp 成本，趋势的侵蚀仅 $0.1\%$，而横截面反转（第 15 节，82\%/日换手）约 $41\%$——\textbf{趋势策略的成本抗性是其换手结构的直接红利}，也是它能承载更大资金规模的微观基础（呼应第 12 节）。
 
 \appendix
 \section*{附录 A：符号表}
@@ -366,7 +513,7 @@ D B+回撤降 & 5.1\% & 10.2\% & 0.50 & \textbf{19.6\%} & 0.26 \\
 \midrule
 $r_{t+1}$ & 单期资产收益 \\
 $\sigma_t,\ \hat\sigma_t$ & 条件波动、其估计 \\
-$w_t$ & 仓位权重 \\
+$w_t$ & 仓位权重（$\mathcal{F}_t$ 可测） \\
 $C,\ f,\ m$ & 账户资本、单笔风险预算、每点金额 \\
 $\text{ATR},\ s$ & 平均真实波幅、止损倍数 \\
 $N$ & 头寸手数 \\
@@ -375,9 +522,9 @@ $f^{*}$ & Kelly 分数 \\
 $q_t,\ \bar q_t,\ d_t$ & 对数净值、峰值、对数回撤 \\
 $g(d)$ & 回撤降杠杆倍率 \\
 $\mathrm{DD}$ & 权益回撤 \\
-$\bar\beta_{trend}$ & 降杠杆后有效趋势暴露 \\
+$\bar\beta_{trend}$ & 降杠杆后的有效趋势暴露 \\
 $\rho_{jl}$ & 品种间相关系数 \\
-$p_{\text{part}}$ & 参与率 \\
+$p_{\text{part}}$ & 参与率（冲击成本输入） \\
 IC / IR / $t$ & 信息系数 / 信息比率 / $t$ 值 \\
 \bottomrule
 \end{tabular}
@@ -386,28 +533,28 @@ IC / IR / $t$ & 信息系数 / 信息比率 / $t$ 值 \\
 \section*{附录 B：练习与自测}
 \addcontentsline{toc}{section}{附录 B：练习与自测}
 \begin{enumerate}[itemsep=2pt]
-\item 用 $p=0.4,b=1.8$ 代入 $\mathbb{E}[\text{单笔}]=p(b+1)-1$，判断期望是否为正；若为正，$f^{*}$ 是多少？
-\item 若某品种 $\hat\sigma_{ann}=40\%$、$\sigma_{tar}=20\%$、$w_{max}=1.0$，$w_t$ 应为多少？若 2 个不相关品种各自目标化再等权，组合波动约多少？
-\item ATR 例：$C=500{,}000$、$f=1\%$、ATR$=20$、$s=2$、$m=10$，$N$ 是多少？
-\item 用 $\mu_g=g\mu_x-\tfrac12g^2\sigma_x^2$ 说明：回撤期若已欠杠杆，降杠杆会怎样？
-\item 组合层单次目标化为什么能避免 $\sqrt N$ 倍放大？
-\item 读第 15 节，为什么 B 的 $t=2.23$ 而 C 的 $t=1.47$？
-\item 用第 13 节决策链把“单品种 $t=0.72$、组合 $t=2.23$”按 7 步走一遍。
+\item 用 $p=0.4,b=1.8$ 代入 $\mathbb{E}[\text{单笔}]=p(b+1)-1$，判断该趋势系统期望是否为正；若为正，$f^{*}$ 是多少？
+\item 若某品种 $\hat\sigma_{ann}=40\%$、$\sigma_{tar}=20\%$、$w_{max}=1.0$，$w_t$ 应设为多少？若 $N{=}2$ 个不相关品种各自目标化再等权，组合波动约多少？
+\item ATR 例：$C=500{,}000$、$f=1\%$、ATR$=20$、$s=2$、$m=10$，手数 $N$ 是多少？
+\item 用 $\mu_g=g\mu_x-\tfrac12g^2\sigma_x^2$ 说明：回撤期若已“欠杠杆”，降杠杆会怎样？这正是哪一节看到的实证？
+\item 组合层“单次目标化”为什么能避免 $\sqrt N$ 倍波动放大？
+\item 读第 15 节，为什么 B 的 $t=2.23$ 而 C 的 $t=1.47$？这对“该不该加组合层上封”给什么提示？
+\item 用第 13 节决策链，把“单品种 $t=0.72$、组合 $t=2.23$”的对比，按 7 步逐条走一遍，指出每一步对应哪个小节。
 \end{enumerate}
 
 \section*{附录 C：参考阅读}
 \addcontentsline{toc}{section}{附录 C：参考阅读}
 \begin{enumerate}[itemsep=2pt]
-\item Moskowitz, Ooi, Pedersen (2012). \emph{Time Series Momentum}.
-\item Moreira \& Muir (2017). \emph{Volatility-Managed Portfolios}.
-\item Kaminski \& Lo (2014). \emph{When Do Stop-Loss Rules Stop Losses?}
-\item Sandberg, et al. \emph{Systematic Trading}（卡佛）。
+\item Moskowitz, Ooi, Pedersen (2012). \emph{Time Series Momentum}. \textbf{趋势溢价的经典实证。}
+\item Moreira \& Muir (2017). \emph{Volatility-Managed Portfolios}. \textbf{波动率目标化为何提高夏普的机制。}
+\item Kaminski \& Lo (2014). \emph{When Do Stop-Loss Rules Stop Losses?} \textbf{回撤/止损规则何时有益的框架。}
+\item Sandberg, et al. \emph{Systematic Trading}（卡佛）。\textbf{CTA 系统化交易的风控纪律全集。}
 \end{enumerate}
 
 \section*{收束}
 \addcontentsline{toc}{section}{收束}
 \begin{quote}
-\textbf{趋势跟踪赚的不是“每次对”，而是“对的时候把仓位放得足够大、足够久”。}方向决定你暴露给谁（$\beta_{trend}$），仓位决定你从这份暴露里拿走多少……所有纪律最后落到第 13 节那条可执行、可复核的决策链上。
+\textbf{趋势跟踪赚的不是“每次对”，而是“对的时候把仓位放得足够大、足够久”。}方向决定你暴露给谁（$\beta_{trend}$），仓位决定你从这份暴露里拿走多少；从单笔风险头寸、波动率目标化、Kelly 上界，到回撤/regime 动态杠杆、组合层等风险与容量约束——这些不是一个技巧列表，而是\emph{一根风险预算链上不同截面的决策}，最后全部落到第 13 节那条可执行、可复核的决策链上。
 \end{quote}
 
 \end{document}

@@ -1,0 +1,454 @@
+\documentclass[UTF8,11pt]{ctexart}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{codegray}{RGB}{230,230,235}
+\definecolor{codered}{RGB}{180,60,60}
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codegray},
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{gray!60},
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=4,
+  keywordstyle=\color{codered}\bfseries,
+  commentstyle=\color{gray},
+}
+\newcommand{\codeinl}[1]{\texttt{#1}}
+
+\title{\bfseries 从收益自相关到均值回归因子\\[2pt]\large 与动量对偶的因子量化链路（深度版）}
+\author{量化投研学习笔记}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+本教程以\textbf{收益自相关}为统一出发点，把均值回归与动量放进同一套数学框架：先讲清"负自相关"是均值回归的机制来源，再用平稳性（AR(1)/OU 过程）、检验（自相关/方差比/ADF）、因子构造（时序反转/横截面反转）、暴露中性化与标准化，搭出与动量对称的完整因子生产线，最后给出评估口径，并讨论"均值回归为何盯住相对强弱而非绝对方向"。
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{均值回归与动量：一枚硬币的两面}
+
+\subsection{本质问题}
+动量赚的是\textbf{正自相关}的钱（今天涨、明天大概率还涨），均值回归赚的是\textbf{负自相关}的钱（今天涨过头、明天大概率回落）。两者不是两种"流派"，而是同一件事的两个方向：
+\begin{quote}
+资产收益序列的自相关符号，决定了"追涨杀跌"还是"高抛低吸"哪个是对的。
+\end{quote}
+这个问题的价值同样不在于记账，而在于判定一件事：\textbf{当前这个标的、这个时间尺度上，价格是被"延续"驱动还是被"回复"驱动。}
+
+\subsection{单期收益的一阶自相关定义}
+设收益序列 $r_t$，其一阶自相关系数为
+\begin{equation}
+\rho_1 \;=\; \frac{\operatorname{Cov}(r_t,\,r_{t+1})}{\operatorname{Var}(r_t)}.
+\end{equation}
+\begin{itemize}[itemsep=2pt]
+\item $\rho_1 > 0$：动量占优——历史收益对未来收益有正向预测力。
+\item $\rho_1 < 0$：均值回归占优——极端收益之后大概率反向。
+\item $\rho_1 \approx 0$：随机游走——短期不可预测（有效市场弱式）。
+\end{itemize}
+\textbf{关键认识}：$\rho_1$ 的符号不是固定的，它随\textbf{资产类别、时间尺度、市场状态}漂移。日频期货整体偏正自相关（动量），而分钟/日内、以及横截面相对强弱往往偏负自相关（反转）——这正是本系列教程第 2 篇实证要展开的载体问题。
+
+\section{平稳性与 AR(1)：均值回归的数学骨架}
+
+\subsection{AR(1) 模型}
+最简单的均值回归模型是一阶自回归：
+\begin{equation}
+x_{t+1} - \mu \;=\; \phi\,(x_t - \mu) + \varepsilon_{t+1},
+\qquad \varepsilon \sim \mathcal{N}(0,\sigma_\varepsilon^2),
+\end{equation}
+其中 $\mu$ 是长期均值，$\phi$ 是回归系数。当 $|\phi|<1$ 时过程\textbf{平稳}，任意偏离 $\mu$ 都会被拉回。一阶自相关正是 $\rho_1 = \phi$。
+
+\textbf{数字例}：设 $\phi = 0.9$、$\mu=0$、当前偏离 $x_t-\mu = 2\sigma$。一步后期望偏离为 $0.9\times 2\sigma = 1.8\sigma$——只被拉回 $10\%$，回复很慢；若 $\phi = 0.5$，一步后为 $1.0\sigma$，回复 $50\%$。\textbf{$\phi$ 越小回复越快，但噪声占比越高}。
+
+\subsection{OU 过程（连续时间极限）}
+把 AR(1) 放到连续时间、取无穷小步长，得到 Ornstein--Uhlenbeck 过程：
+\begin{equation}
+dX_t \;=\; \theta\,(\mu - X_t)\,dt + \sigma\,dW_t,
+\end{equation}
+$\theta>0$ 为均值回复速率（mean reversion speed），$\sigma$ 为波动。OU 过程的解析性质给出两个核心量。
+
+\subsection{OU 的解析解：从 SDE 到显式形式}
+设 $\tilde X_t = e^{\theta t}(X_t-\mu)$，用 It\^o 公式求其微分：
+\begin{equation}
+d\tilde X_t = \theta e^{\theta t}(X_t-\mu)\,dt + e^{\theta t}\,dX_t
+= \theta e^{\theta t}(X_t-\mu)\,dt + e^{\theta t}\big[\theta(\mu-X_t)\,dt + \sigma dW_t\big]
+= \sigma e^{\theta t}\,dW_t.
+\end{equation}
+两项线性漂移完全抵消，只剩纯扩散。对 $[0,t]$ 积分并还原 $X_t$：
+\begin{equation}
+X_t - \mu = (X_0-\mu)\,e^{-\theta t} + \sigma\int_0^t e^{-\theta(t-s)}\,dW_s.
+\end{equation}
+这是 OU 的\textbf{显式解}，它直接给出条件分布——$\sigma\int_0^t e^{-\theta(t-s)}dW_s$ 是均值为 0、方差
+$\sigma^2\int_0^t e^{-2\theta(t-s)}ds = \frac{\sigma^2}{2\theta}(1-e^{-2\theta t})$ 的高斯鞅，故
+\begin{equation}
+\boxed{\;\mathbb{E}[X_t\mid X_0] = \mu + (X_0-\mu)\,e^{-\theta t},\qquad
+\operatorname{Var}(X_t\mid X_0) = \frac{\sigma^2}{2\theta}\big(1-e^{-2\theta t}\big).}
+\end{equation}
+三个推论：
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{条件均值以速率 $\theta$ 指数回归}——这正是半衰期 $t_{1/2}=\ln2/\theta$ 的来源（见下节）。
+\item \textbf{方差随时间饱和}：$t\to\infty$ 时 $\operatorname{Var}\to\sigma^2/2\theta$，这是\textbf{平稳方差}；时间拉长并不会让 OU 的方差无限增长（与随机游走相反，后者方差 $\propto t$）。
+\item \textbf{均值回复速率与噪声强度可分离}：$\theta$ 只控制回归速度、$\sigma$ 只控制噪声量，两者正交地决定一条 OU 路径的形状——\textbf{半衰期短 $\neq$ 波动小}。
+\end{enumerate}
+\textbf{一个有用的一步关系}：令 $t\to$ 一个时间步 $\Delta$，条件方差 $\approx \sigma^2\Delta$（当 $\theta\Delta$ 很小时），与离散 AR(1) 的噪声方差 $\sigma_\varepsilon^2$ 对应，桥接连续与离散两种刻画。
+
+\subsection{半衰期（half-life）：均值回归的关键参数}
+对 OU 过程，偏离均值 $X_t-\mu$ 的期望衰减为
+\begin{equation}
+\mathbb{E}[X_{t+\tau}-\mu \mid X_t] = (X_t-\mu)\,e^{-\theta \tau}.
+\end{equation}
+定义\textbf{半衰期} $t_{1/2}$ 为偏离衰减一半所需时间：
+\begin{equation}
+e^{-\theta\,t_{1/2}} = \tfrac12 \;\Longrightarrow\; \boxed{\,t_{1/2} = \frac{\ln 2}{\theta}\,}.
+\end{equation}
+\textbf{半衰期决定你的交易频率}：半衰期 2 天，就做 2--5 天的反转；半衰期 60 天，就做 60 天附近的摆动。用错半衰期，信号方向对了但频段错了，同样亏钱。
+
+\textbf{离散估计}：对离散样本，用 AR(1) 的 $\hat\phi$ 估计：
+\begin{equation}
+\hat\theta = -\ln\hat\phi, \qquad \hat{t}_{1/2} = \frac{\ln 2}{-\ln\hat\phi}.
+\end{equation}
+
+\textbf{由半衰期反推信号窗口 $H$}：信号窗口与半衰期同量级但不相等，一个常用规则是取 $H \approx \lceil 2\,t_{1/2}\rceil$，理由如下。信号要求"过去 $H$ 日的累计偏离"携带足够多的回归信息；若 $H \ll t_{1/2}$，窗口内偏离几乎未衰减，信号退化成噪声；若 $H \gg t_{1/2}$，窗口内偏离已回归多次，方向被平均抵消。使"窗口内完成约两次半衰期"的折中即 $H \approx 2\,t_{1/2}$。
+\begin{itemize}[itemsep=2pt]
+\item \textbf{数字例}：$\hat\phi=0.95$（日频）$\Rightarrow \hat t_{1/2}=\ln2/(-\ln0.95)\approx13.5$ 日 $\Rightarrow H\approx\lceil27\rceil=27$ 日，取 $H=20$--$30$ 做周月频反转。
+\item \textbf{验证}：$\hat\phi=0.8 \Rightarrow \hat t_{1/2}\approx3.1$ 日 $\Rightarrow H\approx6$ 日——正是短期反转常用的 $H=5$。
+\end{itemize}
+\textbf{注意}：这个 $H$ 是"信号窗口"，与持仓期限不一定相同；持仓长短由出场规则（回归完成/时间止损）另定。
+
+\section{统计检验：怎么确认"真的会回归"}
+
+\subsection{自相关检验（Ljung--Box）}
+检验 $H_0:\rho_1=\dots=\rho_m=0$，统计量
+\begin{equation}
+Q = T(T+2)\sum_{k=1}^{m}\frac{\hat\rho_k^2}{T-k} \;\sim\; \chi^2_m.
+\end{equation}
+$Q$ 显著 $\Rightarrow$ 存在可预测的自相关结构（无论正负）。\textbf{注意}：这只是"有结构"，还要看符号与频段。
+
+\subsection{方差比检验（Variance Ratio）}
+随机游走下，$q$ 期收益方差是单期方差的 $q$ 倍：
+\begin{equation}
+\operatorname{VR}(q) \;=\; \frac{\operatorname{Var}(r_t+\dots+r_{t-q+1})}{q\,\operatorname{Var}(r_t)}.
+\end{equation}
+\begin{itemize}[itemsep=2pt]
+\item $\operatorname{VR}(q) < 1$：长期比随机更"收敛"——负自相关，均值回归。
+\item $\operatorname{VR}(q) > 1$：长期比随机更"发散"——正自相关，动量。
+\end{itemize}
+\textbf{这是最重要的"先验体检"指标}：在构造因子前先看 VR 是否显著偏离 1，方向选错再精细的因子都是白搭。
+
+\textbf{VR 与自相关的解析关系}：把 $q$ 期和方差展开，
+\begin{equation}
+\operatorname{Var}\Big(\sum_{k=0}^{q-1} r_{t-k}\Big)
+= \sum_{k}\operatorname{Var}(r_{t-k}) + 2\sum_{k>l}\operatorname{Cov}(r_{t-k},r_{t-l})
+= q\,\sigma^2 + 2\sum_{k=1}^{q-1}(q-k)\,\rho_k\,\sigma^2,
+\end{equation}
+其中 $\sigma^2=\operatorname{Var}(r_t)$，$\rho_k$ 是滞后 $k$ 的自相关。代入 VR 定义得
+\begin{equation}
+\boxed{\;\operatorname{VR}(q) = 1 + 2\sum_{k=1}^{q-1}\Big(1-\frac{k}{q}\Big)\rho_k.\;}
+\end{equation}
+两个直接推论：
+\begin{itemize}[itemsep=2pt]
+\item \textbf{符号由自相关总和决定}：$q$ 期窗口内若正自相关占优则 $\operatorname{VR}>1$（动量），负自相关占优则 $\operatorname{VR}<1$（反转）。$\rho_k$ 全为零时 $\operatorname{VR}=1$，对应随机游走。
+\item \textbf{多期累计才有统计力}：单期 $\rho_1$ 常很小（如 $0.02$），但 $q$ 期累积 $(1-k/q)\rho_k$ 加权后，VR 可显著偏离 1——\textbf{这正是为什么短频动量/反转要按周/月频测 VR}。
+\end{itemize}
+\textbf{数字例}：设 $\rho_1=-0.05$、$\rho_2=-0.03$、其余为 0，则 $\operatorname{VR}(2)=1+2\times(1-\tfrac12)\times(-0.05)=0.95$；$\operatorname{VR}(5)=1+2[0.8(-0.05)+0.6(-0.03)]=0.884$。负自相关越累积，VR 越低——反转信号在长窗口更强。
+
+\subsection{ADF 检验（平稳性）}
+Dickey--Fuller 检验 $H_0:\phi=1$（单位根，非平稳）：
+\begin{equation}
+\Delta x_t = \alpha + \beta t + \gamma x_{t-1} + \sum_{j}\delta_j \Delta x_{t-j} + u_t,
+\qquad \text{ADF 统计量} = \frac{\hat\gamma}{s.e.(\hat\gamma)}.
+\end{equation}
+$\gamma<0$ 显著 $\Rightarrow$ 拒绝单位根 $\Rightarrow$ 存在均值回归。\textbf{边界}：ADF 检验的是"长期平稳"，不等于"短期可交易的反转"——一个平稳但半衰期 500 天的过程，对短线策略毫无用处。
+
+\textbf{为什么不能用标准 t 分布（非标准分布）}：在 $H_0:\phi=1$（单位根）下，$x_{t-1}$ 的系数估计不满足常规 OLS 渐近——$\hat\gamma$ 的极限分布不是正态，而是 \textbf{Dickey--Fuller 分布}（非标准、非对称）。原因在于 $x_{t-1}$ 在单位根下是随机游走，其样本矩收敛速度是 $O_p(T)$ 而非 $O_p(\sqrt T)$，导致 t 统计量的分母被低估，标准临界值会\textbf{过度拒绝}（把平稳误判为有均值回归）。因此 ADF 必须查 DF 专用临界表，不能用 $\pm1.96$。\textbf{工程含义}：手写 ADF 很易犯错，直接用成熟实现（statsmodels 等）即可。
+
+\textbf{单位根边界的直观}：$|\phi|<1$ 与 $\phi=1$ 是\textbf{临界分界}——前者方差有限、偏离会衰减；后者方差发散、偏离永不回复。$|\phi|>1$ 则爆炸（无金融意义）。这意味着：\textbf{检验的"零假设"选哪一边，决定了显著性方向}——ADF 把"不回归"当零假设（拒绝它才证明有回归），所以检验功效天然偏向"能检测到明显的回归"，弱回归（$\phi=0.98$）很难被检出。
+
+\section{均值回归因子怎么构造}
+
+\subsection{时序反转（单标的）：距均线的偏离}
+单标的的均值回归因子 = 当前价对长期均线的偏离：
+\begin{equation}
+z_t \;=\; \frac{P_t - \operatorname{MA}_N(P_t)}{\sigma_t},
+\end{equation}
+信号：$z_t$ 显著为正 $\Rightarrow$ 超买做空；$z_t$ 显著为负 $\Rightarrow$ 超卖做多。\textbf{注意}：这是"时序"反转——它赌的是该标的自身回复。
+
+\subsection{横截面反转（相对强弱）：这才是主力战场}
+横截面反转赌的不是"自己回均值"，而是\textbf{"相对别人回均值"}：
+\begin{equation}
+z_{i,t} \;=\; \frac{f_{i,t} - \bar f_t}{\sigma(f_t)},
+\qquad f_{i,t} = \sum_{k=1}^{H} r_{i,t-k}\ (\text{过去 }H\text{ 日收益}).
+\end{equation}
+即：过去 $H$ 日\textbf{相对全市场弱}的股票做多、相对强的做空。\textbf{实证要点（本系列第 2 篇）}：在 8 个国内期货品种上，横截面反转（$H=5$）年化约 $+4.1\%$、夏普 $0.44$、回撤 $18.4\%$，显著为正；而同一批品种的时序反转全为负（RB 夏普 $-0.36$）。\textbf{结论}：期货日频更偏动量，均值回归的 alpha 主要藏在横截面相对强弱里。
+
+\textbf{算例（5 只股票，$H=5$）}：设过去 5 日收益分别为 $f_i = +6\%,+2\%,-1\%,-4\%,-8\%$。
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+股票 & A & B & C & D & E \\
+\midrule
+过去 $H$ 日收益 $f_i$ & $+6\%$ & $+2\%$ & $-1\%$ & $-4\%$ & $-8\%$ \\
+偏离 $f_i-\bar f$ & $+7\%$ & $+3\%$ & $0\%$ & $-3\%$ & $-7\%$ \\
+$z_{i,t}$（横截面） & $+1.30$ & $+0.56$ & $0.00$ & $-0.56$ & $-1.30$ \\
+信号 & 做空 & 做空 & 平 & 做多 & 做多 \\
+\bottomrule
+\end{tabular}
+\end{center}
+横截面均值 $\bar f=(-5/5)\%=-1\%$，标准差 $\sigma=\sqrt{(49+9+0+9+49)/4}\%\approx5.39\%$，故 A 的 $z=(+6\%-(-1\%))/5.39\%\approx1.30$。相对最弱的 D、E 做多，最强的 A、B 做空——这就是"相对强弱反转"的一次具体落地；把这一过程放到多品种/多股票上，再叠加中性化与标准化，就是完整流水线。
+
+\subsection{反转因子的权重方案：等权 vs z 加权 vs rank 加权}
+信号定了方向，权重决定"下多少"。三种常用方案：
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}llll@{}}
+\toprule
+方案 & 权重公式 & 优点 & 代价 \\
+\midrule
+等权 & $w_i=\operatorname{sign}(-z_i)$ & 换手最低、稳健 & 极端股与温和股同等对待 \\
+z 加权 & $w_i\propto -z_i$ & 极端偏离给更多 & 尾部噪声放大、换手最高 \\
+rank 加权 & $w_i\propto -\operatorname{rank}(z_i)$ & 介于两者之间 & 需排序、实现略繁 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{一个必须知道的权衡}：反转的收益主要来自\textbf{极端尾部}（最超跌/超涨的少数股），但尾部的 z 又是噪声最大的地方。z 加权理论上能多吃尾部收益，却会\textbf{成倍放大换手}（权重随 z 剧烈波动）——在反转这种成本敏感的策略里，\textbf{高换手带来的成本侵蚀往往超过尾部收益增益}。工程结论：
+\begin{itemize}[itemsep=2pt]
+\item 首测\textbf{等权或 rank 加权}：换手可控、对 z 估计误差不敏感。
+\item 若用 z 加权，\textbf{必须配合截尾}（把 $|z|$ 截到上限 $z_{\max}$）并做成本审计，否则容易被极端值驱动。
+\item 数字直觉（沿用 5 股算例）：等权下 D、E 各得 $+\tfrac12$、A、B 各得 $-\tfrac12$；z 加权下 D、E 权重 $\propto1.30,0.56$（归一化后约 70\%/30\%），对 D 的押注是 E 的 2.3 倍——押注集中度更高，但若 D 的 $z$ 是噪声，损失也更大。
+\end{itemize}
+
+\subsection{配对交易（pairs trading）：均值回归在成对价差上的应用}
+横截面反转是对一篮子资产的"相对强弱"下注；配对交易是它的\textbf{两人版}——只对两只高度相关资产的\textbf{价差}下注，赌价差回归其长期均值。这是统计套利最经典的形态。
+
+\textbf{价差的 z 分数}：对两只资产 A、B，用回归或等权定义价差
+\begin{equation}
+\text{spread}_t = P_{A,t} - \beta P_{B,t},\qquad
+z^{\text{pair}}_t = \frac{\text{spread}_t - \operatorname{MA}_N(\text{spread})}{\hat\sigma_{\text{spread}}},
+\end{equation}
+信号：$z^{\text{pair}}$ 显著为正 $\Rightarrow$ 做空价差（空 A 多 B）；显著为负 $\Rightarrow$ 做多价差（多 A 空 B）。持仓目标是 $\beta$ 单位的对冲，把市场/行业暴露压到近零——这与横截面反转"中性化"的思路一脉相承，只是暴露对象从"全市场"变成"单只配对"。
+
+\textbf{半衰期在配对中的双重作用}：半衰期不只决定信号窗口 $H$，还决定\textbf{该对是否值得做}。若配对价差的半衰期过长（如 $>100$ 天），回归期望过薄、还容易被结构性断点打断（两只资产的基本面关系改变）；若过短（如 $<1$ 天），信号被交易成本吞掉。\textbf{实务上常筛掉半衰期极短或极长的配对，只做中间带}。
+
+\textbf{实证坐标（Gatev、Goetzmann \& Rouwenhorst，2006）}：在美股 1962--2002 年，用滚动 12 个月选配对数、后 6 个月交易的"最小距离配对"策略，年化超额约 $11\%$，且几乎全来自\textbf{多头腿}（空头腿贡献有限）——这提示配对交易的 alpha 对做空成本与融券约束极其敏感，A 股等做空受限市场需谨慎评估净收益。
+
+\textbf{与横截面反转的关系}：配对是"一维价差"上的反转，横截面反转是"多维相对强弱"上的反转；两者共享同一数学内核（偏离 $\to$ 回归），但配对天然自融资（多空对冲）、暴露更集中，横截面更分散、容量更大。\textbf{初学者先掌握横截面反转的整套管线，配对是其特例}。
+
+\section{暴露中性化：均值回归因子的隐形污染}
+
+\subsection{为什么反转因子尤其需要中性化}
+反转因子天然携带两类\textbf{隐性暴露}，比动量更严重：
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}lll@{}}
+\toprule
+暴露 & 机制 & 后果 \\
+\midrule
+市值暴露 & 小盘股往往过去收益更极端 & 反转变成变相买小盘 \\
+流动性暴露 & 超跌股往往流动性差 & 反转变成变相买冷门 \\
+行业暴露 & 某行业整体超跌/超涨 & 反转变成变相赌行业 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{不做中性化：遗漏变量偏差（fake 反转 Alpha）}
+与动量篇同款推导：真实模型 $y=\beta_1 z+\beta_2 \ln\text{Cap}+u$，只对 $z$ 回归，则
+\begin{equation}
+\mathbb{E}[\tilde b_1] = \beta_1 + \beta_2\,\frac{\operatorname{Cov}(z,\ln\text{Cap})}{\operatorname{Var}(z)}.
+\end{equation}
+只要 $z$ 与市值相关（小盘股动量/反转更极端），估计出的"反转 alpha"里就混着\textbf{小盘溢价}——这在 A 股尤其致命，因为小市值因子本身是强风险溢价。
+
+\subsection{中性化的目标（一句话）}
+让处理后的反转因子与"行业哑变量、$\ln$ 市值"正交，使按它排序建仓的组合不再隐含行业与市值暴露——与动量篇完全同构的机器。
+
+\section{行业 + 市值中性化的具体操作（与动量篇同构）}
+
+\subsection{数学模型（矩阵形式）}
+对某一时点横截面（$i=1,\dots,N$），设计矩阵 $X=$ 行业哑变量 $+$ $\ln$市值列 $+$ 截距列，回归取残差：
+\begin{equation}
+f = X\gamma + \varepsilon
+\;\Rightarrow\;
+\hat\gamma=(X^{\top}X)^{-1}X^{\top}f,\quad
+\bar f = f-X\hat\gamma = (I-P)\,f.
+\end{equation}
+
+\subsection{为什么保证正交（线性代数证明）}
+$(I-P)$ 是正交投影矩阵，对 $X$ 任意列 $v$ 有 $(I-P)v=0$，故
+\begin{equation}
+\big((I-P)f\big)^{\top}v = f^{\top}(I-P)v = 0.
+\end{equation}
+残差与每一列内积为 0。三条可操作结论不变：\textbf{残差均值归零、行业内均值归零、与市值不相关}。
+
+\subsection{逐期重估与两个坑}
+\begin{itemize}[itemsep=2pt]
+\item \textbf{必须逐期重估} $\gamma$：行业均值、市值溢价随时间漂移。
+\item \textbf{哑变量陷阱}：每行业一列让截距吸收基准，或用最小范数解规避。
+\item \textbf{取残差不取系数}：中性化要的是 $(I-P)f$，不是暴露大小 $\hat\gamma$。
+\end{itemize}
+
+\subsection{代码实现}
+\begin{lstlisting}[language={},caption={行业 + 市值中性化（伪代码）}]
+输入：原始反转因子 f，行业标签 ind，对数市值 lncap（同一横截面、按股票对齐）
+输出：中性化因子 f_clean
+
+1. 构造设计矩阵 X：
+     X <- [每行业一列哑变量（属于该行业为 1，否则为 0）
+           | lncap 列 | 全 1 截距列]
+2. 解最小二乘：gamma <- lstsq(X, f)     # 最小范数解，规避哑变量共线
+3. 计算拟合：f_hat <- X @ gamma
+4. 返回残差：f_clean <- f - f_hat       # 残差即中性化因子
+\end{lstlisting}
+
+\section{残差 z-score 标准化}
+
+\subsection{严格步骤}
+\textbf{Step 1}——只用"当前一个横截面"求均值与标准差：
+\begin{equation}
+\mu=\frac1N\sum_{i=1}^{N}\bar f_i,\qquad
+\sigma=\sqrt{\frac{1}{N-1}\sum_{i=1}^{N}(\bar f_i-\mu)^2}.
+\end{equation}
+$\mu,\sigma$ 只在当天全部股票上算，\textbf{绝不跨历史混合}。
+
+\textbf{Step 2}——逐个代入：
+\begin{equation}
+z_i = \frac{\bar f_i-\mu}{\sigma}.
+\end{equation}
+当天横截面满足：均值($z$)=0、标准差($z$)=1。
+
+\textbf{Step 3}——用 $z$ 排序/赋权：排序取 $z_i$ 前 N；赋权 $w_i=z_i/\sum_j|z_j|$。
+
+\subsection{两个必须注意的坑}
+\textbf{坑 1——残差非正态，直接 z-score 会被极端值绑架。}反转因子的残差往往比动量更重尾（超跌/超涨股极端值多）。惯例 winsorize 后再标准化：
+\begin{lstlisting}[language={},caption={截尾 z-score（伪代码）}]
+输入：残差 resid，截尾分位 lo=1%, hi=99%
+输出：z 分数
+
+1. lo_q <- 分位数(resid, lo)；hi_q <- 分位数(resid, hi)
+2. resid_c <- 截断(resid, 下界=lo_q, 上界=hi_q)   # 极端值拉回边界
+3. 返回 (resid_c - 均值(resid_c)) / 标准差(resid_c)
+\end{lstlisting}
+
+\textbf{坑 2——反转因子对标准化方式极度敏感。}用均值/方差还是中位数/MAD 会显著改变极端股排名；反转策略的收益主要来自极端尾部，截尾过度会直接削掉 alpha 来源，截尾不足又被噪声绑架——\textbf{这是反转因子与动量因子最大的工程差异}。
+
+\section{完整信号流水线与评估}
+
+\subsection{完整 pipeline}
+\begin{lstlisting}[language={},caption={因子流水线（伪代码）}]
+输入：原始反转因子 f，行业 ind，市值 mcap（每期一个横截面）
+输出：标准化因子分数 z
+
+1. f_clean <- 中性化(f, ind, ln(mcap))     # 行业+市值取残差
+2. 截尾：f_c <- 截断(f_clean, 1%, 99%)
+3. z <- (f_c - 均值(f_c)) / 标准差(f_c)     # 横截面 z-score
+4. 返回 z
+\end{lstlisting}
+月度口径：每个月底对当期横截面执行上述流程得 z 分数，据此排序建仓。
+
+\subsection{如何评估（别只看多空曲线）}
+\textbf{1. IC / Rank IC}：每期算 $\operatorname{corr}(z_t,\,r_{t+1})$。反转因子的 IC 往往是"短窗口显著、长窗口归零或翻负"——必须\textbf{按半衰期匹配评估窗口}。
+\textbf{2. 分层回测}：按 $z$ 分十分位，看极端分位差是否单调。反转因子常见"两端凸起"而非单调——\textbf{只买最极端一端往往比多空全押更稳}。
+\textbf{3. Fama--MacBeth 回归}：剔除市场/行业/市值后再看残差 $\alpha$。
+\textbf{4. 信息比率与 t 值}：
+\begin{equation}
+\operatorname{IR}=\frac{\alpha_p}{\sigma(\varepsilon_p)},\qquad
+t_\alpha=\frac{\alpha_p}{\sigma(\varepsilon_p)/\sqrt{T}}.
+\end{equation}
+\textbf{5. 换手与成本（反转的主要约束）}：反转因子天然高换手，必须同时报告换手率与扣成本后净值。\textbf{一个日频反转因子换手 80\%/日，先扣 5bp 双边成本再评估其是否仍有正期望}。
+
+\subsection{前视偏差（工程红线）}
+与动量篇完全一致：中性化 $\gamma$ 用 $t-1$ 期已知暴露估计、对 $t$ 期应用；任何因子值、暴露、成交量在决策时刻必须"可用"。\textbf{反转因子特别容易踩"用当日收盘算因子、又用当日收益归因"的坑}——因为它的收益窗口极短。
+
+\section{为什么盯住"相对强弱"而非"绝对方向"}
+
+\subsection{均值回归 Alpha 的本质}
+把单标的收益拆开：
+\begin{equation}
+r_{i,t} \;=\; \underbrace{\beta_i\,r_{m,t}}_{\text{市场}} + \underbrace{\theta_i\,(y_{i,t-1} - \bar y_t)}_{\text{均值回归·横截面}} + \underbrace{\alpha_i}_{\text{残差}} + \varepsilon_{i,t},
+\end{equation}
+其中 $y$ 是过去收益排序。\textbf{时序反转赌的是 $\beta_i\,r_{m,t}$ 也回复——但市场动量会覆盖它；横截面反转只赌"相对偏离"回复，把市场、行业、市值都中性化掉，剩下的才是纯反转 alpha}。这正是"盯住相对强弱"的数学理由。
+
+\subsection{均值回归 vs 动量的世界观}
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{4.2cm}@{}}
+\toprule
+ & \textbf{动量} & \textbf{均值回归} \\
+\midrule
+自相关 & 正（延续） & 负（回复） \\
+利润来源 & 趋势溢价 & 反转/流动性提供溢价 \\
+损益分布 & 低胜率高赔率（右偏） & 高胜率低赔率（左偏/窄） \\
+换手 & 低 & 极高（成本敏感） \\
+主要战场 & 期货/趋势市 & 横截面/震荡市/分钟级 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{一句话}：动量赚"追得对"，均值回归赚"买得聪明"；前者要扛住长期小亏等大趋势，后者要忍受高换手与窄盈利，在震荡市里反复收割。
+
+\section*{附录：符号表 / 练习自测 / 参考阅读}
+\addcontentsline{toc}{section}{附录}
+
+\subsection*{A. 符号表}
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}ll@{}}
+\toprule
+符号 & 含义 \\
+\midrule
+$r_t$ & 单期收益 \\
+$\rho_1$ & 一阶自相关系数 \\
+$\phi$ & AR(1) 回归系数 \\
+$\theta$ & OU 均值回复速率 \\
+$t_{1/2}$ & 半衰期（$=\ln2/\theta$） \\
+$\operatorname{VR}(q)$ & $q$ 期方差比 \\
+$z_i$ & 标准化因子分数 \\
+$X,\,P$ & 设计矩阵、投影矩阵 \\
+$\mathrm{IC}/\mathrm{IR}/t$ & 信息系数 / 信息比率 / $t$ 值 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{B. 练习与自测}
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{概念}：用一句话说明动量与均值回归在自相关上的差别。
+\item \textbf{推导}：从 AR(1) 推出半衰期 $t_{1/2}=\ln2/(-\ln\hat\phi)$；若 $\hat\phi=0.8$，半衰期是几天？
+\item \textbf{体检}：一个标的 $\operatorname{VR}(5)=0.8$ 说明什么？该做动量还是反转？
+\item \textbf{正交性实验}：造一组数据跑 \codeinl{factor\_pipeline}，检验残差与 $\ln$市值、行业哑变量的协方差是否约 0。
+\item \textbf{换手审计}：一个日频反转因子换手 80\%/日，双边成本 10bp，估算年化成本对 alpha 的侵蚀。
+\item \textbf{载体判断}：为什么时序反转在期货日频失效、横截面反转却有效？（提示：市场动量 vs 相对强弱）
+\item \textbf{前视自查}：检查反转因子回测里建仓时刻用到的因子/暴露是否均为当时已知信息。
+\end{enumerate}
+
+\subsection*{C. 参考阅读（按难度递增）}
+\begin{enumerate}[itemsep=2pt]
+\item Jegadeesh, N. (1990). \emph{Evidence of Predictable Behavior of Security Returns}.
+\item Lehmann, B. (1990). \emph{Fads, Martingales, and Market Efficiency}.
+\item Lo, A. \& MacKinlay, A. (1988). \emph{Stock Market Prices Do Not Follow Random Walks}.
+\item Avellaneda, M. \& Lee, J. H. (2010). \emph{Statistical Arbitrage in the US Equities Market}.
+\end{enumerate}
+
+\section*{延伸阅读}
+\addcontentsline{toc}{section}{延伸阅读}
+均值回归策略的仓位纪律、动态管理与组合层分散，及其在真实期货数据（8 品种横截面反转）上的实证，已独立成篇：\textbf{《均值回归策略与仓位管理：从负自相关到可运行的仓位纪律》}。本教程只聚焦收益自相关认识论与因子中性化、标准化这条生产线。
+
+\section*{总结}
+\addcontentsline{toc}{section}{总结}
+\textbf{均值回归赚的是负自相关}——价格偏离均值后回复的钱；\textbf{动量和它是同一枚硬币的两面}，区别只在自相关的符号与频段。先测 $\operatorname{VR}$ 定方向、按半衰期定频段、横截面中性化去暴露、z-score 标准化再评估、始终盯住换手成本——这套流程把"均值回归能赚的那部分"从趋势与噪声中分离出来。
+
+\end{document}

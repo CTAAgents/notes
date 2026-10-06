@@ -1,0 +1,144 @@
+% ============================================================
+%  第二部分之一：变点检测族
+% ============================================================
+
+\section{变点检测族：从统计突变到在线监控}
+
+如果第一部分把非平稳拆成三层，那么变点检测（change point detection, CPD）处理的是最“硬”的一层——参数在某个时刻的突然跳跃。它比状态模型更古老、也更朴素：不要求状态会重现、不假设转移概率，只问一个问题：\emph{这段数据中途有没有断？断在哪里？}
+
+本章沿“离线 $\to$ 在线”两条线索整理变点检测族，给出关键算法（Bai--Perron、PELT、CUSUM、BOCPD）的原理与数学结构，并明确它与状态模型的分工。
+
+\subsection{变点模型与状态模型：一对必须分清的概念}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{4.7cm}>{\raggedright\arraybackslash}p{4.7cm}}
+\toprule
+& \textbf{变点模型（change point）} & \textbf{状态模型（regime / state）} \\
+\midrule
+参数结构 & 分段独立：每段的参数互不关联 & 状态由随机过程驱动，转移矩阵刻画 \\
+状态重现 & 不要求（断点后是“新世界”） & 默认要求（状态会反复出现） \\
+切换频率 & 稀疏、一次性 & 可反复、持续 \\
+典型输出 & 断点位置（$+$ 置信区间） & 每期状态的后验概率 \\
+代表方法 & Bai--Perron、PELT、CUSUM、BOCPD & HMM、Markov-Switching、跳变模型 \\
+\bottomrule
+\end{tabular}
+\caption{变点模型与状态模型的结构差异}
+\label{tab:cp-vs-state}
+\end{table}
+
+两者并非竞争关系，而是服务于不同问题：\textbf{变点检测回答“什么时候发生了断裂”}，适合风控报警、结构复盘、模型失效诊断；\textbf{状态模型回答“当前处在哪一段”}，适合策略姿态路由。混用两者——尤其是用离线断点序列回测在线策略——是前瞻偏差的常见伪装（见第~\ref{sec:validation}~节的检查清单）。
+
+\subsection{离线多重变点检测：全局最优分割}
+
+\subsubsection{统一的目标函数}
+
+设观测序列 $Y_{1:T}$。离线多重变点检测的通用形式是求解
+\begin{equation}
+\min_{0 < \tau_1 < \cdots < \tau_K < T} \;\; \sum_{j=0}^{K} \mathcal{C}\big(Y_{\tau_j+1 : \tau_{j+1}}\big) \;+\; \beta\, K,
+\label{eq:cp-objective}
+\end{equation}
+其中 $\mathcal{C}(\cdot)$ 是段内代价（如高斯模型下的负对数似然或 SSE），$\beta \ge 0$ 是每增加一个变点的惩罚。式~\eqref{eq:cp-objective} 是一个组合优化问题；幸运的是，当代价可加时它可用动态规划精确求解：
+\begin{equation}
+F(t, m) \;=\; \min_{0 \le \tau < t}\Big\{ F(\tau, m-1) + \mathcal{C}(Y_{\tau+1:t}) + \beta \Big\},
+\end{equation}
+其中 $F(t, m)$ 表示“用 $m$ 个变点解释前 $t$ 个观测”的最小代价。朴素 DP 是 $O(T^2)$ 或 $O(T^3)$。
+
+\subsubsection{Bai--Perron：统计学家的完备方案}
+
+Bai \& Perron~\cite{bai1998} 在“未知断点位置的多重结构变化线性模型”下建立了这一问题的完整统计理论：
+\begin{itemize}[itemsep=2pt]
+\item 断点位置的\textbf{一致性}与收敛速度——估计精度由跳跃幅度决定：跳跃越弱，位置估计越不确定；
+\item \textbf{推断框架}：SupF 检验（$0$ vs $1$ 个变点）、UDmax、以及“$l$ vs $l+1$ 个变点”的\emph{序贯检验}策略——后者使“从具体到一般”地确定变点数成为规范流程；
+\item 允许部分结构变化（仅部分参数漂移）的推广。
+\end{itemize}
+Bai--Perron 至今是学术与业界的默认离线基准。但要注意其经典设定：线性模型、段内参数同质、变点数目有上界——把它直接套用到“波动率变点 + 均值变点混合”的金融序列上，需要按目标（检验什么参数）显式选择模型。
+
+\subsubsection{PELT：线性成本的最优分割}
+
+Killick et al.~\cite{killick2012} 的 PELT 给出了一个算法层面的突破：在代价函数满足一定正则性（分段代价的变化有限）时，可以在动态规划过程中安全地“剪枝”——\emph{若某候选断点在当前时刻的最优累计代价已不可能被后续最优解使用，则将其永久移除}。在常见模型下，这使平均计算成本从 $O(T^2)$ 降到 $O(T)$。
+
+\begin{remark}[剪枝直觉]
+PELT 的剪枝逻辑与“分支定界”同源：维护候选断点集合 $\mathcal{R}$，若 $\tau \in \mathcal{R}$ 满足代价已超过当前全局最优加可容许增量，则从 $\mathcal{R}$ 中剔除。这一结构使“全序列重新分割”在工程上变得廉价——对滚动复盘尤其重要。
+\end{remark}
+
+\subsubsection{变点位置的不确定性：从点到区间}
+
+一个常被忽略的推断事实是：变点位置本身是一个\emph{估计量}，有抽样分布。Casini \& Perron~\cite{casini2022} 发展了基于广义 Laplace 推断的方法，为变点时刻构造最高密度区域（HDI），直接反驳了“变点是一个精确日期”的直觉。工程含义：报告中应给出“断点区间”（如“2024 年 8 月中下旬”），而不是“2024 年 8 月 19 日”——后者是精度幻觉。
+
+\subsection{在线变点检测：只有“现在”可用}
+
+离线方法在样本内工作得很好，但实时决策只能用截至当前的数据流。在线检测的两条主流路线是频率派的 CUSUM 与贝叶斯派的 BOCPD。
+
+\subsubsection{CUSUM：最简单的最优检测器}
+
+CUSUM（累积和控制图，Page~\cite{page1954}）的核心思想是“累积证据”：把对数似然比按如下方式递归累积，
+\begin{equation}
+S_t \;=\; \max\Big\{\,0,\; S_{t-1} + \log \frac{p_1(Y_t)}{p_0(Y_t)} \Big\},
+\qquad
+\text{若 } S_t > h \text{ 则报警},
+\end{equation}
+其中 $p_0, p_1$ 分别为切换前后的（名义）分布，$h$ 为阈值。$\max\{0, \cdot\}$ 使统计量在证据不足时“归零重来”，这正是它相对于“固定窗口滚动检验”的优势——不会把久远的历史证据误当作当前证据。
+
+CUSUM 与第一部分式~\eqref{eq:delay} 的延迟—误报结构直接相连：阈值 $h$ 就是工作点旋钮。它的最优性（在适当的极小极大意义下）是序贯检测理论的经典结果；其工程优点同样是经典的：单变量递归、常数内存、可解释。
+
+\subsubsection{BOCPD：维护“距上次变点多久”的后验}
+
+Adams \& MacKay~\cite{adams2007} 的贝叶斯在线变点检测（BOCPD）引入了一个优雅的核心变量——\emph{游程长度}（run length）$r_t$：距最近一次变点的期数。
+\begin{equation}
+r_t \;=\;
+\begin{cases}
+0, & \text{若时刻 } t \text{ 发生变点},\\
+r_{t-1} + 1, & \text{否则}.
+\end{cases}
+\end{equation}
+在“变点前参数与变点后参数独立”与乘积分割假设下，游程后验可用消息传递精确递推：
+\begin{equation}
+\underbrace{P(r_t, Y_{1:t})}_{\text{新联合}} \;=\; \sum_{r_{t-1}} \underbrace{P(r_t \mid r_{t-1})}_{\text{变点先验}}
+\underbrace{P\big(Y_t \mid r_{t-1}, Y^{(r)}_{t-r_{t-1}:t-1}\big)}_{\text{预测概率}}
+\underbrace{P(r_{t-1}, Y_{1:t-1})}_{\text{上期消息}},
+\label{eq:bocpd}
+\end{equation}
+其中变点先验通常取几何 hazard：每期以固定概率 $\lambda$ 发生变点，对应期望段长 $1/\lambda$。预测概率项由共轭模型（如 Normal-Gamma）解析给出，这是 BOCPD “模块化”的来源——换模型只需换预测项。
+
+BOCPD 相对 CUSUM 的三个优点：
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{输出整个后验}：$P(r_t \mid Y_{1:t})$ 而非单点统计量，报警置信度天然可校准；
+\item \textbf{不确定性显式}：可以给出“变点存在概率”与位置的可信区间；
+\item \textbf{可组合}：与任意共轭指数族观测模型即插即用（均值/方差/计数/趋势）。
+\end{enumerate}
+其代价是每期需更新 $t+1$ 维分布（可用截断控制计算量）。
+
+\begin{remark}[Shiryaev--Roberts：第三位期权]
+在贝叶斯序贯检测族中，Shiryaev--Roberts 程序是另一个经典选择：它维护“变点曾发生过”的似然比统计量，并在最小化检测延迟的意义上有最优性结果。工程上它与 CUSUM 可互为验证——两者同时报警时，证据的可信度高于任何单一方。
+\end{remark}
+
+\subsection{金融数据上的三个陷阱}
+
+\begin{enumerate}[itemsep=3pt]
+\item \textbf{“事后确定性”错觉}。离线方法（Bai--Perron、PELT）给出的是\emph{样本内}最优分割；把它当作“当年当时能知道的事”做回测，等于假设自己拥有未来数据。严谨做法：任何使用断点的策略回测，必须改用在线检测器（CUSUM/BOCPD）逐点重跑。
+\item \textbf{检测器调参的过拟合}。阈值、惩罚 $\beta$、hazard 参数 $\lambda$ 若在历史上“调到效果最好”，检测器的输出就包含了未来信息。检测质量应在\emph{样本外}评估：监控“历史断点能否被提前量化的方式复现”，而不是“拟合得多好”。
+\item \textbf{稀疏性假设的失效}。金融现实中的结构变化常常是连续渐变与突跳的混合；硬变点方法会把渐变拆成一串小跳变（或全部漏掉）。这正是下一章状态模型、以及第~\ref{sec:frontier}~节跳变惩罚框架的用武之地——它们用持续性与先验强度来处理“渐变还是跳变”的连续谱。
+\end{enumerate}
+
+\subsection{选择指南}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\begin{tabular}{p{3.5cm}p{3.4cm}p{4.9cm}}
+\toprule
+\textbf{需求} & \textbf{推荐} & \textbf{理由} \\
+\midrule
+复盘历史结构断裂 & Bai--Perron / PELT & 全局最优分割，统计推断完备 \\
+实时快速报警 & CUSUM & 常数内存、延迟最优性质、易解释 \\
+实时报警 $+$ 不确定性 & BOCPD & 全后验、可信区间、多模型可组合 \\
+持续状态路由（多期持仓） & 状态模型（下一章） & 转移结构、滤波递推、概率语义 \\
+\bottomrule
+\end{tabular}
+\caption{变点检测方法的选择指南}
+\label{tab:cp-choice}
+\end{table}
+
+\keynote{变点检测回答“什么时候断”，状态模型回答“现在处在哪一段”。前者是事件语言，后者是状态语言——用离线断点序列回测在线策略，是前瞻偏差的又一种常见伪装。}

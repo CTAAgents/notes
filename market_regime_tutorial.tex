@@ -1,0 +1,170 @@
+\documentclass[UTF8,11pt]{ctexart}
+
+% ============================================================
+%  Market Regime 系统教程
+%  从状态切换的第一性原理到多资产工程落地
+% ============================================================
+
+% ---------- 数学 ----------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{bm}
+
+% ---------- 页面 ----------
+\usepackage[a4paper,margin=2.2cm]{geometry}
+
+% ---------- 表格与列表 ----------
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{enumitem}
+\setlength{\tabcolsep}{4.5pt}   % 全局收紧表格列距，避免宽表溢出
+\setlength{\emergencystretch}{2.5em}  % 允许段落紧急伸展，缓解长代码名句溢出
+
+% ---------- 颜色与图形 ----------
+\usepackage[table]{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% ---------- 代码 ----------
+\usepackage{listings}
+
+% ---------- 标题样式 ----------
+\usepackage{titlesec}
+
+% ---------- 超链接与参考文献 ----------
+\usepackage[hidelinks]{hyperref}
+\usepackage[backend=biber,style=numeric-comp,sorting=none,giveninits=true,doi=true]{biblatex}
+\addbibresource{references.bib}
+
+% ============================================================
+%  配色体系（全局统一）
+% ============================================================
+\definecolor{themeblue}{RGB}{31,64,104}     % 主题深蓝：章节标题
+\definecolor{themered}{RGB}{170,60,50}      % 强调砖红：代码关键字、重点
+\definecolor{themegray}{RGB}{95,95,100}     % 中性灰：注释、辅助文字
+\definecolor{codegray}{RGB}{232,232,237}    % 代码底色
+\definecolor{tintblue}{RGB}{240,244,249}    % 浅蓝底：表格、面板
+
+% ============================================================
+%  章节标题样式
+% ============================================================
+\titleformat{\section}
+  {\normalfont\large\bfseries\color{themeblue}}{\thesection}{0.6em}{}
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries\color{themeblue!85!black}}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{themegray}}{\thesubsubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{14pt plus 3pt minus 2pt}{7pt}
+\titlespacing*{\subsection}{0pt}{10pt plus 2pt minus 2pt}{5pt}
+
+% 页眉保持标题原样（避免英文词被强制大写，如 Regime -> REGIME）
+\makeatletter
+\renewcommand{\sectionmark}[1]{\markright{\thesection\hskip 1em\relax #1}}
+\makeatother
+
+% ============================================================
+%  定理环境
+% ============================================================
+\theoremstyle{definition}
+\newtheorem{definition}{定义}[section]
+\newtheorem{example}{例}[section]
+\newtheorem{proposition}{命题}[section]
+\newtheorem{theorem}{定理}[section]
+\newtheorem{corollary}{推论}[section]
+\theoremstyle{remark}
+\newtheorem{remark}{注}[section]
+
+% ============================================================
+%  代码样式
+% ============================================================
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codegray},
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{gray!60},
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=4,
+  language=Python,
+  keywordstyle=\color{themered}\bfseries,
+  commentstyle=\color{themegray},
+  stringstyle=\color{themeblue},
+}
+
+% ---------- 中文强调：斜体在中文字体下不可用，统一改为加粗 ----------
+\renewcommand{\emph}[1]{\textbf{#1}}
+
+% ---------- 常用记号 ----------
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Regime}{\mathcal{S}}
+\newcommand{\bx}{\bm{x}}
+\newcommand{\btheta}{\bm{\theta}}
+
+% ---------- 章节主句（每章末尾的可记忆一句话） ----------
+\newcommand{\keynote}[1]{%
+  \par\medskip\noindent
+  \textcolor{themeblue}{\rule[-0.35em]{3pt}{1.35em}}\hspace{0.6em}%
+  \textcolor{themeblue}{#1}\par\medskip}
+
+% ============================================================
+%  标题信息
+% ============================================================
+\title{\bfseries Market Regime 系统教程\\[3pt]
+\large 从状态切换的第一性原理到多资产工程落地（深度版）}
+\author{量化投研学习笔记}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+\noindent
+量化投研有一个贯穿始终的问题：\textbf{当市场的统计规律本身随时间改变时，任何固定参数的系统都注定在某个时刻失效——我们能否把"市场处于什么状态"这一隐变量显式地推断出来，并让策略姿态随状态切换？}教程以"本质问题—第一性原理—同构论证—工程映射—诚实边界—修正判断"为主线：
+
+\textbf{理论侧}，从非平稳性的三层分解出发，建立 Regime 的形式化定义与可识别性条件，并从信息论角度论证"识别必然滞后"这一被大多数教程回避的下界；随后系统整理方法论谱系——变点检测族、参数化状态模型（Markov Switching 与 HMM 的完整 EM 推导）、非参数与机器学习方法、工程规则法，以及 2023--2026 的前沿进展（Statistical Jump Model、Wasserstein HMM、KAN 可微 Regime、HMM--RL 混合）。
+
+\textbf{工程侧}，剖析一个三级 Regime 体系的完整架构（L1 全市场七维判档 / L2 产业链 HMM 三窗口投票 / L3 品种三信号规则法），给出机制设计、数据工程要素（多源降级链、乘数修正、就绪度检查）与跨资产推广路径（商品 $\to$ 股指 $\to$ 利率 $\to$ 外汇）。
+
+\textbf{实证侧}，基于真实期货数据复盘产业链状态演化、量化检测延迟与假阳性统计。
+
+\textbf{边界侧}，诚实呈现反方证据：军备竞赛、样本内幻觉、状态数不可辨识、结构演化——并给出修正后的使用纪律。
+
+本教程面向具备量化基础的读者，假定读者熟悉基本的概率统计、线性代数与 Python 工程实践。
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ============================================================
+%  正文
+% ============================================================
+\input{sections/01_essence}
+\input{sections/02_changepoint}
+\input{sections/03_statespace}
+\input{sections/04_ml}
+\input{sections/05_frontier}
+\input{sections/06_validation}
+\input{sections/07_strategy}
+\input{sections/08_engineering}
+\input{sections/09_empirical}
+\input{sections/10_boundaries}
+
+\newpage
+\appendix
+\input{sections/90_appendix}
+
+\newpage
+\printbibliography[title={参考文献}]
+
+\end{document}

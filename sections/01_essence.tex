@@ -1,0 +1,248 @@
+% ============================================================
+%  第一部分：本质问题与理论基础
+% ============================================================
+
+\section{本质问题：当市场规律本身在变}
+\label{sec:essence}
+
+一个量化系统的全部可靠性，建立在一个很少被写进文档的假设之上：\textbf{策略所依赖的统计规律，在未来的持有期内保持有效}。趋势跟踪假设价格存在持续性；均值回归假设偏离会被修正；配对套利假设价差结构稳定；风险模型假设协方差可估计。这些假设彼此不同，却共享同一块地基——\emph{平稳性}（stationarity）。
+
+当地基本身移动时，系统不是“变差”，而是“失效”：它的全部参数在同一时刻集体指向错误的答案。本章从一个现象学入口出发（三个真实失效场景），把“非平稳”这一含糊直觉拆解成三个性质不同的层次，并把 Regime 假设放在清晰的位置上。
+
+\subsection{三个失效场景：现象学入口}
+
+\textbf{场景一：趋势跟踪的转折成本。}
+趋势策略的收益结构是“少数大趋势 $+$ 多数小亏损”。当市场从趋势状态切向震荡状态时，这个结构的成分比例被直接改写。Garg et al.~\cite{garg2024} 量化了这一效应：以快慢动量信号（如 1 个月与 12 个月）符号不一致的月份数定义“转折点密度”，在 1990--2019 年的跨市场样本上，当某品种每年转折点超过 6 次时，标准趋势策略的表现转负。Goulding et al.~\cite{goulding2023} 的平行结论是：在转折点附近，最优动量速度本身发生切换——静态参数的策略无法同时适应两个状态。
+
+这里的关键在于：\emph{这不是参数调优问题}。无论把回看窗口设为一个月还是一年，策略都在同一个收益结构上优化；而结构本身变了。
+
+\textbf{场景二：波动率目标化的顺周期陷阱。}
+波动率目标化（volatility targeting）是机构风险管理的标准组件：仓位与目标波动率成正比、与已实现波动率成反比。当波动率从低态跳变到高态时，系统被迫在流动性最差的时点机械减仓——这是与价格无关的卖出。更根本的问题在于：波动率本身具有“时代”结构，其水平在若干年内系统性地整体上移或下移，而非围绕常数均值波动~\cite{ang2012,nystrup2015}。一个以波动率为输入的杠杆系统，实际上是一个\emph{隐式的 Regime 系统}——只是它自己不知道这一点，因而无法区分“波动率暂时偏高”与“状态已经切换”。
+
+\textbf{场景三：分散化的瞬时失效。}
+Ang \& Bekaert~\cite{ang2002} 的核心发现是：国际股票市场收益的相关性在高波动熊市显著上升，国际分散化在最需要它的时刻贬值。Scherer~\cite{scherer2020} 对另类风险溢价（ARP）策略的研究给出了更尖锐的对偶证据：ARP 策略之间存在显著传染——大量策略同时跳到最差十分位收益，分散化无法对冲；面对传染状态，投资者最好的防御是降低组合杠杆、回避在传染状态下表现差的资产。
+
+\textbf{三个场景的共同结构。}
+三种失效的触发机制不同（趋势断裂、波动率跳变、相关性上升），但结构是同一个：
+
+\begin{quote}
+策略的核心参数——趋势的持续性、波动率的水平、相关矩阵——都是市场状态的函数；
+固定参数系统等价于在“所有状态的平均”上做优化，而这个平均最优点在任何一个具体状态里都不是最优的。
+\end{quote}
+
+这就是“平均深度一米的河”的量化版本：A 状态的最优仓位与 B 状态的最优仓位平均之后，得到一个在 A 与 B 中都很糟糕的配置。
+
+\subsection{非平稳性的三层分解}
+
+把“非平稳”当作一个整体概念处理，是许多工程失败的起点。至少应拆成三个性质不同的层次：
+
+\begin{enumerate}[itemsep=3pt]
+\item \textbf{参数缓慢漂移}：参数随时间连续、缓慢地变化，如波动率量级的长期迁移、市场深度随参与者结构变化的渐变。应对手段是滚动估计、指数加权（adaptive estimation）。
+\item \textbf{状态切换}：参数在若干离散状态之间跳变，状态具有持续性与重现性，如牛市/熊市、高波/低波、趋势/震荡。这是本教程的主题，应对手段是状态建模。
+\item \textbf{结构演化}：数据生成机制本身发生变化且不可逆、不重现，如市场微观结构变革、策略拥挤导致 alpha 衰减、监管框架变化。它没有历史样本可供训练，只能通过持续监控与前向验证来管理。
+\end{enumerate}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{p{2.1cm}p{2.4cm}p{2.0cm}p{2.3cm}p{2.6cm}}
+\toprule
+\textbf{层次} & \textbf{时间尺度} & \textbf{是否重现} & \textbf{可识别性} & \textbf{有效应对} \\
+\midrule
+参数漂移 & 数月--数年 & 部分 & 高 & 滚动/加权估计 \\
+状态切换 & 数周--数年 & 是 & 中（滞后可控） & Regime 建模 \\
+结构演化 & 不可逆 & 否 & 仅事后可见 & 监控 + 前向验证 \\
+\bottomrule
+\end{tabular}
+\caption{非平稳性的三层分解：可识别性与应对手段完全不同}
+\label{tab:nonstationarity}
+\end{table}
+
+三层之间是\textbf{嵌套}关系，不是并列关系：状态切换的可识别性，依赖于“状态会重现”这一前提；而结构演化恰恰会缓慢改变每个状态的统计特征。历史训练出来的状态模型，可能在用一个逐渐过时的“状态字典”给当下降本释义。这个约束无法通过更复杂的模型消除，只能通过后文（第~\ref{sec:boundaries}~节）讨论的监控纪律来管理。
+
+\subsection{Regime 假设：把非平稳近似为“分段平稳”}
+
+\begin{definition}[分段平稳假设]
+存在一个有限状态的隐过程 $\{S_t\}_{t\ge 1}$ 与一族分布 $\{F_k\}_{k=1}^{K}$，使得在给定 $S_t = k$ 的条件下，观测 $Y_t$ 的分布为 $F_k$，且与更早的历史条件独立。
+\end{definition}
+
+这个假设的作用不是描述市场“真相”，而是做一次\emph{问题转化}：把“如何处理一般的非平稳”这个无从下手的问题，转化为“如何识别状态”这个有明确工具（第 2--4 章）的问题。
+
+\begin{remark}[跳变—漂移是一个连续谱]
+严格的 Markov 跳变是“跳变先验”的极端情形。统计跳变模型（Statistical Jump Model）通过跳变惩罚参数 $\lambda$ 在同一框架内插值：$\lambda = 0$ 时退化为逐点聚类（完全漂移视角），$\lambda \to \infty$ 时状态坍缩为一个~\cite{shu2024a}。“漂移还是跳变”不是一个二分判断，而是由先验强度控制的连续谱；第~\ref{sec:frontier}~节将展示这一谱系如何统一多种方法。
+\end{remark}
+
+\begin{remark}[表达能力通常不是限制]
+在合适的分布距离下（例如弱收敛意义或 Wasserstein 距离），分段常值分布族可以逼近相当一般的连续演化过程。真正困难的从来不是“能否表示状态”，而是“能否从有限噪声数据中可靠地识别状态”，以及“能否诚实地验证识别质量”。这分别是第 2--3 章与第~\ref{sec:validation}~节的任务。
+\end{remark}
+
+\keynote{趋势断裂、波动率跳变、相关性上升，本质是同一件事：策略参数是状态的函数。固定参数系统优化的从来不是任何真实状态，而是一个不存在的“平均状态”。}
+
+% ============================================================
+
+\section{Regime 的形式化：状态、观测与三个推断任务}
+
+\subsection{形式化定义}
+
+\begin{definition}[状态过程]
+\label{def:state}
+设 $(\Omega, \mathcal{F}, \{\mathcal{F}_t\}, \Prob)$ 为滤过概率空间。状态过程 $\{S_t\}_{t\ge 1}$ 取值于有限集 $\Regime = \{1, \dots, K\}$，满足一阶 Markov 性与时齐性：
+\begin{equation}
+\Prob(S_t = j \mid S_{1:t-1}) \;=\; \Prob(S_t = j \mid S_{t-1} = i) \;=\; a_{ij},
+\end{equation}
+转移矩阵 $A = (a_{ij}) \in \mathbb{R}^{K \times K}$ 行和为 $1$；初始分布 $\pi = (\pi_1, \dots, \pi_K)$。
+\end{definition}
+
+\begin{definition}[Regime-Switching 观测模型]
+观测过程 $\{Y_t\}$ 满足：
+\begin{enumerate}[itemsep=1pt]
+\item \textbf{发射性}：条件于 $S_t = k$，有 $Y_t \sim F_k(\cdot; \theta_k)$；
+\item \textbf{条件独立性}：$Y_t \perp (Y_{1:t-1}, S_{1:t-1}) \mid S_t$。
+\end{enumerate}
+模型参数集合为 $\btheta = \{\pi, A, (\theta_k)_{k=1}^{K}\}$。
+\end{definition}
+
+\begin{example}[两状态高斯 HMM]
+取 $K = 2$，$F_k = \mathcal{N}(\mu_k, \sigma_k^2)$。这类模型在金融中的经典用法是区分“低波/高波”或“牛/熊”状态~\cite{hamilton1989,ang2012}。若 $a_{11} = 0.98$，则状态 1 的期望持续期为 $1/(1-0.98) = 50$ 期——\emph{持久性}（persistence）是金融状态最被广泛接受的先验特征，也是后文诸多技术（跳变惩罚、HSMM 时长分布）试图强化的对象。
+\end{example}
+
+\begin{remark}[Regime 的三种刻画方式]
+工程中出现的“状态”有三种来源，性质差别很大：
+\begin{itemize}[itemsep=2pt]
+\item \textbf{生成式}（generative）：显式概率模型（HMM、Markov-Switching、HSMM）。有似然函数、有滤波递推、有模型选择工具；代价是分布假设较强。
+\item \textbf{判别式}（discriminative）：给定特征直接输出标签或概率（分类器、规则法、树模型）。灵活、可纳入任意特征；代价是没有自洽的概率语义，且依赖“标签从何而来”这一外部输入。
+\item \textbf{描述式}（descriptive）：聚类标签（K-means、跳变模型的硬标签）。无分布假设；代价是无时序结构、无概率含义。
+\end{itemize}
+真实生产系统几乎都是混合体。理解一个混合系统的关键问题是：\emph{各部分的状态定义是否同构}——即不同的“状态 $k$”是否指向同一个经济实体。第~\ref{sec:engineering}~节剖析的实战体系正是一个“HMM $+$ 规则法 $+$ 投票合成”的混合设计。
+\end{remark}
+
+\subsection{三个推断任务：滤波、平滑、预测}
+
+给定观测历史，对状态有三种不同的推断问题：
+
+\begin{align}
+\text{滤波（filtering）：}\quad & \alpha_t(k) \;=\; \Prob(S_t = k \mid Y_{1:t}), \\
+\text{平滑（smoothing）：}\quad & \gamma_t(k) \;=\; \Prob(S_t = k \mid Y_{1:T}), \qquad T > t, \\
+\text{预测（prediction）：}\quad & \Prob(S_{t+h} = j \mid Y_{1:t}), \qquad h \ge 1.
+\end{align}
+
+\begin{proposition}[一步预测递推]
+在定义~\ref{def:state} 的模型下，
+\begin{equation}
+\Prob(S_{t+1} = j \mid Y_{1:t}) \;=\; \sum_{k=1}^{K} \alpha_t(k)\, a_{kj} \;=\; \big[\alpha_t A\big]_j .
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+由全概率公式与 Markov 性，
+$\Prob(S_{t+1} = j \mid Y_{1:t}) = \sum_k \Prob(S_{t+1} = j \mid S_t = k, Y_{1:t})\,\Prob(S_t = k \mid Y_{1:t}) = \sum_k a_{kj}\,\alpha_t(k)$，
+其中第一个等号用了 $S_{t+1} \perp Y_{1:t} \mid S_t$，第二个等号用了时齐性。
+\end{proof}
+
+\begin{remark}[工程红线：平滑不是信号]
+在时刻 $t$，实时系统只能获得 $\alpha_t$。平滑概率 $\gamma_t(k)$ 依赖 $Y_{t+1:T}$——它关于 $\mathcal{F}_t$ 不可测，是\emph{未来信息}。平滑序列适合做研究、复盘与模型诊断，绝不能作为交易信号。当一篇研究用“事后平滑的状态序列”回测 Regime 开关策略时，其收益包含未来信息，这是最隐蔽的一类前瞻偏差（look-ahead bias）。检验方法简单而残酷：把回测中每个 $t$ 的状态判定改为“只用 $Y_{1:t}$ 重估”的版本，观察收益衰减幅度——第~\ref{sec:validation}~节给出完整的检查清单。
+\end{remark}
+
+\subsection{可识别性：什么时候“状态”是虚的}
+
+\subsubsection{参数可识别性}
+
+HMM 的参数在一般性的光滑条件下可识别，但存在不可识别的特例（例如某些对称混合结构、退化分布分量）。工程上的实际含义不是去逐一验证可识别性条件，而是接受一个事实：\emph{数据不会自动决定“真实状态数”}。
+
+\subsubsection{Label switching：状态编号的任意性}
+
+\begin{proposition}[置换不变性]
+对任意置换 $\sigma \in \mathfrak{S}_K$，将参数重排为 $(\pi_\sigma,\, A_\sigma,\, \theta_{\sigma(k)})$ 后，观测数据的似然函数不变。
+\end{proposition}
+
+\begin{proof}
+观测似然为对隐状态的全边缘化：$\mathcal{L}(\btheta; Y_{1:T}) = \sum_{s_{1:T}} \pi_{s_1} \prod_t a_{s_{t-1}s_t} f_{s_t}(Y_t)$。置换 $\sigma$ 只是对求和指标做了一个双射重命名，求和值不变。
+\end{proof}
+
+这个看似技术性的结论有一个严重的工程后果：\textbf{“状态 1”没有内在语义}。在滚动重估中，本周期的“状态 1”与上周期重新估计出的“状态 1”可能对应完全不同的经济实体。若系统在报告中用“状态 1 的历史平均收益”直接外推，就可能是在把两类不同的状态混为一谈。
+
+可行的解法是：\emph{以状态画像（signature）而非状态编号作为身份}——为每个状态维护可解释的特征签名（均值、波动、平均持续期、与关键宏观变量的相关），在每轮估计后做匹配。这一“身份追踪”问题的严格版本，正是前沿工作用最优传输（$2$-Wasserstein 距离）在滚动窗口间对齐高斯分量的动机~\cite{boukardagha2026}（第~\ref{sec:frontier}~节展开）。
+
+\subsubsection{状态数 \texorpdfstring{$K$}{K}：分辨率选择而非真理逼近}
+
+随着 $K$ 增大，似然必然单调不减，AIC/BIC 类惩罚的选择直接决定结论；实践中信息准则常在 $K = 2 \sim 3$ 之后改善微弱~\cite{nystrup2018}。比准则更硬的两个约束是：
+
+\begin{itemize}[itemsep=2pt]
+\item \textbf{经济可解释性}：每个状态应当有清晰的市场叙事（如“高波熊市”“低波牛市”“政策后震荡”），否则它只是对噪声的过拟合；
+\item \textbf{切换成本}：$K$ 越大，状态边界越密、切换越频繁、换手与交易成本越高——这是不少“高分辨率”研究无法落地的主要原因。
+\end{itemize}
+
+\keynote{状态编号是任意的，状态画像是稳定的——能用于决策的从来不是“状态几”，而是“这个状态的统计签名”。}
+
+% ============================================================
+
+\section{为什么识别必然滞后：信息论下界}
+\label{sec:bound}
+
+以上建立了 Regime 的形式框架。但在动手实现之前，必须先接受一个大多数人绕过的事实：\textbf{识别存在一个无法通过更聪明的算法突破的滞后下界}。本节给出这一下界的量级论证——它不只是一条理论注脚，而是决定了后文所有工程设计（阈值、投票、确认期）的边界条件。
+
+\subsection{分辨两个状态有多难：KL 散度}
+
+设两个状态的观测分布分别为 $P$ 与 $Q$，定义 KL 散度（相对熵）
+\begin{equation}
+D(P \,\|\, Q) \;=\; \E_P\!\left[\log \frac{\mathrm{d}P}{\mathrm{d}Q}\right],
+\end{equation}
+它度量“单次观测平均能提供多少区分信息”。与检测的直接联系由 Stein 引理给出~\cite{cover2006}：
+
+\begin{proposition}[Stein 引理的样本量含义]
+对 $n$ 个 i.i.d. 观测，控制第一类错误概率不超过 $\varepsilon$，最优（Neyman--Pearson）检验的第二类错误 $\beta_n$ 满足
+\begin{equation}
+\lim_{n\to\infty} \frac{1}{n}\log \beta_n \;=\; -D(P\,\|\,Q).
+\end{equation}
+转成样本量语言：要在两类错误都受控的水平上区分两个状态，所需观测数约为
+\begin{equation}
+n \;\approx\; \frac{\log(1/\beta)}{D(P\,\|\,Q)} .
+\label{eq:stein}
+\end{equation}
+\end{proposition}
+
+式~\eqref{eq:stein} 已经包含了核心结构：难度与 $\log(1/\beta)$ 成正比（温和），与 $D$ 成\emph{反比}（残酷）。两个状态越像（$D$ 越小），可靠分辨所需的观测就越多；$D$ 减半，样本需求翻倍。
+
+\subsection{序贯检测：延迟与误报的对数关系}
+
+现实场景不是“看清 $n$ 个样本再判断”，而是“状态切换后尽快确认”。考虑序贯概率比检验（SPRT）的理想化版本：累积对数似然比
+\begin{equation}
+L_t \;=\; \sum_{i=1}^{t} \log \frac{p_1(Y_i)}{p_0(Y_i)}
+\end{equation}
+在状态 $1$ 下的单步期望为 $D = D(P_1 \| P_0)$。设置确认阈值 $b \approx \log(1/\alpha)$（$\alpha$ 为误报概率），则由 Wald 恒等式，确认所需的观测数期望为
+\begin{equation}
+\E[N] \;\approx\; \frac{b}{D} \;\approx\; \frac{\log(1/\alpha)}{D}.
+\end{equation}
+在变化点检测的标准工具（CUSUM）中，这一关系以“平均运行长度”$\mathrm{ARL}_0$ 的形式重新出现：
+\begin{align}
+\text{误报控制：}\quad & \mathrm{ARL}_0 \;\sim\; e^{h},
+\qquad
+\text{平均检测延迟：}\quad \approx\; \frac{h}{D}, \notag\\
+\text{因此：}\quad & \text{延迟} \;\propto\; \frac{\log \mathrm{ARL}_0}{D}.
+\label{eq:delay}
+\end{align}
+
+\begin{proposition}[延迟—误报的对数量级交换（理想化条件）]
+在“观测 i.i.d.、分布已知、切换后观测持续同分布”的理想化设定下：
+\begin{itemize}[itemsep=2pt]
+\item 把误报控制从 $\mathrm{ARL}_0$ 提高到原来的 $e$ 倍，平均检测延迟只增加约 $1/D$ 期；
+\item 反过来，把平均检测延迟压缩至 $1/\kappa$，误报水平需要恶化到 $\mathrm{ARL}_0^{1/\kappa}$ 量级。
+\end{itemize}
+即：\emph{延迟与误报按对数尺度交换}。
+\end{proposition}
+
+\begin{remark}[如何理解这一命题的适用范围]
+金融现实与理想化条件有多处偏离：分布未知且需估计、观测非 i.i.d.、切换幅度与时刻未知、状态可能只持续很短。因此式~\eqref{eq:delay} 与上述命题应理解为\textbf{量级层面的启发式外推}，而非可直接代入的公式。但它揭示的结构——延迟与误报在对数尺度上交换、辨识难度由 $D$ 决定——在变化点检测与序贯分析的文献中具有一般性，且在金融实践中反复被验证为“定性正确的痛苦”。
+\end{remark}
+
+\subsection{延迟—假阳性前沿：唯一可选的自由}
+
+由此得到一个冷峻但极其实用的结论：
+
+\begin{enumerate}[itemsep=3pt]
+\item 任何声称“及时且不误报”的 Regime 系统，都不是突破了统计前沿，而是\emph{在前沿上选了一个工作点}；一个系统的“聪明”，只能体现为在同等延迟下获得更低的误报，或反之——不存在两全。
+\item 工程上真正的自由是\textbf{工作点选择}：阈值高低、确认期数、投票规则、状态维度的选择。第~\ref{sec:engineering}~节将展示，一套实战体系的“三窗口投票、需 2/3 一致才切换”正是对工作点的一种具体编码。
+\item 一个经常被误读的方向是“预测型 Regime”：用监督学习从领先特征预测下一期状态（如 Shu et al.~\cite{shu2024b} 用资产特征 $+$ 跨资产宏观特征预测 Regime）。它确实改善了组合表现，但其机理不是“识别得更快”，而是“输入变量本身领先于状态”。其可持续性完全取决于领先关系的稳定性——一个结构演化问题（第~\ref{sec:boundaries}~节）。
+\end{enumerate}
+
+\keynote{识别滞后不是算法不够聪明，而是数据里没有那么多信息。工程上唯一的自由，是在“多晚确认”与“多易误报”之间选择工作点——并诚实承担所选点的代价。}

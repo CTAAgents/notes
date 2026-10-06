@@ -1,0 +1,100 @@
+% ============================================================
+%  附录
+% ============================================================
+
+\section{数学推导补充}
+
+\subsection{EM 算法的单调性证明}
+
+\begin{proposition}[EM 的单调性]
+记 $Q(\btheta \mid \btheta') = \E_{S \mid Y, \btheta'}[\log P(Y, S \mid \btheta)]$，则对任意 $\btheta, \btheta'$，
+\begin{equation}
+\log P(Y \mid \btheta) - \log P(Y \mid \btheta') \;\ge\; Q(\btheta \mid \btheta') - Q(\btheta' \mid \btheta').
+\end{equation}
+因而 EM 每次迭代（$\btheta_{\text{new}} = \arg\max_{\btheta} Q(\btheta \mid \btheta_{\text{old}})$）后对数似然单调不减。
+\end{proposition}
+
+\begin{proof}
+从观测似然的条件期望展开开始：
+\begin{align}
+\log P(Y \mid \btheta) - \log P(Y \mid \btheta')
+&= \log \sum_{s} P(Y, s \mid \btheta) - \log P(Y \mid \btheta') \notag \\
+&= \log \sum_{s} P(s \mid Y, \btheta')\, \frac{P(Y, s \mid \btheta)}{P(s \mid Y, \btheta')} - \log P(Y \mid \btheta').
+\end{align}
+对第一项使用 Jensen 不等式（$\log$ 为凹函数）：
+\begin{equation}
+\ge\; \sum_{s} P(s \mid Y, \btheta')\, \log \frac{P(Y, s \mid \btheta)}{P(s \mid Y, \btheta')} - \log P(Y \mid \btheta').
+\end{equation}
+把 log 内的分数拆开并整理（注意 $\sum_s P(s \mid Y, \btheta') = 1$）：
+\begin{align}
+&= \underbrace{\sum_{s} P(s \mid Y, \btheta')\, \log P(Y, s \mid \btheta)}_{=\, Q(\btheta \mid \btheta')}
+- \underbrace{\sum_{s} P(s \mid Y, \btheta')\, \log P(Y, s \mid \btheta')}_{=\, Q(\btheta' \mid \btheta')} \notag \\
+&= Q(\btheta \mid \btheta') - Q(\btheta' \mid \btheta'),
+\end{align}
+其中最后一步用了恒等式 $P(s \mid Y, \btheta')\, P(Y \mid \btheta') = P(Y, s \mid \btheta')$（贝叶斯公式），使两个带 $P(Y \mid \btheta')$ 的项相互抵消。因此当 $Q(\btheta \mid \btheta') \ge Q(\btheta' \mid \btheta')$ 时必有 $\log P(Y \mid \btheta) \ge \log P(Y \mid \btheta')$。
+\end{proof}
+
+\begin{remark}
+这个证明只用到 Jensen 不等式与贝叶斯公式，不依赖任何分布形式——它适用于 HMM、GMM 及一切 EM 估计场景，是附录中唯一需要逐行记住的推导。
+\end{remark}
+
+\subsection{前向算法的缩放（scaling）版本}
+
+$\alpha_t(j)$ 随 $t$ 指数衰减，直接计算在 $T$ 稍大时即下溢。标准缩放算法每步归一化：
+\begin{align}
+\hat\alpha_1(j) &= \pi_j f_j(Y_1) / c_1, \qquad c_1 = \sum_j \pi_j f_j(Y_1), \\
+\hat\alpha_t(j) &= \Big[\sum_i \hat\alpha_{t-1}(i)\, a_{ij}\Big] f_j(Y_t) \Big/ c_t, \qquad
+c_t = \sum_j \Big[\sum_i \hat\alpha_{t-1}(i) a_{ij}\Big] f_j(Y_t),
+\end{align}
+其中 $\hat\alpha_t$ 每步之和恒为 $1$。观测对数似然由缩放因子累加恢复：
+\begin{equation}
+\log P(Y_{1:T} \mid \btheta) \;=\; \sum_{t=1}^{T} \log c_t .
+\end{equation}
+该恒等式是 Baum--Welch 数值实现中“似然从哪来”的标准答案，也是判断实现正确性的首个自检点（对上式应等于直接计算的小样本似然）。
+
+\subsection{Viterbi 路径与逐点最优的差异}
+
+\begin{example}
+设 $K=2$、$T=3$，平滑后验为 $\gamma_1 = (0.6, 0.4)$、$\gamma_2 = (0.6, 0.4)$、$\gamma_3 = (0.6, 0.4)$，而转移矩阵强烈偏好状态稳定（$a_{11} = a_{22} = 0.95$）。逐点最优序列为 $(1,1,1)$；若联合概率最高的路径是 $(2,2,2)$（例如状态 2 的发射似然在三个时点联合占优），则 Viterbi 返回 $(2,2,2)$。两者都不“错误”——它们优化的是不同的目标函数（边缘 vs 联合）；工程含义不同（风险预算 vs 叙事复盘），因此接口必须显式区分。
+\end{example}
+
+\subsection{式~\texorpdfstring{\eqref{eq:delay}}{\ref{eq:delay}} 的 Wald 恒等式来源}
+
+对 SPRT，记 $N$ 为停止时刻、$L_N$ 为停止时的累积对数似然比。Wald 恒等式给出
+\begin{equation}
+\E_{P_1}[L_N] \;=\; \E_{P_1}[N] \cdot \E_{P_1}[\log (p_1/p_0)(Y)],
+\end{equation}
+当忽略“过冲”时 $\E[L_N] \approx b \approx \log(1/\alpha)$，于是 $\E[N] \approx \log(1/\alpha)/D$。对 CUSUM，将其视为“对每个可能的切换起点重启的 SPRT”即得延迟 $\propto \log(\mathrm{ARL}_0)/D$ 的量级关系。\emph{过冲修正与多状态推广的技术细节超出本教程范围}，但量级结构（延迟与误报的对数交换）在此推广下保持。
+
+\section{术语表}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{8.8cm}}
+\toprule
+\textbf{术语} & \textbf{含义} \\
+\midrule
+\endhead
+Regime / 状态 & 市场的隐性的、可持久的统计行为模式（如牛/熊、高波/低波、趋势/震荡） \\
+滤波（filtering） & $\Prob(S_t = k \mid Y_{1:t})$：只用当前与历史信息推断状态（实时决策唯一合法输入） \\
+平滑（smoothing） & $\Prob(S_t = k \mid Y_{1:T})$：使用全样本信息，仅可用于研究复盘 \\
+预测（prediction） & $\Prob(S_{t+h} = j \mid Y_{1:t})$：对未来状态的推断 \\
+发射分布 & 给定隐状态下观测的条件分布 $F_k$ \\
+转移矩阵 $A$ & $a_{ij} = \Prob(S_t = j \mid S_{t-1} = i)$，行和为 1 \\
+Label switching & 状态编号的置换不变性：编号无语义，画像才有 \\
+状态画像 & 状态的统计签名（均值、波动、持续期等），用于身份追踪 \\
+Baum--Welch & HMM 的 EM 学习算法（前向—后向 $+$ 加权统计） \\
+Viterbi 解码 & 求联合概率最大的状态\emph{路径}（$\ne$ 逐点最优） \\
+MS-GARCH & 波动率方程随状态切换的 Markov-Switching 模型 \\
+HSMM & 隐半马尔可夫模型：显式状态时长分布（非几何） \\
+跳变惩罚 & 统计跳变模型中惩罚状态切换的 $\lambda$（$0$ 时退化为 K-means） \\
+Wasserstein 距离 & 分布间的最优传输距离；用于跨窗口的状态身份对齐 \\
+CUSUM & 累积和在线变点检测（Page 1954），阈值控制延迟—误报工作点 \\
+BOCPD & 贝叶斯在线变点检测：维护游程长度（run length）后验 \\
+游程（run length） & 距最近一次变点的期数（BOCPD 的核心变量） \\
+hazard 率 & 每期发生变点的先验概率（几何 hazard 对应期望段长 $1/\lambda$） \\
+ARI & 调整后兰德指数：两次分割的一致性度量（稳定性检验用） \\
+前瞻偏差 & 回测中使用了当时不可得的信息（平滑/参数/特征/执行四类） \\
+工作点 & 延迟—误报前沿上选定的操作点（阈值、确认期、投票规则） \\
+条件化先验 & 用高分辨率状态（如产业链）修正低分辨率状态（如品种）的启发式贝叶斯 \\
+约束式接口 & 上游输出参数边界（上限/倍率）而非具体仓位，提高对识别误差的容错 \\
+\bottomrule
+\end{longtable}

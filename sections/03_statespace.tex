@@ -1,0 +1,181 @@
+% ============================================================
+%  第二部分之二：参数化状态模型（Markov Switching 与 HMM）
+% ============================================================
+
+\section{参数化状态模型：Markov-Switching 与 HMM}
+\label{sec:statespace}
+
+变点检测把结构变化当作稀疏事件；状态模型则把它当作持续过程——这正是“策略姿态路由”需要的东西。本章从 Hamilton 的 Markov-Switching 出发，建立隐马尔可夫模型（HMM）的完整推断与学习框架：前向—后向算法、Baum--Welch（EM）的逐项推导、Viterbi 解码，以及工程落地的数值细节。
+
+\subsection{模型族地图：MS 与 HMM 的关系}
+
+\begin{itemize}[itemsep=2pt]
+\item \textbf{Markov-Switching 回归（MS）}~\cite{hamilton1989}：在回归/AR 框架内让参数随隐状态切换，$Y_t = \mu_{S_t} + \phi_{S_t} Y_{t-1} + \sigma_{S_t}\varepsilon_t$。Hamilton 用它刻画美国 GNP 增长的高低状态，开启了宏观经济与金融的 Regime 研究；其 EM 推断与状态平滑由后续工作系统化~\cite{hamilton1990,kim1994}。
+\item \textbf{隐马尔可夫模型（HMM）}：状态链 $+$ 一般发射分布 $F_k$ 的概率框架；MS 可视为其“回归发射”的特例，反之 HMM 是更一般的学习与推断模板~\cite{rabiner1989}。
+\item \textbf{连续时间 HMM}：以生成器矩阵替代逐期转移矩阵，适合不规则采样与到期结构建模~\cite{nystrup2015}。
+\end{itemize}
+
+本章以 HMM 为主线，因为它同时是“数学上最完整”与“工程上最常用”的骨架。先约定记号：状态链 $\{S_t\}$ 与转移矩阵 $A$、初始分布 $\pi$；发射分布 $f_k(y) = f(y \mid S_t = k; \theta_k)$；完整参数 $\btheta = \{\pi, A, (\theta_k)\}$。
+
+\subsection{似然函数与组合爆炸}
+
+观测数据的似然是对所有状态路径的边缘化：
+\begin{equation}
+P(Y_{1:T} \mid \btheta) \;=\; \sum_{s_1=1}^{K} \cdots \sum_{s_T=1}^{K}
+\pi_{s_1} \prod_{t=2}^{T} a_{s_{t-1} s_t} \prod_{t=1}^{T} f_{s_t}(Y_t).
+\label{eq:hmm-likelihood}
+\end{equation}
+式~\eqref{eq:hmm-likelihood} 的求和包含 $K^T$ 项——$K=5$、$T=250$ 时约为 $10^{174}$，直接计算完全不可行。于是有了第一个核心技巧：把“对所有路径求和”化成“逐期递推”。
+
+\subsection{前向—后向算法：推断的基础}
+
+\subsubsection{前向递推}
+
+定义前向变量 $\alpha_t(j) = P(Y_{1:t},\, S_t = j \mid \btheta)$。
+
+\begin{align}
+\text{初始化：}\quad & \alpha_1(j) = \pi_j\, f_j(Y_1), \\
+\text{递推：}\quad & \alpha_t(j) = \Big[\sum_{i=1}^{K} \alpha_{t-1}(i)\, a_{ij}\Big] f_j(Y_t), \qquad t \ge 2, \\
+\text{似然：}\quad & P(Y_{1:T} \mid \btheta) = \sum_{j=1}^{K} \alpha_T(j).
+\end{align}
+
+\begin{proof}[递推的推导]
+对 $\alpha_t(j) = P(Y_{1:t}, S_t=j)$ 关于 $S_{t-1}$ 全概率展开：
+\begin{align}
+\alpha_t(j) &= \sum_i P(Y_{1:t-1},\, S_{t-1}=i)\, P(S_t = j \mid S_{t-1}=i)\, P(Y_t \mid S_t = j) \notag\\
+&= \Big[\sum_i \alpha_{t-1}(i)\, a_{ij}\Big] f_j(Y_t),
+\end{align}
+其中三个因子依次使用了“观测关于状态条件独立”（前两项）与发射性（第三项）。
+\end{proof}
+
+递推成本为 $O(K^2 T)$——与指数级的直接求和相比，这是决定性的胜利。
+
+\subsubsection{后向递推与平滑}
+
+定义后向变量 $\beta_t(i) = P(Y_{t+1:T} \mid S_t = i, \btheta)$：
+\begin{align}
+\text{初始化：}\quad & \beta_T(i) = 1, \\
+\text{递推：}\quad & \beta_t(i) = \sum_{j=1}^{K} a_{ij}\, f_j(Y_{t+1})\, \beta_{t+1}(j).
+\end{align}
+由此得到两个关键的后验量：
+\begin{align}
+\text{滤波：}\quad & \alpha_t(j) \; \text{（前向变量归一化后即为 } \Prob(S_t = j \mid Y_{1:t}) \text{）},\\
+\text{平滑：}\quad & \gamma_t(i) = \Prob(S_t = i \mid Y_{1:T}) = \frac{\alpha_t(i)\, \beta_t(i)}{P(Y_{1:T})}, \\
+\text{成对平滑：}\quad & \xi_t(i, j) = \Prob(S_t = i, S_{t+1} = j \mid Y_{1:T})
+= \frac{\alpha_t(i)\, a_{ij}\, f_j(Y_{t+1})\, \beta_{t+1}(j)}{P(Y_{1:T})}.
+\end{align}
+
+\begin{remark}[平滑与滤波的差距就是“信息量”]
+$\gamma_t(i)$ 与 $\alpha_t(i)$ 的差异，量化了“未来数据能改变多少当下的判断”。若某状态上两者长期接近，说明该状态几乎不需要未来信息即可确认（易识别）；差距大则说明该状态判定严重依赖事后信息（回测中极易高估的信号）。这个差距本身就是一个实用的“信号可信度体检指标”。
+\end{remark}
+
+\subsection{Baum--Welch：EM 的逐项推导}
+
+现在解决学习问题：在只有观测 $Y_{1:T}$ 的情况下估计 $\btheta$。Baum--Welch 算法~\cite{baum1970}——HMM 版的 EM——把“不知道的状态”当作缺失数据，交替执行：
+
+\subsubsection{E 步：写出 Q 函数}
+
+\begin{equation}
+Q(\btheta \mid \btheta^{\text{old}}) \;=\; \E_{S \mid Y, \btheta^{\text{old}}}\big[\log P(Y_{1:T}, S_{1:T} \mid \btheta)\big].
+\end{equation}
+利用完全数据对数似然的分解
+\begin{align}
+\log P(Y_{1:T}, S_{1:T} \mid \btheta) \;=\;& \sum_{k=1}^{K} \mathbb{1}[S_1=k]\log \pi_k \notag\\
+&+ \sum_{t=2}^{T}\sum_{i,j} \mathbb{1}[S_{t-1}=i, S_t=j]\log a_{ij} \notag\\
+&+ \sum_{t=1}^{T}\sum_{k=1}^{K} \mathbb{1}[S_t=k]\log f_k(Y_t),
+\end{align}
+对状态路径取期望（把指示函数换成后验概率），得
+\begin{equation}
+Q(\btheta \mid \btheta^{\text{old}}) \;=\;
+\sum_{k} \gamma_1(k) \log \pi_k
+\;+\; \sum_{t=2}^{T}\sum_{i,j} \xi_t(i,j) \log a_{ij}
+\;+\; \sum_{t=1}^{T}\sum_{k} \gamma_t(k) \log f_k(Y_t).
+\label{eq:bw-q}
+\end{equation}
+注意式~\eqref{eq:bw-q} 的三个求和项\emph{解耦}：$\pi$、$A$、发射参数各自只出现在一项中。这正是 Baum--Welch 可解析求解的原因。
+
+\subsubsection{M 步：三个闭式解}
+
+\textbf{初始分布}。在约束 $\sum_k \pi_k = 1$ 下最大化第一项，Lagrange 乘子法给出
+\begin{equation}
+\hat{\pi}_k = \gamma_1(k).
+\end{equation}
+
+\textbf{转移矩阵}。约束每行 $\sum_j a_{ij} = 1$，对第 $i$ 行用乘子 $\lambda_i$：
+$\frac{\partial}{\partial a_{ij}}\big[\sum_t \xi_t(i,j)\log a_{ij} - \lambda_i(\sum_j a_{ij} - 1)\big] = 0
+\Rightarrow a_{ij} \lambda_i = \sum_t \xi_t(i,j)$。对 $j$ 求和定出 $\lambda_i = \sum_{t}\gamma_t(i)$（因 $\sum_j \xi_t(i,j) = \gamma_t(i)$），故
+\begin{equation}
+\hat{a}_{ij} \;=\; \frac{\sum_{t=1}^{T-1} \xi_t(i,j)}{\sum_{t=1}^{T-1} \gamma_t(i)}.
+\label{eq:bw-trans}
+\end{equation}
+
+\textbf{发射参数}。第三项是“以后验概率为权重的加权似然”：
+\begin{equation}
+\hat{\theta}_k \;=\; \arg\max_{\theta_k} \sum_{t=1}^{T} \gamma_t(k) \log f_k(Y_t; \theta_k).
+\end{equation}
+对高斯发射 $f_k = \mathcal{N}(\mu_k, \Sigma_k)$，加权极大似然解为状态的加权均值与加权协方差：
+\begin{equation}
+\hat{\mu}_k = \frac{\sum_t \gamma_t(k)\, Y_t}{\sum_t \gamma_t(k)},
+\qquad
+\hat{\Sigma}_k = \frac{\sum_t \gamma_t(k)\,(Y_t - \hat{\mu}_k)(Y_t - \hat{\mu}_k)^{\!\top}}{\sum_t \gamma_t(k)}.
+\label{eq:bw-gauss}
+\end{equation}
+
+\begin{remark}[一致性检查：与“直觉版本”的关系]
+若状态完全已知（$\gamma_t(k)$ 退化为 0/1 指示），式~\eqref{eq:bw-trans}--\eqref{eq:bw-gauss} 就退化为普通的频率统计（转移频数之比、组内均值方差）。Baum--Welch 的全部“魔法”在于：把无法观测的状态用其后验概率\emph{软分配}，然后照常做加权统计。
+\end{remark}
+
+\subsubsection{收敛性与 EM 的边界}
+
+EM 的单调性（每次迭代对数似然不减）由 Dempster et al.~\cite{dempster1977} 的经典结果保证；附录 A 给出基于 Jensen 不等式的证明。但必须诚实列出这套工具有限性的清单：
+
+\begin{enumerate}[itemsep=2pt]
+\item \textbf{局部最优}：似然曲面在 HMM 中普遍多峰；不同初始化会收敛到不同解。工程标准做法：多起点训练（常见 5--10 次），取似然最高者；
+\item \textbf{奇异解}：某状态坍缩为单点（方差 $\to 0$、似然 $\to \infty$）——需要通过正则化或协方差下界约束防止；
+\item \textbf{状态坍缩}：训练中出现“某状态几乎从不激活”，等价于有效状态数小于 $K$；
+\item \textbf{非平稳侵蚀}：用全样本估计的参数是“历史平均态”，滚动样本上必须重估（见第~\ref{sec:validation}~节）。
+\end{enumerate}
+
+\subsection{Viterbi 解码：最可能路径}
+
+在线决策有时需要一条“硬”状态序列。Viterbi 算法~\cite{viterbi1967} 求的是\emph{联合最优路径}：
+\begin{equation}
+s^*_{1:T} = \arg\max_{s_{1:T}} P(s_{1:T} \mid Y_{1:T}).
+\end{equation}
+以动态规划求解：定义 $\delta_t(j) = \max_{s_{1:t-1}} P(s_{1:t-1}, S_t = j, Y_{1:t})$，
+\begin{align}
+\delta_1(j) &= \pi_j f_j(Y_1), \\
+\delta_t(j) &= \Big[\max_i \delta_{t-1}(i)\, a_{ij}\Big] f_j(Y_t), \qquad
+\psi_t(j) = \arg\max_i \big[\delta_{t-1}(i) a_{ij}\big],
+\end{align}
+最后从 $\arg\max_j \delta_T(j)$ 回溯。
+
+\begin{remark}[一个高频误解：Viterbi 路径 $\ne$ 逐点最优]
+Viterbi 给出的是\emph{路径级}联合最优；而“对每个 $t$ 取 $\arg\max_k \gamma_t(k)$”给出的是\emph{逐点}边缘最优。两者一般不同——前者偏好平滑、连通的路径，后者可能在状态间高频跳跃。工程选择原则：用于“叙事与复盘”用 Viterbi（路径连贯）；用于“逐期风险预算”用平滑/滤波概率（每期独立最优）。混用两者解释结果，是许多报告内部矛盾的来源。
+\end{remark}
+
+\subsection{模型族的扩展}
+
+\subsubsection{MS-GARCH：让波动率也有状态}
+
+标准 MS 模型中，波动率要么固定、要么随状态整体缩放。Gray~\cite{gray1996} 提出可在利率等序列上估计的 MS-GARCH 设定，使条件波动率方程本身随状态切换，解决了“GARCH 项依赖路径、状态无法解析聚合”的技术难题。这类模型的价值在于：把“波动率聚类”（GARCH 语言）与“状态切换”（状态语言）统一到一个似然框架内——这正是金融时间序列的两大经验事实的合流。
+
+\subsubsection{隐半马尔可夫模型（HSMM）：给状态一个“年纪”}
+
+HMM 的隐式时长分布是几何分布（无记忆）：$\Prob(\text{持续} \ge d) = a_{ii}^{d-1}$，这意味着“已经持续了 3 个月”与“刚刚开始”在下月切换概率上完全相同——与金融状态“越老越脆弱”或“新状态更有惯性”等经验直觉均不完全相符。HSMM 显式引入时长分布 $p_k(d)$（如负二项），允许状态具有“记忆”。代价是推断复杂度的上升（需在递推中额外维护时长维度或使用近似）。
+
+\subsubsection{时变转移与外部信息}
+
+可通过 logistic 形式让转移概率依赖可观测协变量（TVTP，time-varying transition probabilities），或如 Shu et al.~\cite{shu2024b} 那样将“状态预测”外包给监督学习模型。前者保持完整似然的优雅但协变量维度受限；后者灵活性高，但把“识别”问题部分转化为“预测”问题（第~\ref{sec:frontier}~节讨论其边界）。
+
+\subsection{工程落地的数值细节}
+
+\begin{enumerate}[itemsep=3pt]
+\item \textbf{缩放与对数域}。$\alpha_t$ 随 $t$ 指数衰减，$T=250$ 时 double 精度亦会下溢。标准解法：每步归一化并累加对数（$\log L = \sum_t \log c_t$，$c_t = \sum_j \hat\alpha_t(j)$），或在 log 域实现递推。
+\item \textbf{初始化}。K-means 对观测聚类作为热启动（$\gamma$ 初值），再跑若干随机起点——生产环境的标准配方。
+\item \textbf{特征标准化}。多特征发射（如收益率 $+$ 波动率）量纲差异会使协方差估计病态；先做 $z$-score 或稳健标准化，再训练。
+\item \textbf{滚动重估成本}。完整 Baum--Welch 在 $O(K^2 T)$ 每轮迭代、数十轮迭代下，对中等规模系统代价可控；但若对数百品种高频重估，应使用增量更新或降低重估频率（见第五部分实战体系的窗口化设计）。
+\item \textbf{协方差类型}。全协方差（full）表达力强但参数多（每状态 $d(d+1)/2$）；对角（diag）稳健但忽略特征间关系；球面（spherical）最省。特征维度 $d$ 较大时应倾向对角或降维，否则“参数多、样本少”会直接表现为状态不稳定。
+\end{enumerate}
+
+\keynote{状态模型的核心机制可以归结为一句话：把看不见的状态用后验概率软分配，然后照常做加权统计。前向递推解决了“路径求和爆炸”，EM 解决了“参数从哪来”，而滚动重估与多起点解决了——或者说部分缓解了——“历史是不是还作数”这个问题。}

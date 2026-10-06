@@ -1,0 +1,56 @@
+% 第5章 统一比较矩阵
+\section{统一比较矩阵}\label{sec:matrix}
+
+为控制可读性，矩阵按核验维度拆为两组。\textbf{组 A}：数据与信号维度；\textbf{组 B}：成本、许可、基准与污染审计维度。单元格使用极简标注（有/部分/无/理论），详细口径见证据表与正文。
+
+\begin{table}[htbp]
+\centering
+\caption{统一比较矩阵（组 A：样本数据 / 信号设定 / 样本外稳健性 / 概率与状态预测）}
+\label{tab:matrix_a}
+\footnotesize
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}p{2.7cm}@{}}
+\toprule
+来源 & 样本数据 & 信号设定 & 样本外稳健性 & 概率/状态预测 \\
+\midrule
+R1 反转1985 & CRSP/NYSE 1926--82 月频 & 36M 形成+36M 持有 & 分时期、分大小市值 & 无 \\
+R2 短反转1990 & NYSE/AMEX 1962--86 周频 & 1W 形成+1W 持有 & 跨样本段 & 无 \\
+R3 短反转1990b & NYSE/AMEX 1934--87 月频 & 1M 滞后+1M 持有 & 跨时期 & 无 \\
+R7 长反转1988 & US 1871--1986 + 17 国 & 方差比 2--8 年 & 多国、多期 & 无 \\
+R12 配对2006 & CRSP 1962--2002 日频 & 6M 形成+6M 交易，距离法 & 滚动 6 个月窗口 & 无 \\
+R13 统计套利2010 & US 1997--2007 日频 & 因子/PCA 残差 + s-score & 分年段回测 & 无 \\
+R16 OU配对2005 & 外汇/商品价差 & Kalman 滤波状态估计 & 部分 & 有（状态后验） \\
+R17 成本审计2012 & CRSP 1962--2009 日频 & 复现 R12 + 成本档 & 分时期衰减曲线 & 无 \\
+R20 篮子SDP2013 & 合成/多元价格路径 & 最大均值回归+方差阈值 & 有限（模拟） & 无（优化代理） \\
+R23 成本敏感2011 & 理论+蒙特卡洛 & 最优交易带 & 理论解 & 无 \\
+R43 全配对2014 & 东证 2005--14 日频 & 全配对距离/协整 & 跨配对、跨年份 & 无 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{统一比较矩阵（组 B：计算成本 / 许可 / 公开基准 / 数据污染审计）}
+\label{tab:matrix_b}
+\footnotesize
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{3.6cm}@{}}
+\toprule
+来源 & 计算成本 & 许可 & 公开基准 & 数据污染审计 \\
+\midrule
+R9 跨国2000 & 低（指数组合） & CRSP/WRDS 订阅 & 无公开复现 & 需警惕 18 国多重检验 \\
+R21 阈值带2004 & 理论推导 & 不适用 & 无 & 理论模型 \\
+R24 动量2012 & 中（多资产期货） & 数据供应商订阅 & 论文自报回测 & 1990 年前样本+事后选择 \\
+R25 商品2006 & 低 & 商品数据订阅 & 无 & 样本内回归 \\
+R26 方差溢价2009 & 中（期权定价） & 期权数据订阅 & 无 & 模型依赖强 \\
+R27 GARCH 1986 & 低 & 不适用（方法） & 无 & 计量方法，非策略 \\
+R28 现实检验2000 & 低 & 不适用 & 无 & 核心主题（bootstrap） \\
+R29 规则审计1999 & 低 & 不适用 & 无 & 核心主题（7846 规则） \\
+R30 多重检验2016 & 低 & 不适用 & 无 & 核心主题（$t>3$） \\
+R31 PBO2016 & 低 & 不适用 & \href{https://github.com/esvhd/pypbo}{pypbo 参考实现} & 核心主题（CSCV） \\
+R32 DSR2014 & 低 & 不适用 & 无 & 核心主题（选择偏差） \\
+R34 深度套利2021 & 高（算力/特征工程） & 未披露 & 无独立复现 & 未披露试验次数 \\
+R35 RL套利2024 & 高（训练） & 未披露 & 无独立复现 & 未披露试验次数 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{读表要点}：经典文献（R1--R13）在“样本数据与信号设定”上透明，但普遍缺失概率/状态预测与多重检验；ML 前沿（R34--R46）在计算成本与基准披露上显著弱于经典文献；“评测方法族”（R28--R32）本身就是针对数据污染设计，是最可信的审计工具。

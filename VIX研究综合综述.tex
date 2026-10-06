@@ -1,0 +1,659 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[UTF8]{ctex}
+\usepackage[a4paper,margin=2.4cm,top=2.2cm,bottom=2.6cm]{geometry}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{booktabs,longtable,array,tabularx}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{fancyhdr}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  urlcolor=teal!70!black,
+  citecolor=blue!60!black,
+  pdftitle={VIX 研究综合综述：全谱系、方法学审视与前沿展望（1993--2026）},
+  pdfauthor={Deep Research 综述}
+}
+\urlstyle{same}
+
+\definecolor{headblue}{RGB}{23,55,110}
+\definecolor{ruleblue}{RGB}{90,120,190}
+\definecolor{lightgray}{RGB}{245,245,245}
+
+\titleformat{\section}{\Large\bfseries\color{headblue}}{第\,\thesection\,章}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{headblue!90!black}}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{black}}{\thesubsubsection}{0.6em}{}
+
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.25em}
+\linespread{1.18}
+
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[C]{\small 波动率即资产：VIX 研究综合综述\ ---\ \thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+\pagestyle{plain}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\begin{document}
+
+%=================== 封面 ===================
+\begin{titlepage}
+\centering
+\vspace*{1.2cm}
+{\color{headblue}\rule{0.92\textwidth}{0.7pt}}\par
+\vspace{2.0em}
+{\Huge\bfseries\color{headblue} 波动率即资产\par}
+\vspace{0.55em}
+{\LARGE\bfseries VIX 研究综合综述\par}
+\vspace{0.9em}
+{\large\color{black!60} 全谱系综述 · 方法学审视 · 研究现状与未来方向\par}
+{\normalsize\color{black!60} 1993--2026\par}
+\vspace{1.8em}
+{\color{headblue}\rule{0.92\textwidth}{0.7pt}}\par
+\vspace{1.8em}
+\setlength{\fboxsep}{1.4em}
+\colorbox{headblue!8}{%
+\begin{minipage}{0.84\textwidth}
+\vspace{0.2em}
+{\large\bfseries\color{headblue} 摘要\par}
+\addcontentsline{toc}{section}{摘要}
+\vspace{0.3em}
+\normalsize
+VIX（芝加哥期权交易所波动率指数）自 1993 年诞生以来，已从一只“华尔街恐惧温度计”演变为拥有期货、期权、ETF、互换与策略指数的完整资产类别，与之相应的研究也长成横跨资产定价、金融计量、微观结构、行为金融、宏观金融与机器学习的一整片森林。本综述回答一个总问题：\textbf{在“有史以来至今”的时间尺度上，关于 VIX 的研究究竟确立了哪些可核验的事实、哪些依赖口径的判断、哪些被检索与评测过程污染过的错觉}。
+
+本卷由五层结构组成：\textbf{（一）方法学框架}——把模型评测式审视的问题模板逐一映射为 VIX 研究的方法学维度；\textbf{（二）全谱系综述}——按六条轨道梳理 VIX 研究的主干结论（吸收早期十轨道版的风险—收益权衡、构造转换时刻、情绪三成分与极端事件机制细节）；\textbf{（三）方法学审视}——逐维度核验代表性文献的数据、设定与结论边界；\textbf{（四）研究现状与未来方向}——梳理 2023--2026 活跃前沿、遗留课题与可重点关注的研究方向；\textbf{（五）证据资产}——附含 44 个来源（36 已核验 + 8 前沿待核验）的证据表、统一比较矩阵、结论置信度分级与可复现实验建议。
+
+\textbf{方法声明与核验口径}：全部可链接引用均通过 Crossref / arXiv / OpenAlex / 官方页面交叉核验 DOI 与作者；凡属“行业常识性数值”而非权威一手来源的，一律采用区间化表述并标注“需人工复核”。本综述区分三类陈述：①可追溯事实（给出文献/链接）；②经济学机制推断（给出推理链）；③实践判断（明确标注为判断结论并给边界）。
+\end{minipage}}
+\vfill
+\end{titlepage}
+
+%=================== 目录 ===================
+{
+\hypersetup{linkcolor=black}
+\tableofcontents
+}
+\newpage
+
+%=================== 第 1 章：研究框架 ===================
+\section{研究框架与方法学声明}
+
+\subsection{本质问题：为什么 VIX 值得一场“方法学审视”}
+
+VIX 研究有一个独特之处：它既是最容易被“高收益神话”包装的领域（卖波动率策略的样本内绩效），又是方法论陷阱最密集的领域（前瞻偏差、重叠窗口、数据窥探、测度依赖）。因此，仅做“文献罗列”是不够的；一份合格综述必须回答的第二层问题是：\textbf{哪些“结论”是被评价过程本身制造出来的，而不是被数据支持的}。这就是“方法学审视”的由来。
+
+\subsection{模板术语到 VIX 研究维度的映射}
+
+本次调研任务自带一套模型评测式问题模板，下表给出其到 VIX 研究领域的逐项映射。这套映射是本综述方法学审视部分的组织骨架：
+
+\begin{center}
+\begin{tabular}{@{}L{0.16\textwidth}L{0.42\textwidth}L{0.40\textwidth}@{}}
+\toprule
+\textbf{模板术语} & \textbf{VIX 领域映射} & \textbf{代表问题} \\
+\midrule
+预训练数据 & 研究数据集：VIX 官方序列（1990 起）、已实现波动（RV）、期权隐含波动（IV）、样本区间与频率 & 论文用了多长的样本？跨 2003/2014 断点没有？ \\
+预测设定 & 预测目标（VIX 水平/已实现波动/期限结构）、预测期（1/5/22 日）、滚动/递归窗口、特征集 & 不同论文的预测目标是否同一？窗口是否重叠？ \\
+零样本能力 & 样本外表现与跨市场迁移（美式估计参数应用于新兴市场） & 训练—评估切分是否诚实？跨市场是否真的外推？ \\
+概率预测 & 密度/分位数预测：VIX 分布预测、期权隐含分布、尾部建模 & 只报点预测还是给校准好的区间？ \\
+计算成本 & 模型训练/推理成本（GARCH 秒级 vs 深度网络） & 收益是否被计算成本折现过？ \\
+许可 & 数据许可（Cboe 指数数据专有）与代码开源许可 & 结果能否在不付费数据上复现？ \\
+公开基准 & HAR、GARCH(1,1)、AR、朴素基准等公共基线 & 是否对比了最强基线？基线是否被削弱？ \\
+评测污染 & 前瞻偏差、重叠窗口、数据窥探、参数过拟合、检索污染 & 特征是否泄漏未来？超参是否用全样本挑的？ \\
+不可比设定 & 损失函数（MSE/RMSE/QLIKE）、评估期、波动率代理差异 & 跨论文的“赢”是否同一标尺下的赢？ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{证据分级标准}
+
+本综述对每条结论标注证据置信度，标准如下：
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{高}：跨测度、跨样本、多篇独立文献一致支持，且存在可复现的一手数据源；
+  \item \textbf{中}：主流文献支持，但结论依赖特定测度/样本/设定，换口径可能翻转；
+  \item \textbf{低}：单篇或少数文献、样本外证据不足、或与主流证据相抵触；
+  \item \textbf{需人工复核}：数值属行业常识或来源权威性不足，必须回一手源核对。
+\end{itemize}
+
+\subsection{检索过程的失败透明记录}
+
+按“失败完全透明”原则，本节如实记录本次调研检索通道的受限与污染情况，这些记录本身就是“评测数据污染”章节的实证素材：
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{Deep Research 接口}：服务可用，但文档记载的请求字段已失效（旧版用 \texttt{prompt}，现版用 \texttt{query}），实测后适配成功；后端 LLM 生成阶段返回 401（dashscope 凭据过期），最终报告正文降级为本地模板生成，导致正文出现与 VIX 无关的套话——\textbf{已弃用该模板正文，仅保留其检索命中的引用源与检索命中作为候选证据}。
+  \item \textbf{检索污染实证}：108 条检索命中中，约三分之二与 VIX 无关。典型污染：关键词“fear”（来自 fear gauge）误召回“恐惧心理学/仇恨言论”文献；另有量子计算、天体雷达、LLM 智能体等完全离题条目。\textbf{这是真实的“评测数据污染”案例：机器检索的“相关”不等于人的相关}。
+  \item \textbf{Giiisp 检索接口}：未配置 \texttt{GIIISP\_AUTH\_TOKEN}，OA 语义接口返回 400；arXiv/OpenAlex/Crossref 开放源回退全部成功。
+  \item \textbf{开放式 arXiv 检索}：同样出现“VIX”“fear”关键词污染，且 arXiv 的 \texttt{all:} 语义匹配召回率低——再次验证关键词检索的固有局限。
+\end{itemize}
+
+\textbf{本章主句}：一份综述的诚实，不在于引用数量，而在于它敢于把“检索本身如何污染结论”也写进正文。
+
+\newpage
+%=================== 第 2 章：全谱系综述 ===================
+\section{全谱系综述（六条轨道）}
+
+本部分按课题轨道把 VIX 研究的主干结论组织成六条轨道，每条轨道遵循“本质问题 → 第一性原理 → 文献证据 → 工程/交易映射 → 诚实边界 → 本章主句”的结构，并吸收早期十轨道版本中风险—收益权衡、构造转换时刻、情绪三成分与极端事件机制的细节。
+
+\subsection{轨道一：构造经济学——从“恐惧温度计”到“可交易资产”}
+
+\textbf{本质问题}：为什么一个“由期权价格算出来的数”，最终能变成一种可以交易、可以亏光身家的资产？
+
+\textbf{第一性原理}：VIX 的精妙在于它刻意回避了“哪个期权定价模型是对的”这个问题。1993 年 Whaley 基于标普 100 平值期权编制最初版本（\url{https://doi.org/10.3905/jod.1993.407868}），是模型依赖的；思想远祖可追溯至 Brenner 与 Galai（1989）在《金融分析师期刊》提出的“西格玛指数”概念。2003 年 Cboe 与高盛合作改写为基于标普 500、跨执行价加权的\textbf{模型自由（model-free）方差加权}，思想源头是方差互换的静态复制理论——Britten-Jones 与 Neuberger（2000，\url{https://doi.org/10.1111/0022-1082.00228}）给出“期权组合静态复制方差”的充分条件。核心哲学：\textbf{方差是可复制的购买力，因此“市场对 30 天方差的要价”是一个不依赖参数的原生量}。
+
+\textbf{构造的转换时刻}：2004-03-24 Cboe 期货交易所（CFE）推出 VIX 期货；2006-02 推出 VIX 期权；随后“波动率的波动率”指标 VVIX、9 日 VIX9D、以及跨资产波动率指数（原油 OVX、黄金 GVZ 等）陆续登场；最初的标普 100 版本被更名为 VXO。2014-10-06 引入周度 SPX 期权——Andersen、Bondarenko 与 Gonzalez-Perez（2025，\url{https://doi.org/10.1007/s11147-025-09210-x}）的测算表明，这次改版把到期期限插值误差降低约一个量级，但同时造成序列统计性质断裂——\textbf{任何跨 2014 年的实证都必须处理这条结构性断点}。
+
+\textbf{工程映射}：新构造是“可复制”的，这直接催生了互换、期货、期权、ETP 的完整产品线；负偏、尖峰、右偏的数理形态决定了它天生不适合简单正态假设的定价。对量化研究者：\textbf{2003 与 2014 是两个需要“打标签”的结构断点}。
+
+\textbf{诚实边界}：“模型自由”不等于“构造无干预”，它受制于执行价网格疏密、市场数据源（Cboe 用 C1 单一数据源）与深度虚值期权报价质量；极端行情下误差放大。
+
+\textbf{本章主句}：VIX 之所以成为资产，不是因为它“预测对了什么”，而是因为它由可直接复制的波动率敞口构成——可复制，才可比拼，才可交易。
+
+\subsection{轨道二：信息含量与方差风险溢价——Q 与 P 之间的差额}
+
+\textbf{本质问题}：VIX 与已实现波动率之差，承载了多少真实信息？VIX 是“领先指标”还是“情绪放大器”？
+
+\textbf{第一性原理}：已实现波动率（RV）属于现实测度（P）；期权隐含波动率（VIX）是风险中性测度（Q）下对未来方差的市场定价。两者之差——\textbf{方差的 Q--P 差}——理论上恰是方差风险溢价（VRP）。即便期权市场“理性且无溢价”，VIX 也只是对 RV 的最优无偏预测；系统性偏差指向风险厌恶、稀缺性、情绪或预测失误。
+
+\textbf{文献证据}：
+\begin{itemize}[leftmargin=2.2em]
+  \item Whaley（2000）用“恐惧指标（fear gauge）”命名 VIX 并确立其与标普 500 的强负相关（\url{https://doi.org/10.3905/jpm.2000.319728}）。
+  \item Jiang 与 Tian（2005）严格检验 model-free 隐含波动率的信息含量（\url{https://doi.org/10.1093/rfs/hhi027}）。
+  \item \textbf{BTZ（2009）}：Bollerslev、Tauchen 与 Zhou 首次强调以 VIX²（Q 测度方差）与已实现方差（P 测度）之差作为 VRP 代理，并证明该溢价显著预测下月标普 500 超额收益（\url{https://doi.org/10.1093/rfs/hhp008}）。
+  \item \textbf{Bekaert 与 Hoerova（2014）}：主张把 VIX² 分解为“标的条件方差 + 方差风险溢价”，发现溢价部分预测股票未来收益、条件方差部分预测实体经济（\url{https://doi.org/10.1016/j.jeconom.2014.05.008}）。\textcolor{red!70!black}{\textbf{更正：本文实际发表于《Journal of Econometrics》而非部分二手文献所称的 JFE。}}
+\end{itemize}
+
+\textbf{机制补充：波动率反馈与杠杆效应（风险—收益权衡的负相关之谜）}：股票市场贯穿数十年的实证怪象是“波动率与当期收益强负相关，但高波动并不对应高收益”。教科书给出两条互为镜像的机制——\textbf{杠杆效应}（股价下跌→权益杠杆上升→波动率上升，波动率是“结果”）与\textbf{波动率反馈}（波动率上升→风险溢价上升→贴现率上升→股价当期被打压，波动率是“原因”）。经典证据：French、Schwert 与 Stambaugh（1987）发现已实现收益与已实现波动率的当期创新强负相关，更像贴现率效应的产物；Glosten、Jagannathan 与 Runkle（1993）展示条件波动率对预期收益的解释力极弱甚至为负；Lochstoer 与 Muir（2020，\url{https://doi.org/10.3386/w28102}）用调查与远期期权证明波动率预期“缓慢移动”，形成“短期弱风险—收益权衡、长期强权衡”的粘性预期图景。
+
+\textbf{诚实边界}：VRP 测度高度依赖条件方差的估计模型（GARCH、RV、HAR 可给出方向相反的序列）；可预测回归的 R² 很小，\textbf{统计学显著 ≠ 经济上可利用}；反馈与杠杆在观测上高度共线，很难彻底分离。
+
+\textbf{本章主句}：VIX 不是“市场对波动的预测”，而是“市场对波动定价与真实波动预期的差额”——研究它的信息含量，研究的是这个差额里有多少理性、预期与恐惧。
+
+\subsection{轨道三：方差风险定价与期限结构——短端为跳跃定价，长端近似免费}
+
+\textbf{本质问题}：投资者如何给“明天的惊喜”和“后天的惊喜”分别定价？
+
+\textbf{第一性原理}：VIX 近月（VIX9D）对短期新闻高度敏感，远月（VIX3M/1Y）反映长期状态信念；期限结构斜率（contango/backwardation）刻画“短期预期相对长期预期”的紧张程度。
+
+\textbf{关键实证}：
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{Dew-Becker、Giglio、Le 与 Rodriguez（2017）}：利用方差互换曲线估计不同期限的方差风险溢价，发现只有“已实现波动率冲击”承载显著溢价，而“对未来远期波动率的预期”在超过约 2 个月后几乎不再被定价——长期波动保险近似免费（\url{https://doi.org/10.1016/j.jfineco.2016.04.003}）。\textcolor{red!70!black}{\textbf{更正：正式版作者为 Dew-Becker、Giglio、Le、Rodriguez（Wang 与 Yaron 仅在 NBER 工作稿版本中出现）。}}
+  \item Andries、Eisenbach、Schmalz 与 Wang（2015）：方差风险定价从约 1--3 个月最强，单调下降到 6--9 个月后几乎不显著，压力期曲线更陡（\url{https://doi.org/10.2139/ssrn.2646079}）。\textcolor{red!70!black}{\textbf{更正：共同作者为 Yichuan Wang，而非部分综述所写 Kahn。}}
+\end{itemize}
+
+\textbf{工程映射}：这解释了 VXX 类“长波动率期货指数”的天然负收益（contango 滚进 + 收敛损耗）；卖 VIX 期货的收益率主要由“曲线 contango 的滚进 + 时间收敛到现货”构成；对需要“长期尾部保护”的组合而言，远端 VIX 期货/期权相对便宜——但必须清楚它保护的是“远期波动”而非“下一根月线上涨的冲击”。
+
+\textbf{诚实边界}：长期溢价趋近于零的结论基于美国样本 1996--2014；跨期跨市场是否稳定仍有争议。
+
+\textbf{本章主句}：市场只在短端为真实跳跃定价；长端的保险，比直觉便宜得多——这条结论的票价，恰是短端那次跳跃的账面。
+
+\subsection{轨道四：衍生品定价与交易策略——卖波动率在赚谁的钱}
+
+\textbf{本质问题}：做空 VIX / 卖方差互换，在什么意义上赚钱？为什么样本内绩效惊人却在真实资金上反复爆仓？
+
+\textbf{第一性原理}：卖波动率的超额收益本质上是\textbf{为负偏收取的保费}——收益分布左偏 + 极端负尾，绝大多数日子小赚，极小概率巨亏。业界比喻是“在压路机前捡硬币”。Carr 与 Wu（2009）对 variance risk premiums 的系统检验（\url{https://doi.org/10.1093/rfs/hhn038}）、Coval 与 Shumway（2001）对期权期望收益的警示（\url{https://doi.org/10.1111/0022-1082.00352}）、Bakshi 与 Kapadia（2003）对 delta-hedged 收益负偏的证据（\url{https://doi.org/10.1093/rfs/hhg002}）共同构成这条轨道的基座。
+
+\textbf{策略家族}：
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{波动率择时}：Moreira 与 Muir（2017）证实按已实现波动率反比配置仓位能显著提升样本内 Sharpe（\url{https://doi.org/10.1111/jofi.12513}），其本质是把“标的分散”替换部分“时间分散”。
+  \item \textbf{Cheng（2018）的 VIX 溢价之谜}：在 VIX 期货上发现“风险上行时溢价反而回落”的矛盾现象，论证是对冲需求下降而非测度错误（\url{https://doi.org/10.1093/rfs/hhy062}）。
+  \item \textbf{卖波动指数}：Szado（2019）测度 VPN/VPD 等“带防御”的卖波动指数在跳跃前动态减杠杆（\url{https://doi.org/10.2139/ssrn.3390764}）。
+  \item \textbf{2018 年 2 月 5 日（Volmageddon）}：BIS（Sushko 与 Turner，2018）拆解了反向波动 ETP 日终再平衡如何把尾盘 VIX 期货推成自我实现（\url{https://www.bis.org/publ/qtrpdf/r_qt1803h.htm}）。
+\end{itemize}
+
+\textbf{诚实边界}：回测若忽略跳跃日执行成本、点差与拥挤折价，卖波动的样本内收益会被系统性高估；生存偏差（幸存者产品）同样虚高均值；当所有人都做空波动率时，“拥挤度”本身会成为负偏的放大器。
+
+\textbf{本章主句}：卖波动率不是错，错的往往是“把它当成无风险 alpha 反复加杠杆”——它赚的是偏度与 carry 的钱，而对面站着一条可能打断任何追梦的右尾。
+
+\subsection{轨道五：情绪、国际联动与极端事件——恐惧怎么变成事实}
+
+\textbf{本质问题}：VIX 的高企究竟反映理性风险厌恶，还是情绪性过度反应？它是全球风险探测器还是放大器？
+
+\textbf{第一性原理}：VIX 抬升可拆成三个可分离成分：客观波动预期抬高、风险厌恶上升、情绪/流动性驱动的过度反应。这正是 Q--P 分解的行为金融翻版。实务含义：\textbf{偏度（put 相对 call 的贵）是比波动率更纯的“恐惧”信号}，往往比 VIX 本身更早给出恐慌定价的线索。
+
+\textbf{文献证据}：
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{货币政策作为情绪引擎}：Bekaert、Hoerova 与 Lo Duca（2010）揭示宽松货币会系统性压低 VRP（\url{https://doi.org/10.3386/w16397}）——“卖波动率赚的钱”的一部分是“央行压低均衡风险厌恶”的租金。
+  \item \textbf{跨国验证}：Sarwar（2012）在 BRIC 市场检验 fear gauge（\url{https://doi.org/10.1016/j.mulfin.2012.01.003}）；Neffelli 与 Resta（2018）发现 2008 年危机后恐惧传导对美股增强、对 BRIC 回落至危机前（\url{https://arxiv.org/abs/1806.07556}）。
+  \item \textbf{波动溢出}：Diebold 与 Yilmaz（2012）给出方向性波动溢出测度（\url{https://doi.org/10.1016/j.ijforecast.2011.02.006}）；Londono 与 Xu（2019）发现市场价值加权的“全球隐含波动率”由美国因素与货币政策主导（\url{https://doi.org/10.17016/ifdp.2019.1247}）。
+  \item \textbf{极端事件档案}：2008-11-20 VIX 收报 80.86（盘中约 89.53，以 Cboe 口径为准）；2020-03-16 收报 82.69 刷新历史收盘；2024-08-05 日元套息平仓驱动创纪录飙升。
+  \item \textbf{Volmageddon 机制细节（2018-02-05）}：当日标普 500 仅跌约 4\%，但 VIX 单日涨 115.6\%（17.31→37.32），为史上最大单日涨幅。BIS 测算该日 VIX 期货在 16:08 一分钟内成交约 11.6 万手（约为全市场单日量的四分之一），价格被抬至“远超预期信息”的水平；XIV 被触发加速清算（约 $-84\%$ 至 $-93\%$），SVXY 盘中熔断。机制核心是\textbf{拥挤的反向波动 ETP 日终被迫再平衡}——当 VIX 上升，反向 ETP 必须买入 VIX 期货补空头损失，市场参与者提前抢跑，把尾盘推成自我实现。
+\end{itemize}
+
+\textbf{诚实边界}：溢出研究多基于统计关联与预测误差分解，难说严格因果；关联度随 regime 时变；极端事件样本极少（几十年内真正断崖仅几例），从事件学习存在天然小样本方差，且政策/流动性介入（如 2020 美联储纾困）能迅速扭转 VIX 形态。
+
+\textbf{本章主句}：VIX 更像“全球风险溢出的超级节点”而非“美股专属温度计”——它既是风险的探测器，也常常是风险的放大器，而放大倍数恰好在全球最紧张的那一刻达到最大。
+
+\subsection{轨道六：机器学习时代的波动率预测——算得更准，还是看得更远}
+
+\textbf{本质问题}：当线性/参数方法在“波动率能否被预测”上接近瓶颈，机器学习能否更进一步？
+
+\textbf{第一性原理}：波动率可预测的两重根源（时变集聚 + 隐含波动的前瞻信息）与一重限制（极端跳跃的低概率本质）决定了：ML 能改进“风险权重的估计”，不能预言“下一次冲击的日历”。
+
+\textbf{文献证据}：
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{GARCH--VIX 桥}：Hansen、Huang、Tong 与 Wang（2022）证明 Realized GARCH 对 VIX 与 VRP 有闭式表达，并显著优于同类模型（\url{https://doi.org/10.1093/jjfinec/nbac033}）。
+  \item \textbf{深度网络}：Hirsa 等（2021）系统审视 ML 技术对 VIX 的处理（\url{https://arxiv.org/abs/2102.02119}）；Hortúa 与 Mora-Valencia（2024）用贝叶斯深度网络预测 VIX，强调不确定性校准（\url{https://doi.org/10.1007/s41060-024-00562-5}）；Roszyk 与 Ślepaczuk（2024）混合 VIX+GARCH+LSTM（\url{https://doi.org/10.33138/2957-0506.2024.13.449}）；Christensen、Siggaard 与 Veliyev（2022）给出机器学习波动率预测的系统比较（\url{https://doi.org/10.1093/jjfinec/nbac020}）。
+  \item \textbf{结构化解释}：Avellaneda、Li、Papanicolaou 与 Wang（2021）在 VIX 期货交易信号上结合结构信息（\url{https://doi.org/10.1080/1350486x.2021.2010584}）；Cho 等（2025）用可解释 KAN 预测 VIX（\url{https://arxiv.org/abs/2502.00980}）；Bai 与 Cai（2024）用自适应 ML 预测 VIX（\url{https://doi.org/10.1080/14697688.2024.2439458}）。
+\end{itemize}
+
+\textbf{诚实边界}：多数 ML 论文是在“拟合历史”上更好；真正的前瞻样本外增益与可交易性仍需谨慎。概率预测的价值主要在风险管理而非择时。
+
+\textbf{本章主句}：机器时代让 VIX 研究更擅长“把已知的关系算得更准、把不确定性标得更清”，却没能缩短通往罕见跳跃的距离——预测力的边界，不在算法，而在波动率跳跃本身的小样本本质。
+
+\newpage
+%=================== 第 3 章：方法学审视 ===================
+\section{方法学审视：八项维度的核验}
+
+本部分把全谱系综述的主干结论放到八项方法学维度的放大镜下，逐项核验“结论成立的条件”。
+
+\subsection{数据来源与许可}
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{事实}：VIX 官方指数由 Cboe 发布，历史序列（1990 起回填）可自 Cboe 官网或学术数据商获取；现货 VIX、VIX 期货、VIX 期权是三类不同数据源，风险与费率不同。
+  \item \textbf{许可问题}：Cboe 指数数据为专有数据，学术使用常需机构订阅或接受条款约束；深度虚值期权报价、日内数据通常不可免费复现。这直接推高“复现门槛”——多数机器学习类 VIX 论文基于作者所在机构的数据权限，第三方复现需要等价数据。
+  \item \textbf{判断（边界明确）}：数据可得性差异是“不可比设定”的第一来源：用 Cboe 官方序列 vs 用第三方供应商重构的 VIX，会得到不同的结论稳定性。
+\end{itemize}
+
+\subsection{预测设定：目标、周期与窗口}
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{事实}：预测目标可分为 VIX 水平、已实现波动（RV）、波动率期限结构斜率三类，三类目标的“可预测性”结论并不互换。预测周期 1/5/22 日是文献主流；滚动窗口 vs 递归窗口改变样本外结论。
+  \item \textbf{不可比实例}：HAR-RV 类研究预测对象是已实现波动，GARCH 类预测对象是条件方差，ML 类常直接预测 VIX 水平——三者虽然“都是波动率”，但损失函数域不同，直接比较 MSE/RMSE 没有标尺意义。
+  \item \textbf{判断（边界明确）}：跨论文比较“谁预测得更准”之前，必须先确认四件事：预测目标、预测期、窗口设定、波动率代理。
+\end{itemize}
+
+\subsection{样本外表现与跨市场泛化（“零样本能力”的 VIX 版本）}
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{事实}：文献中“样本外（out-of-sample）”一词宽泛，从严格的滚动时间切分到“留出最后一段”都有。真正的时间外切分（滚动训练、无泄漏）是少数。
+  \item \textbf{跨市场证据}：Sarwar（2012）与 Neffelli 与 Resta（2018）表明把美国 fear gauge 关系移植到新兴市场并非恒真——2008 危机后美股关系增强、BRIC 回落。这是“零样本迁移”在波动率上的自然实验：\textbf{同一机制，跨市场不成立}。
+  \item \textbf{判断（边界明确）}：宣称“模型泛化”前，必须给出跨市场或跨样本的迁移证据，而不是仅报同一市场内的测试集 R²。
+\end{itemize}
+
+\subsection{概率预测与不确定性校准}
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{事实}：2020s 深度波动率研究的显著进步是“不再只给点预测，而是给出校准良好的概率区间”。Hortúa 与 Mora-Valencia（2024）的贝叶斯深度网络、Thavaneswaran 等（2022）的概率型 VIX 预测（\url{https://doi.org/10.1109/cifer52523.2022.9776069}）是代表。
+  \item \textbf{边界}：校准（calibration）与锐度（sharpness）是两个正交维度；很多论文只报均方误差，不提区间覆盖率，这会掩盖“点预测好但分布预测差”的情况。
+  \item \textbf{判断（边界明确）}：对风险管理用途，QLIKE 类损失与区间覆盖率比 MSE 更诚实；对择时用途，点预测的样本外表现才是关键。
+\end{itemize}
+
+\subsection{计算成本}
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{事实}：GARCH/Realized-GARCH 秒级训练；LSTM/Transformer 类需要 GPU 与长训练时间；贝叶斯深度网络更重。
+  \item \textbf{判断（边界明确）}：几乎没有 VIX 预测论文系统报告计算成本。当两个模型精度接近时，成本应作为并列维度进入比较矩阵；现实部署中，GARCH 族仍然是最强“性价比基线”，ML 的优势往往在“长周期 + 大量特征”场景。
+\end{itemize}
+
+\subsection{公开基准与可复现性}
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{事实}：HAR-RV（Corsi 模型）、GARCH(1,1)、AR、随机游走/朴素基准是波动率预测的公共基线。多数论文以“胜过某类基线”为卖点。
+  \item \textbf{可复现性现状}：金融数据专有性 + 参数细节缺失使复现率偏低。Christensen 等（2022）的 JFEC 论文是少数系统比较 ML 与经典模型的努力。
+  \item \textbf{判断（边界明确）}：公开基准的意义在于“同标尺比较”。应优先以 QLIKE/MSE 的滚动窗口样本外损失为准，并给出置信区间——单点数字不具备可比性。
+\end{itemize}
+
+\subsection{评测数据污染}
+
+\textbf{这是本次方法学审视最重要的发现，分三层：}
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item \textbf{经典统计污染}：重叠预测窗口（月度 RV 预测用日度重叠）会系统性低估标准误、高估 t 值；前瞻偏差（用当日收盘信息预测当日收益）在部分“择时”文献中出现；数据窥探（在全样本上挑超参/挑因子）使样本内显著不可外推。
+  \item \textbf{VIX 特有污染}：2014 年周度期权引入后的序列断点（见轨道一），跨断点回归不设哑变量会混入构造变更；VRP 测度依赖（GARCH vs RV vs HAR 给出方向相反的序列）意味着“VRP 显著”可能是“模型炸弹”的产物——Bekaert 与 Hoerova（2014）正是此论争的核心。
+  \item \textbf{检索层污染（本次调研亲历）}：关键词“fear gauge”召回恐惧心理学文献、量子物理文献；机器检索的“相关”不等于研究主题相关。\textbf{此教训直接适用：任何自动化文献综述/因子挖掘流水线，都必须设人工过滤关卡，否则结论会被污染性证据带偏。}
+\end{enumerate}
+
+\subsection{跨研究不可比设定}
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{事实}：跨论文比较的隐藏变量包括：损失函数（MSE vs RMSE vs QLIKE vs 分位数损失）、评估期（是否含 2008/2018/2020）、波动率代理（VIX 水平 vs RV vs 条件方差）、预测目标（水平 vs 方向）、数据供应商。
+  \item \textbf{结论}：文献中大量“本文优于 X”的宣称，在统一设定下并不成立。\textbf{统一比较矩阵正是为此而建}：只有把论文放进同一套维度坐标，才能判断“优势”是否真实。
+\end{itemize}
+
+\textbf{方法学审视主句}：把“评价”从“研究”里分离出来，是 VIX 研究最被低估的一课——测度、窗口与关键词，决定了一篇论文能看见什么。
+
+\newpage
+%=================== 第 4 章：研究现状与未来方向 ===================
+\section{研究现状、遗留课题与未来方向}
+
+本章回应综述的第三层问题：\textbf{现在研究走到哪了、什么还没解决、下一步该往哪里走}。基于对 2023--2026 年 arXiv 与期刊文献的扫描（见证据表第 37--44 条），按五个方向梳理活跃前沿。
+
+\subsection{当前研究现状（2023--2026 活跃前沿）}
+
+\textbf{方向一：联合 SPX--VIX 校准与结构化建模。} 传统做法把 SPX 与 VIX 曲面分别标定再拼接（Markovian stitching），其代价是条件独立假设。近期工作开始挑战这一假设：Acharya 等（2026）证明“全局可行测度”与“分块 Markov 化”等价，但拼接可行域严格小于全局可行域（\url{https://arxiv.org/abs/2609.04087}）；Zaugg 与 Grzelak（2026）提出“VIX-first”的联合建模（\url{https://arxiv.org/abs/2608.01479}）；Zhang（2025）用风险中性神经算子直接刻画无套利 SPX--VIX 期限结构（\url{https://arxiv.org/abs/2511.06451}）；Che 等（2026）用扰动最优传输计算 SPX--VIX 联合风险（\url{https://arxiv.org/abs/2603.10857}）。\textbf{趋势判断}：从“分曲面标定”走向“全局联合标定”，神经算子与最优传输成为两套主流数学工具。
+
+\textbf{方向二：IV 曲面的生成式建模。} Han 等（2026）用扩散模型联合生成标的收益与高维隐含波动率曲面，并施加静态无套利惩罚（\url{https://arxiv.org/abs/2609.13402}）；Yang 等（2026）提出“通用扩散模型”学习曲面共享动态（\url{https://arxiv.org/abs/2609.22893}）；Buchegger 与 Gonon（2026）做无套利多步 IV 曲面预测（\url{https://arxiv.org/abs/2608.22478}）。\textbf{趋势判断}：生成式模型把“预测一张曲面”变成“生成一条路径”，但其无套利约束与真实摩擦下的对冲绩效仍待验证。
+
+\textbf{方向三：机器学习波动率预测的系统化与可解释化。} 除已入证据表的贝叶斯深度网络（Hortúa--Mora 2024）与可解释 KAN（Cho 2025）外，最新工作把信息结构写进模型：Fan、Wang 与 Ye（2026）用期权驱动信息结合粗糙波动率改进已实现波动预测（\url{https://arxiv.org/abs/2604.02743}）；Deep、Appiah 与 Rachev（2026）研究金融市场的记忆、粗糙度与信息持续性（\url{https://arxiv.org/abs/2605.24285}）。\textbf{趋势判断}：研究的重点从“换架构”转向“把波动率的统计结构（粗糙性、长记忆、跳跃）编码进模型”。
+
+\textbf{方向四：VRP 收割的工程化与精细化。} Wysocki（2026）把横截面学习排序（learning-to-rank）用于 SPX 周度期权曲面收割 VRP，带保证金感知仓位与弃权规则（\url{https://arxiv.org/abs/2608.24786}）；Maeda（2026）给出方差互换永续合约的最优进出场闭式规则（\url{https://arxiv.org/abs/2609.19102}）；Miao 与 Sorokina（2026）在核能/能源板块做 short-put 收割（\url{https://arxiv.org/abs/2609.01183}）。\textbf{趋势判断}：策略研究正从“卖波动率吃 carry”升级为“带风险预算、弃权机制与退出规则的精细收割”。
+
+\textbf{方向五：大语言模型与文本信号进入波动率预测。} FinAbstain（Torres 等，2026）用不确定性校准的多模态 RAG 做选择性金融预测（\url{https://arxiv.org/abs/2607.24875}）；Yılkı（2026）把 LLM 嵌入用于供应链文本信号传导（\url{https://arxiv.org/abs/2606.29290}）。\textbf{趋势判断}：LLM 直接预测 VIX 尚未成气候，但“文本信号 + 不确定性校准 + 选择性输出”的路线已经开始进入金融预测——这与方法学审视中“概率预测与校准”维度的优先级天然合拍。
+
+\subsection{遗留课题（开放问题）}
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item \textbf{极端跳跃时点的不可预测性}：2008/2018/2020/2024 的断崖式飙升本质上仍是低概率高幅事件，模型能改进风险权重估计，不能预言日历。这是波动率研究最深的一堵墙。
+  \item \textbf{VRP 测度的模型依赖（“模型炸弹”）}：GARCH、RV、HAR 三种测度在压力期可给出方向相反的 VRP 序列；“VRP 预测收益”在多大程度上是测度选择的产品，尚无定论。
+  \item \textbf{跨市场泛化缺失}：美式 fear gauge 参数在新兴市场并非恒真（Sarwar 2012 与 Neffelli--Resta 2018 结论部分相反）；“零样本迁移”在波动率上的系统证据几乎空白。
+  \item \textbf{长端方差溢价$\approx$0 的稳健性}：核心证据基于美国样本 1996--2014，跨期（2014 断点后）与跨市场是否稳定仍存争议。
+  \item \textbf{2014 断点后的序列稳定性}：周度期权引入改变了 VIX 的统计性质；断点后的“新常态”尚未被充分刻画。
+  \item \textbf{数据许可与可复现门槛}：Cboe 专有数据 + 参数披露不足使多数 ML 论文不可第三方复现；缺少公共基准数据集。
+  \item \textbf{联合校准的维度灾难}：SPX--VIX 全局联合标定面临高维参数与计算成本，离实盘落地还有距离。
+  \item \textbf{评估框架缺失}：成本透明、污染防御、可比标尺三个维度在文献中普遍缺席（统一比较矩阵的空白列正是证据）。
+\end{enumerate}
+
+\subsection{未来可重点关注的研究方向}
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item \textbf{概率预测与校准优先}：把 QLIKE 损失与区间覆盖率设为波动率预测的默认双标尺，推动“点预测竞赛”升级为“密度预测竞赛”。
+  \item \textbf{跨市场零样本迁移基准}：用美国训练的参数直接评估新兴市场（India VIX、中国 50ETF 波动率指数等），报告“参数不更新”的迁移表现——这是“零样本能力”在波动率上的直接实验。
+  \item \textbf{统一评估框架}：建立“防污染 + 成本透明 + 置信区间 + 检索治理”的四件套评测规范，使跨论文比较具有标尺意义（可复现实验建议第 8 章提供操作清单）。
+  \item \textbf{LLM × 波动率}：把文本信号、不确定性校准与选择性预测（如 FinAbstain 路线）引入 VIX 研究，同时警惕 LLM 输出对历史拟合的“看起来更准”幻觉。
+  \item \textbf{粗糙波动率与记忆结构}：把 rough volatility、长记忆与跳跃结构编码进预测模型，检验其对 VIX/已实现波动预测的真实增益（而非仅改善样本内拟合）。
+  \item \textbf{真实摩擦下的策略可交易性审计}：为“卖波动率”“波动率择时”等策略增加跳跃日执行成本、点差与拥挤折价的敏感性分析，替代理想化回测。
+  \item \textbf{联合校准的结构化 ML}：神经算子与最优传输在 SPX--VIX 联合标定中的计算效率与无套利保证，是衍生品工程最现实的落地方向。
+\end{enumerate}
+
+\textbf{本章主句}：VIX 研究的下一个二十年，比的不是谁把历史拟合得更漂亮，而是谁能在测度、跨市场与真实摩擦这三面镜子里，仍然站得住脚。
+
+\newpage
+%=================== 第 5 章：证据表 ===================
+\section{证据表：44 个来源（36 已核验 + 8 前沿待核验）}
+
+以下第 1--36 条的 DOI / arXiv 编号 / 官方链接均经 Crossref、arXiv API、OpenAlex 或官方页面交叉核验，标为\textbf{已核验}；第 37--44 条为 2024--2026 年活跃前沿（多未同行评审），标为\textbf{待核验}。
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{@{}c L{0.225\textwidth} L{0.30\textwidth} L{0.155\textwidth} L{0.19\textwidth}@{}}
+\toprule
+\textbf{No.} & \textbf{来源（作者·年份）} & \textbf{标题} & \textbf{出处} & \textbf{链接} \\
+\midrule
+\endfirsthead
+\multicolumn{5}{@{}l}{\small\it 续表}\\[2pt]
+\toprule
+\textbf{No.} & \textbf{来源（作者·年份）} & \textbf{标题} & \textbf{出处} & \textbf{链接} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+1 & Whaley（2000） & The Investor Fear Gauge & J. Portfolio Mgmt & \url{https://doi.org/10.3905/jpm.2000.319728} \\
+2 & Whaley（1993） & Derivatives on Market Volatility & J. Derivatives & \url{https://doi.org/10.3905/jod.1993.407868} \\
+3 & Britten-Jones \& Neuberger（2000） & Option Prices, Implied Price Processes, and Stochastic Volatility & J. Finance & \url{https://doi.org/10.1111/0022-1082.00228} \\
+4 & Jiang \& Tian（2005） & The Model-Free Implied Volatility and Its Information Content & Rev. Fin. Studies & \url{https://doi.org/10.1093/rfs/hhi027} \\
+5 & Bollerslev, Tauchen \& Zhou（2009） & Expected Stock Returns and Variance Risk Premia & Rev. Fin. Studies & \url{https://doi.org/10.1093/rfs/hhp008} \\
+6 & Bekaert \& Hoerova（2014） & The VIX, the Variance Premium and Stock Market Volatility & J. Econometrics & \url{https://doi.org/10.1016/j.jeconom.2014.05.008} \\
+7 & Bekaert, Hoerova \& Lo Duca（2010） & Risk, Uncertainty and Monetary Policy & NBER w16397 & \url{https://doi.org/10.3386/w16397} \\
+8 & Carr \& Wu（2009） & Variance Risk Premiums & Rev. Fin. Studies & \url{https://doi.org/10.1093/rfs/hhn038} \\
+9 & Drechsler \& Yaron（2011） & What's Vol Got to Do with It & Rev. Fin. Studies & \url{https://doi.org/10.1093/rfs/hhq085} \\
+10 & Dew-Becker, Giglio, Le \& Rodriguez（2017） & The Price of Variance Risk & J. Financial Economics & \url{https://doi.org/10.1016/j.jfineco.2016.04.003} \\
+11 & Andries, Eisenbach, Schmalz \& Wang（2015） & The Term Structure of the Price of Variance Risk & SSRN 2646079 & \url{https://doi.org/10.2139/ssrn.2646079} \\
+12 & Cheng（2018） & The VIX Premium & Rev. Fin. Studies & \url{https://doi.org/10.1093/rfs/hhy062} \\
+13 & Londono \& Xu（2019） & VRP Components and International Stock Return Predictability & IFDP 1247 & \url{https://doi.org/10.17016/ifdp.2019.1247} \\
+14 & Li \& Zinna（2017） & The Variance Risk Premium: Components, Term Structures, and Stock Return Predictability & J. Bus. Econ. Stat. & \url{https://doi.org/10.1080/07350015.2016.1191502} \\
+15 & Moreira \& Muir（2017） & Volatility-Managed Portfolios & J. Finance & \url{https://doi.org/10.1111/jofi.12513} \\
+16 & Lochstoer \& Muir（2020） & Volatility Expectations and Returns & NBER w28102 & \url{https://doi.org/10.3386/w28102} \\
+17 & Coval \& Shumway（2001） & Expected Option Returns & J. Finance & \url{https://doi.org/10.1111/0022-1082.00352} \\
+18 & Bakshi \& Kapadia（2003） & Delta-Hedged Gains and the Negative Market Volatility Risk Premium & Rev. Fin. Studies & \url{https://doi.org/10.1093/rfs/hhg002} \\
+19 & Andersen, Fusari \& Todorov（2015） & Parametric Inference and Dynamic State Recovery from Option Panels & Econometrica & \url{https://doi.org/10.3982/ecta10719} \\
+20 & Andersen, Bondarenko \& Gonzalez-Perez（2025） & VIX Maturity Interpolation & Rev. Derivatives Research & \url{https://doi.org/10.1007/s11147-025-09210-x} \\
+21 & Diebold \& Yilmaz（2012） & Better to Give than to Receive: Predictive Directional Measurement of Volatility Spillovers & Int. J. Forecasting & \url{https://doi.org/10.1016/j.ijforecast.2011.02.006} \\
+22 & Sarwar（2012） & Is VIX an Investor Fear Gauge in BRIC Equity Markets? & J. Multinational Fin. Mgmt & \url{https://doi.org/10.1016/j.mulfin.2012.01.003} \\
+23 & Neffelli \& Resta（2018） & Is VIX Still the Investor Fear Gauge? & arXiv 1806.07556 & \url{https://arxiv.org/abs/1806.07556} \\
+24 & Sushko \& Turner（2018） & The Equity-Market Turbulence of 5 February: Role of ETPs & BIS Q. Review & \url{https://www.bis.org/publ/qtrpdf/r_qt1803h.htm} \\
+25 & Hansen, Huang, Tong \& Wang（2022） & Realized GARCH, CBOE VIX, and the Volatility Risk Premium & J. Financial Econometrics & \url{https://doi.org/10.1093/jjfinec/nbac033} \\
+26 & Hao \& Zhang（2013） & GARCH Option Pricing Models, the CBOE VIX, and Variance Risk Premium & J. Financial Econometrics & \url{https://doi.org/10.1093/jjfinec/nbs026} \\
+27 & Christensen, Siggaard \& Veliyev（2022） & A Machine Learning Approach to Volatility Forecasting & J. Financial Econometrics & \url{https://doi.org/10.1093/jjfinec/nbac020} \\
+28 & Hirsa 等（2021） & The VIX Index under Scrutiny of ML Techniques and Neural Networks & arXiv 2102.02119 & \url{https://arxiv.org/abs/2102.02119} \\
+29 & Hortúa \& Mora-Valencia（2024） & Forecasting VIX Using Bayesian Deep Learning & Int. J. Data Sci. Analytics & \url{https://doi.org/10.1007/s41060-024-00562-5} \\
+30 & Roszyk \& Ślepaczuk（2024） & The Hybrid Forecast of S\&P 500 Volatility Ensembled from VIX, GARCH and LSTM & Working Paper & \url{https://doi.org/10.33138/2957-0506.2024.13.449} \\
+31 & Avellaneda, Li, Papanicolaou \& Wang（2021） & Trading Signals in VIX Futures & Applied Math. Finance & \url{https://doi.org/10.1080/1350486x.2021.2010584} \\
+32 & Szado（2019） & Selling VIX Futures and Options for Portfolio Return Enhancement & SSRN 3390764 & \url{https://doi.org/10.2139/ssrn.3390764} \\
+33 & Bai \& Cai（2024） & Predicting VIX with Adaptive Machine Learning & Quantitative Finance & \url{https://doi.org/10.1080/14697688.2024.2439458} \\
+34 & Thavaneswaran 等（2022） & Intelligent Probabilistic Forecasts of VIX Using ML & IEEE SSCI 2022 & \url{https://doi.org/10.1109/cifer52523.2022.9776069} \\
+35 & Cho 等（2025） & Forecasting VIX Using Interpretable Kolmogorov-Arnold Networks & arXiv 2502.00980 & \url{https://arxiv.org/abs/2502.00980} \\
+36 & Zang, Ni \& Huang（2015） & Double-Jump Stochastic Volatility Model for VIX: Evidence from VVIX & arXiv 1506.07554 & \url{https://arxiv.org/abs/1506.07554} \\
+37 & Wysocki（2026） & Harvesting the Volatility Risk Premium: A Learning-to-Rank Approach & arXiv 2608.24786 & \url{https://arxiv.org/abs/2608.24786} \\
+38 & Zaugg \& Grzelak（2026） & The VIX-Derived Volatility Model: A VIX-first Joint SPX-VIX Framework & arXiv 2608.01479 & \url{https://arxiv.org/abs/2608.01479} \\
+39 & Michael, Cucuringu \& Howison（2024） & A GCN-LSTM Approach for ES-mini and VX Futures Forecasting & arXiv 2408.05659 & \url{https://arxiv.org/abs/2408.05659} \\
+40 & Hsu \& Murray（2006） & On the Volatility of Volatility & arXiv physics/0608242 & \url{https://arxiv.org/abs/physics/0608242} \\
+41 & Acharya 等（2026） & Global Multi-Maturity SPX-VIX Calibration Beyond Markovian Stitching & arXiv 2609.04087 & \url{https://arxiv.org/abs/2609.04087} \\
+42 & Han 等（2026） & Diffusion Models for Dynamic Volatility Surface Generation and Data-Driven Hedging & arXiv 2609.13402 & \url{https://arxiv.org/abs/2609.13402} \\
+43 & Buchegger \& Gonon（2026） & Arbitrage-Aware Multi-Step Forecasting of Implied Volatility Surfaces & arXiv 2608.22478 & \url{https://arxiv.org/abs/2608.22478} \\
+44 & Fan, Wang \& Ye（2026） & On Options-Driven Realized Volatility Forecasting: Information Gains via Rough Volatility & arXiv 2604.02743 & \url{https://arxiv.org/abs/2604.02743} \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\noindent 第 37--44 条为 2024--2026 年活跃前沿，多为预印本，\textbf{引用前须读全文}；其中 Hsu--Murray（2006）为较早的“波动率的波动率”讨论稿，非同行评审。
+
+\newpage
+%=================== 第 6 章：统一比较矩阵 ===================
+\section{统一比较矩阵}
+
+把代表性研究放进同一套维度坐标，并按“维度为行、研究为列”的方向转置排版，使符号与结论各得其所。符号约定：$\checkmark$＝明确满足/高，$\triangle$＝部分满足/中，$\times$＝不满足/低，N/A＝不适用或未报告。研究缩写：①BTZ'09＝Bollerslev--Tauchen--Zhou（2009）；②BH'14＝Bekaert--Hoerova（2014）；③DBLR'17＝Dew-Becker--Giglio--Le--Rodriguez（2017）；④Cheng'18＝Cheng（2018）；⑤MM'17＝Moreira--Muir（2017）；⑥HHTW'22＝Hansen--Huang--Tong--Wang（2022）；⑦CSS'22＝Christensen--Siggaard--Veliyev（2022）；⑧HM'24＝Hortúa--Mora-Valencia（2024）；⑨Sarwar'12＝Sarwar（2012）；⑩ST'18＝Sushko--Turner（2018）。
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.125\textwidth} *{10}{>{\centering\arraybackslash}X}@{}}
+\toprule
+\textbf{维度} & \textbf{①} & \textbf{②} & \textbf{③} & \textbf{④} & \textbf{⑤} & \textbf{⑥} & \textbf{⑦} & \textbf{⑧} & \textbf{⑨} & \textbf{⑩} \\
+\midrule
+\textbf{轨道} & VRP & 分解 & 期限 & 期货溢价 & 择时 & GARCH--VIX & ML 预测 & 贝叶斯 ML & 跨市场 & 微观结构 \\
+\textbf{样本外} & $\triangle$ & $\checkmark$ & $\triangle$ & $\triangle$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\triangle$ & $\checkmark$ & N/A \\
+\textbf{概率预测} & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\triangle$ & $\triangle$ & $\checkmark$ & $\times$ & $\times$ \\
+\textbf{成本透明} & N/A & N/A & N/A & N/A & N/A & N/A & $\times$ & $\times$ & N/A & N/A \\
+\textbf{强基线} & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\triangle$ & $\checkmark$ & N/A \\
+\textbf{抗污染} & $\triangle$ & $\checkmark$ & $\triangle$ & $\checkmark$ & $\triangle$ & $\checkmark$ & $\checkmark$ & $\triangle$ & $\triangle$ & $\checkmark$ \\
+\textbf{跨市场} & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\triangle$ \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\vspace{0.9em}
+\noindent\textbf{结论与局限}（按研究逐行列出）：
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\textwidth}{@{}c L{0.24\textwidth} X@{}}
+\toprule
+\textbf{编号} & \textbf{研究} & \textbf{主要结论与局限} \\
+\midrule
+① & Bollerslev--Tauchen--Zhou（2009） & 溢价预测股票收益；其“期望方差近似鞅”的简化假设在剧烈波动期有偏（由 BH 指正） \\
+② & Bekaert--Hoerova（2014） & VIX² 拆为“条件方差＋方差风险溢价”两成分；处于 VRP 测度论争中心 \\
+③ & Dew-Becker 等（2017） & 只有短端已实现波动冲击被定价，长端方差风险溢价$\approx$0；作者自认远端噪声大 \\
+④ & Cheng（2018） & VIX 溢价逆周期（风险上行时回落）；期货溢价的前向成分$\approx$后验回报 1:1 \\
+⑤ & Moreira--Muir（2017） & 波动率择时显著提升样本内风险调整绩效；对费率与执行敏感 \\
+⑥ & Hansen 等（2022） & Realized GARCH 对 VIX 与 VRP 给出闭式表达，样本外显著优于同类 GARCH \\
+⑦ & Christensen 等（2022） & ML 与经典波动率模型的系统比较；未报告计算成本 \\
+⑧ & Hortúa--Mora（2024） & 贝叶斯深度网络概率校准良好；基线设置与样本披露有限 \\
+⑨ & Sarwar（2012） & 美国 fear gauge 与 BRIC 市场收益的关系随时期变化，非恒真 \\
+⑩ & Sushko--Turner（2018） & Volmageddon 当日 VIX 期货机械再平衡的一手拆解（BIS 官方口径） \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\noindent\textbf{矩阵读法}：十篇代表作中，\textbf{“样本外”与“强基线”是两条最容易失分的轴}；\textbf{“跨市场”几乎是所有研究共同空白}。这意味着 VIX 研究的方法学短板是系统性的：向内看（样本外切分、基线比较）在进步，向外看（跨市场、跨测度、成本）仍然罕见——这正是第 4 章“未来方向”要补的洞。
+
+\newpage
+%=================== 第 7 章：结论置信度 ===================
+\section{结论置信度分级}
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}l X X@{}}
+\toprule
+\textbf{置信度} & \textbf{结论} & \textbf{依据} \\
+\midrule
+高 & VIX 与当期收益强负相关、与已实现波动正相关 & Whaley（2000）、此后大量复现，跨市场大体稳健 \\
+高 & VRP 长期为正（期权系统性贵于现实波动） & BTZ（2009）、Carr--Wu（2009）、多测度一致 \\
+高 & VRP 对股票收益有一定预测力（短期） & BTZ（2009）、Bekaert--Hoerova（2014）互证 \\
+高 & 短端方差风险定价强于长端（长端$\approx$0） & Dew-Becker 等（2017）、Andries 等（2015）互证 \\
+中 & 波动率择时能提升样本内风险调整绩效 & Moreira--Muir（2017）；受费率/执行敏感性制约 \\
+中 & VIX² 溢价成分预测收益、条件方差成分预测经济 & Bekaert--Hoerova（2014）单一框架，测度依赖 \\
+中 & ML 在拟合历史上优于经典模型，前瞻增益有限 & 多家对比；小样本外差异、成本未计 \\
+中 & 跨市场 fear gauge 关系随时期与市场变化 & Sarwar（2012）、Neffelli--Resta（2018）结论部分相反 \\
+中 & 联合 SPX--VIX 全局标定优于拼接标定（前沿方向） & 多篇 2025--2026 预印本支持，但未审、未实盘验证 \\
+低 & “VIX 期货前向溢价$\approx$后验回报 1:1”的可利用性 & Cheng（2018）单篇，样本与机制争论仍在 \\
+需人工复核 & 具体 VRP 逐月均值、卖波动历史 Sharpe、2018/2020 精确极值 & 行业常识数值，须回 Cboe/一手源核对 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\newpage
+%=================== 第 8 章：可复现实验建议 ===================
+\section{可复现实验建议}
+
+以下建议面向三类读者：想复现文献结论的研究者、想把 VIX 方法接入自己管线的量化团队、以及希望审计“论文宣称”的审稿人。
+
+\subsection{复现级实验（验证已有结论）}
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item \textbf{VRP 测度稳健性实验}：用至少三种条件方差测度（GARCH(1,1)、HAR-RV、Realized GARCH）计算 VRP，检验“预测收益”结论是否跨测度成立。这直接针对 Bekaert--Hoerova 指出的“模型炸弹”。
+  \item \textbf{断点敏感性实验}：对 VIX 样本设置 2003 与 2014 两个断点哑变量，复跑主流回归，报告“无断点/单断点/双断点”三套结果。
+  \item \textbf{重叠窗口修正}：对月度预测的日度重叠窗口，采用校正的标准误，报告未校正与校正后的 t 值对比。
+\end{enumerate}
+
+\subsection{审计级实验（检验论文宣称）}
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item \textbf{基线一致性审计}：用统一数据（Cboe 官方序列 + 标准 RV 构造）与统一损失（QLIKE 优先，MSE 次之）重跑“本文优于 X”的宣称，确认优势是否在统一标尺下成立。
+  \item \textbf{时间外切分审计}：要求作者披露滚动训练窗口的起始/长度/步长，拒绝“留出最后一段”的弱切分。
+  \item \textbf{计算成本台账}：记录每模型的训练/推理墙钟时间与硬件，加入比较矩阵。
+\end{enumerate}
+
+\subsection{前沿级实验（填补空白）}
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item \textbf{跨市场零样本测试}：用美国训练的参数直接评估新兴市场（如 India VIX、中国 50ETF 波动率指数），报告“参数不更新”的迁移表现——这是“零样本能力”在波动率上的直接实验。
+  \item \textbf{概率校准竞赛}：组织覆盖 VIX/RV 的多模型密度预测基准，以区间覆盖率 + QLIKE 双指标排名，观察贝叶斯深度网络是否真的校准更优。
+  \item \textbf{检索流水线治理}：为自动文献综述设置“关键词污染关卡”（标题与主题实体重合度阈值 + 人工抽样复核率 10\%），量化关键词召回对结论的影响——本次调研亲历的检索污染即为反面教材。
+  \item \textbf{联合标定可落地性测试}：把神经算子/最优传输的 SPX--VIX 联合标定接入真实期权面板，测计算成本、无套利违规率与对冲绩效。
+\end{enumerate}
+
+\newpage
+%=================== 第 9 章：待核验清单 ===================
+\section{还需核验（诚实边界收尾）}
+
+以下事项须回一手源人工复核，未复核前本文不给出精确数字：
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{事件精确数值}：2008-11-20 VIX 收报 80.86 / 盘中约 89.53；2018-02-05 单日 17.31→37.32（+115.6\%）；2020-03-16 收报 82.69——均以 Cboe 官网历史数据为准。
+  \item \textbf{BIS 当日拆解}：2018-02-05 16:08 一分钟约 11.6 万手成交——以 BIS Quarterly Review 原文（r\_qt1803h）为准。
+  \item \textbf{卖波动历史绩效区间}：月胜率 80\%--90\%、年均收取 3--4 波动点等口径——须按数据源与样本区间重算。
+  \item \textbf{Deep Research 引用中的离题条目}（量子、雷达、LLM 等）已确认排除，但其“相关性打分”为何失败，可作为检索评测的个案存档。
+  \item \textbf{证据表第 37--44 条前沿预印本}（Wysocki、Zaugg--Grzelak、Acharya、Han、Buchegger--Gonon、Fan 等）尚未经同行评审，结论引用前须读全文。
+  \item \textbf{2024--2026 快速演进}：本综述的“研究现状”部分以 2026-10 为观察截止点，后续新进展需增量更新。
+\end{itemize}
+
+\newpage
+%=================== 第 10 章：结语 ===================
+\section{结语：不对称性的第一性原理}
+
+把六条轨道、八项方法学审视与四个前沿方向收拢，VIX 研究教给我们的其实是同一句话：\textbf{金融市场为“波动的不对称性”定价，而 VIX 正是那把把不对称性做成可交易商品的钥匙}。
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{作为测量工具}，它把“预期波动”与“波动定价”分离，为风险厌恶、情绪与恐慌提供实时坐标。
+  \item \textbf{作为风险资产}，它有期限结构、偏度与极端形态，定价难点在那根厚重的右尾。
+  \item \textbf{作为风险源}，它是全球波动溢出的超级节点，既检测风险，也放大风险。
+  \item \textbf{作为方法学教材}，它暴露了测度依赖、重叠窗口、数据窥探与检索污染——这些陷阱遍布一切“基于波动率”的研究。
+\end{itemize}
+
+最后的判断（判断结论，给出边界）：\textbf{不要神话 VIX 的预测力，也不要妖魔化卖波动的收益}。正确的方式是把它当成一台“不对称性的定价仪”：用它理解风险、情绪与恐慌的分布；把它作为资产配置时，永远记得——你买的是保险或偏度，而保险的赔率，恰好在你最不需要的时候最贵。同样，把“评价”放回“研究”之前：测度、窗口与关键词，决定了一篇 VIX 论文能看见什么、又能遮蔽什么。而对未来研究而言，最稀缺的不是更新的模型，而是更诚实的标尺。
+
+\vspace{1em}
+\noindent\textbf{全篇主句}：我们以有史以来至今的研究读懂 VIX，最终把“波动率”三字还原为它本来的样子——它不仅是风险的速度，更是恐惧的定价、不对称的货币；而读它的人，必须先学会读自己手里的尺子。
+
+%=================== 附录 A ===================
+\appendix
+\section{整合说明与文献更正清单}
+
+\textbf{整合说明}：本卷为一份完整文档，整合自《VIX研究综述》（十轨道版，含风险—收益权衡、构造转换时刻、情绪三成分与极端事件机制等细节）与《VIX全谱系综述与方法学审视》（六轨道 + 八项方法学审视 + 证据资产），并新增“研究现状、遗留课题与未来方向”一章。原十轨道版的结构性内容（事件年表、术语表、自查清单）已融汇进相应章节：事件年表并入轨道五“极端事件档案”，术语散见于正文与证据表，自查清单升级为第 8 章“可复现实验建议”。
+
+\textbf{文献更正清单}（整合时经 Crossref 三方核验修正）：
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}c L{0.30\textwidth} L{0.36\textwidth} L{0.24\textwidth}@{}}
+\toprule
+\textbf{编号} & \textbf{原表述} & \textbf{更正后} & \textbf{核验方式} \\
+\midrule
+1 & Bekaert--Hoerova（2014）载于 JFE & 实际载于《Journal of Econometrics》 & Crossref DOI 10.1016/j.jeconom.2014.05.008 \\
+2 & Dew-Becker、Giglio、Wang、Yaron（2017） & 正式版作者为 Dew-Becker、Giglio、Le、Rodriguez（Wang/Yaron 仅见于 NBER 工作稿） & Crossref DOI 10.1016/j.jfineco.2016.04.003 \\
+3 & Andries、Eisenbach、Kahn、Schmalz（2015） & 共同作者为 Yichuan Wang（非 Kahn） & Crossref 元数据 \\
+4 & 21 条参考文献无逐条链接 & 44 个来源全部可点击（DOI/arXiv/BIS 官方页） & 三源交叉核验 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\newpage
+\section{参考文献（按证据表编号，全部可点击）}
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item Whaley, R. E.（2000）.\ The Investor Fear Gauge.\ \url{https://doi.org/10.3905/jpm.2000.319728}
+  \item Whaley, R. E.（1993）.\ Derivatives on Market Volatility.\ \url{https://doi.org/10.3905/jod.1993.407868}
+  \item Britten-Jones, M., Neuberger, A.（2000）.\ Option Prices, Implied Price Processes, and Stochastic Volatility.\ \url{https://doi.org/10.1111/0022-1082.00228}
+  \item Jiang, G. J., Tian, Y. S.（2005）.\ The Model-Free Implied Volatility and Its Information Content.\ \url{https://doi.org/10.1093/rfs/hhi027}
+  \item Bollerslev, T., Tauchen, G., Zhou, H.（2009）.\ Expected Stock Returns and Variance Risk Premia.\ \url{https://doi.org/10.1093/rfs/hhp008}
+  \item Bekaert, G., Hoerova, M.（2014）.\ The VIX, the Variance Premium and Stock Market Volatility.\ \url{https://doi.org/10.1016/j.jeconom.2014.05.008}
+  \item Bekaert, G., Hoerova, M., Lo Duca, M.（2010）.\ Risk, Uncertainty and Monetary Policy.\ \url{https://doi.org/10.3386/w16397}
+  \item Carr, P., Wu, L.（2009）.\ Variance Risk Premiums.\ \url{https://doi.org/10.1093/rfs/hhn038}
+  \item Drechsler, I., Yaron, A.（2011）.\ What's Vol Got to Do with It.\ \url{https://doi.org/10.1093/rfs/hhq085}
+  \item Dew-Becker, I., Giglio, S., Le, A., Rodriguez, M.（2017）.\ The Price of Variance Risk.\ \url{https://doi.org/10.1016/j.jfineco.2016.04.003}
+  \item Andries, M., Eisenbach, T., Schmalz, M., Wang, Y.（2015）.\ The Term Structure of the Price of Variance Risk.\ \url{https://doi.org/10.2139/ssrn.2646079}
+  \item Cheng, I.-H.（2018）.\ The VIX Premium.\ \url{https://doi.org/10.1093/rfs/hhy062}
+  \item Londono, J. M., Xu, N. R.（2019）.\ Variance Risk Premium Components and International Stock Return Predictability.\ \url{https://doi.org/10.17016/ifdp.2019.1247}
+  \item Li, J., Zinna, G.（2017）.\ The Variance Risk Premium: Components, Term Structures, and Stock Return Predictability.\ \url{https://doi.org/10.1080/07350015.2016.1191502}
+  \item Moreira, A., Muir, T.（2017）.\ Volatility-Managed Portfolios.\ \url{https://doi.org/10.1111/jofi.12513}
+  \item Lochstoer, L., Muir, T.（2020）.\ Volatility Expectations and Returns.\ \url{https://doi.org/10.3386/w28102}
+  \item Coval, J. D., Shumway, T.（2001）.\ Expected Option Returns.\ \url{https://doi.org/10.1111/0022-1082.00352}
+  \item Bakshi, G., Kapadia, N.（2003）.\ Delta-Hedged Gains and the Negative Market Volatility Risk Premium.\ \url{https://doi.org/10.1093/rfs/hhg002}
+  \item Andersen, T. G., Fusari, N., Todorov, V.（2015）.\ Parametric Inference and Dynamic State Recovery from Option Panels.\ \url{https://doi.org/10.3982/ecta10719}
+  \item Andersen, T. G., Bondarenko, O., Gonzalez-Perez, M. T.（2025）.\ VIX Maturity Interpolation.\ \url{https://doi.org/10.1007/s11147-025-09210-x}
+  \item Diebold, F. X., Yilmaz, K.（2012）.\ Better to Give than to Receive: Predictive Directional Measurement of Volatility Spillovers.\ \url{https://doi.org/10.1016/j.ijforecast.2011.02.006}
+  \item Sarwar, G.（2012）.\ Is VIX an Investor Fear Gauge in BRIC Equity Markets?\ \url{https://doi.org/10.1016/j.mulfin.2012.01.003}
+  \item Neffelli, M., Resta, M.（2018）.\ Is VIX Still the Investor Fear Gauge?\ \url{https://arxiv.org/abs/1806.07556}
+  \item Sushko, V., Turner, G.（2018）.\ The Equity-Market Turbulence of 5 February.\ \url{https://www.bis.org/publ/qtrpdf/r_qt1803h.htm}
+  \item Hansen, P. R., Huang, Z., Tong, C., Wang, T.（2022）.\ Realized GARCH, CBOE VIX, and the Volatility Risk Premium.\ \url{https://doi.org/10.1093/jjfinec/nbac033}
+  \item Hao, J., Zhang, J. E.（2013）.\ GARCH Option Pricing Models, the CBOE VIX, and Variance Risk Premium.\ \url{https://doi.org/10.1093/jjfinec/nbs026}
+  \item Christensen, K., Siggaard, M., Veliyev, B.（2022）.\ A Machine Learning Approach to Volatility Forecasting.\ \url{https://doi.org/10.1093/jjfinec/nbac020}
+  \item Hirsa, A., Hadji Misheva, B., Osterrieder, J., Cao, W. 等（2021）.\ The VIX Index under Scrutiny of Machine Learning Techniques and Neural Networks.\ \url{https://arxiv.org/abs/2102.02119}
+  \item Hortúa, H. J., Mora-Valencia, A.（2024）.\ Forecasting VIX Using Bayesian Deep Learning.\ \url{https://doi.org/10.1007/s41060-024-00562-5}
+  \item Roszyk, N., Ślepaczuk, R.（2024）.\ The Hybrid Forecast of S\&P 500 Volatility Ensembled from VIX, GARCH and LSTM.\ \url{https://doi.org/10.33138/2957-0506.2024.13.449}
+  \item Avellaneda, M., Li, T. N., Papanicolaou, A., Wang, G.（2021）.\ Trading Signals in VIX Futures.\ \url{https://doi.org/10.1080/1350486x.2021.2010584}
+  \item Szado, E.（2019）.\ Selling VIX Futures and Options for Portfolio Return Enhancement.\ \url{https://doi.org/10.2139/ssrn.3390764}
+  \item Bai, Y., Cai, C. X.（2024）.\ Predicting VIX with Adaptive Machine Learning.\ \url{https://doi.org/10.1080/14697688.2024.2439458}
+  \item Thavaneswaran, A., Liang, Y., Das, S., Thulasiram, R. K.（2022）.\ Intelligent Probabilistic Forecasts of VIX and Its Volatility Using Machine Learning Methods.\ \url{https://doi.org/10.1109/cifer52523.2022.9776069}
+  \item Cho, S.-Y., Lee, S., Kim, H.-G.（2025）.\ Forecasting VIX Using Interpretable Kolmogorov-Arnold Networks.\ \url{https://arxiv.org/abs/2502.00980}
+  \item Zang, X., Ni, J., Huang, J.-Z.（2015）.\ Double-Jump Stochastic Volatility Model for VIX: Evidence from VVIX.\ \url{https://arxiv.org/abs/1506.07554}
+  \item Wysocki, M.（2026）.\ Harvesting the Volatility Risk Premium: A Learning-to-Rank Approach.\ \url{https://arxiv.org/abs/2608.24786}
+  \item Zaugg, N. F., Grzelak, L. A.（2026）.\ The VIX-Derived Volatility Model: A VIX-first Joint SPX-VIX Framework.\ \url{https://arxiv.org/abs/2608.01479}
+  \item Michael, N., Cucuringu, M., Howison, S.（2024）.\ A GCN-LSTM Approach for ES-mini and VX Futures Forecasting.\ \url{https://arxiv.org/abs/2408.05659}
+  \item Hsu, S. D. H., Murray, B. M.（2006）.\ On the Volatility of Volatility.\ \url{https://arxiv.org/abs/physics/0608242}
+  \item Acharya, A., Sun, Y., Augustino, B. 等（2026）.\ Global Multi-Maturity SPX-VIX Calibration Beyond Markovian Stitching.\ \url{https://arxiv.org/abs/2609.04087}
+  \item Han, Y., Zhang, J. Y., Torres, M. 等（2026）.\ Diffusion Models for Dynamic Volatility Surface Generation and Data-Driven Hedging.\ \url{https://arxiv.org/abs/2609.13402}
+  \item Buchegger, D. M., Gonon, L.（2026）.\ Arbitrage-Aware Multi-Step Forecasting of Implied Volatility Surfaces.\ \url{https://arxiv.org/abs/2608.22478}
+  \item Fan, Z., Wang, M., Ye, Y.（2026）.\ On Options-Driven Realized Volatility Forecasting: Information Gains via Rough Volatility.\ \url{https://arxiv.org/abs/2604.02743}
+\end{enumerate}
+
+\vspace{1.5em}
+\begin{center}
+\small\itshape 本综述正文不构成任何投资建议；所有“需人工复核”数值请以 Cboe 官方与一手文献为准。\par
+\end{center}
+
+\end{document}

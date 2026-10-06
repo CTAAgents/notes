@@ -1,0 +1,289 @@
+% !TEX program = xelatex
+\documentclass[10pt,a4paper]{ctexart}
+
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{ragged2e}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue]{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{caption}
+\emergencystretch=3em
+
+\definecolor{headblue}{RGB}{20,58,110}
+\titleformat{\section}{\Large\bfseries\color{headblue}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{headblue}}{\thesubsection}{0.6em}{}
+
+% 表格定宽辅助列
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+
+\hypersetup{urlcolor=blue}
+
+\begin{document}
+
+% ============ 标题区（无日期） ============
+\begin{center}
+{\LARGE\bfseries 生成式AI文本的“AI味”：成因、检测、去除与审稿实践}\\[8pt]
+{\large 一份基于实证文献的综述}\\[6pt]
+{\small 配套文件：证据表与比较矩阵（\texttt{证据表与比较矩阵.md}）}
+\end{center}
+
+\vspace{8pt}
+\noindent\textbf{摘要：}大语言模型生成的文本在统计上可被识别，这一可识别性在写作实践里被称作“AI味”。本文基于 2023–2026 年间的实证文献，把“AI味”从一个审美直觉还原为一组可测量的统计签名——低困惑度、低突发性（句长波动）、模板化词汇、过度连贯的语篇与缺乏立场的认识论姿态——并逐一解释这些签名为什么必然出现：自回归采样天然偏向低熵路径，RLHF 进一步奖励“无害且得体”的中庸表达，两者叠加造成风格的统计坍缩。随后综述检测技术的谱系（统计法、分类器、水印、检索式防御与商业工具）及其固有边界，梳理去除 AI 味的三条真实路径与两类常见误区，给出审稿人可执行的识别清单，最后落到符合人类写作习惯的写作建议。全文区分已核验事实与行业观察，引用均链接原始来源。
+
+\noindent\textbf{关键词：}AI生成文本检测；文体计量；困惑度；突发性；学术诚信；人机协同写作
+
+\vspace{4pt}
+\hrule
+
+% ============ 1 引言 ============
+\section{引言：AI味不是一个审美问题，而是一个统计问题}
+
+\begin{justifying}
+在讨论如何“去除论文AI味”之前，先要回答一个问题：我们凭什么说一段文本“有AI味”？直觉给出的答案五花八门——太工整、没个性、爱用“值得注意的是”、每段都三点式……这些印象都对，但它们只是症状。实证研究给出的判断是：AI文本之所以能被识别，不是因为“写得差”，恰恰相反，是因为它在特定统计维度上“好得太均匀”了。检测器抓得最准的AI文本，是那种流畅、规范、语法零瑕疵的文本；真正的问题不是写得不好，而是写得过于稳定地“正确”。
+
+这个观察来自两方面的证据。其一是检测技术本身：从 DetectGPT 的概率曲率到 Binoculars 的跨模型困惑度，再到以 burstiness（句长波动）为核心的文体计量，检测器捕捉的都是统计签名而非语义内容 \href{https://arxiv.org/abs/2301.11305}{[D1]} \href{https://arxiv.org/abs/2401.12070}{[D2]} \href{https://arxiv.org/abs/2511.21744}{[D5]}。其二是语料层证据：Liang 等对 95 万篇论文的统计显示，LLM 修改文本的比例在计算机科学摘要中升至 17.5\%，并伴随特定词汇的异常升频 \href{https://arxiv.org/abs/2404.01268}{[S1]}。
+
+本文讨论三个不同立场的读者：写作者想知道怎么让文字像自己的；审稿人想知道怎么识别；技术研究者想知道检测与去除的边界在哪里。三者的利益并不完全一致，甚至互相冲突——写作者希望文本自然，审稿人希望文本可核验，而“去除AI味”既是写作改进，也可能沦为规避检测的手段。因此本文在实证综述之外，也划出伦理边界：让AI辅助的写作成为自己的写作，与用工具伪造人工作品，是两件事。
+
+\end{justifying}
+
+% ============ 2 成因 ============
+\section{为什么会产生AI味：生成机制与统计坍缩}
+
+\begin{justifying}
+“AI味”不是偶然的缺陷，而是大语言模型生成机制的必然产物。可以从三个层次理解它。
+
+\subsection{自回归采样：低困惑度是天然属性}
+
+大语言模型按“给定前文，预测下一个词”的方式生成文本，每一步都从词表上取一个概率分布。为了得到流畅输出，解码必须偏向高概率路径。结果是：模型每一步都选择“最不让人意外”的下一个词。人类读者会对这种文本感到乏味，但检测器看到的是另一回事——文本中几乎每个词都在模型的预测之内，整段文本的困惑度（perplexity）系统性偏低。DetectGPT 利用的正是这一点：把一段文本随机扰动后，若原文本的模型对数概率显著高于扰动样本，就判定为机器生成 \href{https://arxiv.org/abs/2301.11305}{[D1]}。
+
+困惑度偏低的直接后果是词汇选择的“回归平均”：罕见词、方言、个人化搭配被过滤，留下的是在训练语料中出现频率最高的表达。这解释了为什么不同厂商、不同训练管线的大模型生成同一主题的文本，读起来却像孪生——它们在收敛到同一条统计平均路径。
+
+\subsection{RLHF：把“得体”锻造成平庸}
+
+训练的后半程通常引入基于人类反馈的强化学习（RLHF），奖励模型输出“有用、无害、诚实”的回应。问题在于，“无害”在统计上意味着回避立场、弱化断言、面面俱到；“有用”意味着结构完整、分段工整、结论兜底。这两项奖励叠加，把模型推向一种统计学意义上的“中庸表达”：
+
+\begin{itemize}[leftmargin=2em,itemsep=1pt]
+\item 对冲与平衡措辞：\textit{on the other hand}、“值得注意的是”“综上所述”这类套语被高频使用，因为它们在语义上安全；
+\item 自信化普遍断言：为了“有用”，模型倾向于给出确定性的总结性判断，而非带着条件与例外的具体陈述；
+\item 情感与隐喻的压制：句法上更标准，隐喻更少，情绪表达更平 \href{https://hispadoc.es/descarga/articulo/10651021.pdf}{[S6]}。
+\end{itemize}
+
+\subsection{突发性缺失：没有意图，就没有节奏}
+
+人类写作有一个检测器最看重的统计特征——burstiness，即句长与复杂度的波动。人写文章时，一句长句铺陈，紧接着一个短句收束，这种节奏变化来自修辞意图：哪里该强调，哪里该喘息，是作者在具体语境中做出的选择。模型没有这种意图，它在每一步只追求局部最优，于是句长分布趋于均匀。多项研究在不同语料上一致发现，AI 文本的 burstiness 显著低于人类文本 \href{https://esiconf.org/index.php/AMSI/article/download/9045/9021/17384}{[S5]}。值得注意的是，这个差异在人类读者已经无法在内容层面区分人机文本时依然存在——它存在于统计层，而不在语义层。
+
+\subsection{小结}
+
+AI味的三个来源——自回归的低熵路径、RLHF 的得体奖励、缺乏意图的节奏——共同造成一种“风格坍缩”：文本在统计上高度可预测，在表达上高度均质。理解这一点很重要，因为后续的检测与去除，本质上都是围绕这三个来源展开的。
+
+\end{justifying}
+
+% ============ 3 表现 ============
+\section{AI味的具体表现：五层信号}
+
+\begin{justifying}
+把文献中的发现组织成五层信号。前两层可以被机器精确测量，后三层更多依赖人的判断。
+
+\subsection{概率信号：困惑度与突发性}
+
+这是最可测量的一层，也是 GPTZero 等工具的检测依据：AI 文本困惑度低（词的选择高度可预测），突发性低（句长波动小）。一项针对创意写作的文体计量研究显示，AI 文本在所有测试语料上 burstiness 均显著更低，即使人类评分者无法区分人机内容 \href{https://www.eyesift.com/blog/ai-writing-style-vs-human-writing/}{[S8]}。需要强调的是，这层信号与“文笔好坏”无关：法律文书、学术正文这类经过精修的正式人类文本，同样表现为低困惑度、低突发性——这正是检测器误报的根源。
+
+\subsection{词汇信号：模板词与连接词}
+
+语料层面的统计给出了最直观的证据。Liang 等在 arXiv/bioRxiv/Nature 系期刊论文中发现与 LLM 使用强关联的词汇异常升频 \href{https://arxiv.org/abs/2404.01268}{[S1]}；医学与生物学领域的独立研究追踪到 \textit{delve}、\textit{underscore}、\textit{meticulous}、\textit{commendable} 等词在 ChatGPT 发布后的频率飙升 \href{https://www.medrxiv.org/content/10.1101/2024.05.14.24307373v1}{[S3]}。另一项教育场景研究用可解释AI定位了更细的差异：人类文本倾向实用词（\textit{use}、\textit{allow}），AI 文本倾向抽象正式词（\textit{realm}、\textit{employ}）\href{https://arxiv.org/abs/2501.03203}{[D7]}。中文场景同样有对应物：“值得注意的是”“综上所述”“不言而喻”“在当今……”这类高频套语。
+
+\subsection{语篇信号：过度连贯与模板结构}
+
+AI 文本的段落衔接异常顺滑——连接词（\textit{furthermore}、\textit{moreover}、\textit{it is worth noting}）密度高，段落遵循可预测的“主题句—展开—收束”模式 \href{https://www.eyesift.com/blog/ai-writing-style-vs-human-writing/}{[S7]}。人类作者会允许段落之间的跳跃、话题的偏离、论证的迂回；模型为了“有用”把这些都抹平了。典型的表现还包括“结论回响”：结尾段落几乎逐句复述前文的要点，而不是给出新的落点。
+
+\subsection{认识论信号：无立场的自信}
+
+这是审稿人最容易感知也最难量化的信号。AI 文本倾向做出确定性、普遍化的断言（“这将彻底改变……”），但缺乏具体的支撑细节；引用是“示意式”的（提到某研究存在，却不给出可核验的出处与边界）；对冲是平衡模板式的，而非来自真实的证据权衡。用写作研究的话说：文本有自信的腔调，却没有作者的立场。
+
+\subsection{表达信号：情感与隐喻的扁平}
+
+比较语言学证据显示，ChatGPT、Gemini、BingAI 生成的媒体文本比人类文本语法更标准、句法更同质、隐喻更少、情感表达更低 \href{https://hispadoc.es/descarga/articulo/10651021.pdf}{[S6]}。所谓“AI 味”里最难言说的那部分——“没有灵魂”——在这个证据面前有了操作化定义：表达层的方差被人为压缩了。
+
+\end{justifying}
+
+% ============ 4 检测 ============
+\section{如何检测一篇文章是否有AI味}
+
+\begin{justifying}
+检测技术在谱系上可以分成五类。它们的共同点是：都是统计假设检验，因此天然带有两类错误——把AI文本放过（漏报），或把人类文本错杀（误报）。
+
+\subsection{统计检测：概率与曲率}
+
+DetectGPT 利用“采样文本占据模型对数概率的负曲率区域”这一结构性质做零样本检测，把 GPT-NeoX 假新闻的检出 AUROC 从 0.81 提升到 0.95 \href{https://arxiv.org/abs/2301.11305}{[D1]}。Binoculars 用两个相近模型的交叉困惑度作分数，零样本下对 ChatGPT 等模型的检出率超过 90\%，误报率仅 0.01\% \href{https://arxiv.org/abs/2401.12070}{[D2]}。这类方法的弱点在于依赖参考模型：一旦文本由扩散模型生成，其 perplexity 与 burstiness 贴近人类，面向自回归模型的检测器便大面积漏报 \href{https://arxiv.org/abs/2507.10475}{[D6]}。
+
+\subsection{分类器：数据驱动}
+
+在人类/AI 标注语料上训练的分类器（RoBERTa 等）在受控基准上表现优异：定制 RoBERTa 模型 F1 达 0.992 \href{https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2025.1458707/full}{[D8]}；基于文体特征的轻量模型以 25MB 的体积做到 97\% 准确率 \href{https://arxiv.org/abs/2511.21744}{[D5]}。但分类器受语料分布限制：跨领域、跨语言、跨模型会掉点；对经过改写或深度编辑的文本，分类器的可靠性骤降。
+
+\subsection{水印与检索式防御}
+
+水印在生成时注入统计信号，理论上可提供统计保证的检测 \href{https://arxiv.org/abs/2306.17439}{[D4]}。实测表明，人类改写会稀释但未必消除水印——强改写后约观察 800 个 token 仍可在极低误报率下检出 \href{https://arxiv.org/abs/2306.04634}{[D3]}。但攻击方同样活跃：颜色感知替换可去除任意长度文本的水印 \href{https://arxiv.org/abs/2403.14719}{[R6]}，黑盒逆向可让水印失效 \href{https://arxiv.org/abs/2411.05277}{[R5]}。检索式防御（API 记录所有生成、比对语义相似性）在 Krishna 等的实验中能抓回 80\%–97\% 的改写文本 \href{https://arxiv.org/abs/2303.13408}{[R2]}，但它要求模型提供商配合，只能覆盖自家 API。
+
+\subsection{商业工具与实测分化}
+
+对 10 款免费检测器的实测显示，灵敏度从 0\% 到 100\% 不等；对改写文本，Sapling 与 Undetectable AI 做到了 100\% 检出 \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC11572508/}{[E1]}。另一项 34 篇文献的系统综述结论更冷静：多数检测器准确率过半但不可靠，付费工具通常优于免费，且存在对非英语母语作者的偏误 \href{https://pdfs.semanticscholar.org/4dc4/448b5b6225ab3e63bcb7f5cf88ed83fcc050.pdf}{[E3]}。
+
+\subsection{检测的固有边界}
+
+必须如实说明：检测从来不是判定，而是统计提示。
+
+\begin{itemize}[leftmargin=2em,itemsep=1pt]
+\item \textbf{误报是结构性的。}正式的人类写作（法律文本、经过编辑的学术正文）与 AI 文本共享低困惑度、低突发性签名。一项研究显示，要求模型“写得更像人”的提示反而让检测分数上升，并导致形式化人类写作 76.3\% 的误报 \href{https://arxiv.org/abs/2610.03110}{[R4]}。
+\item \textbf{改写显著削弱检测。}DIPPER 将 DetectGPT 检出率从 70.3\% 打到 4.6\% \href{https://arxiv.org/abs/2303.13408}{[R2]}；人类改写是所有攻击中最难检测的 \href{https://arxiv.org/abs/2412.05139}{[R3]}。
+\item \textbf{“AI 编辑”比“AI 生成”更难查。}最新研究显示，AI 生成文本存在稳定且跨模型一致的文体足迹，而 AI 编辑后的文本没有稳定足迹 \href{https://arxiv.org/abs/2608.27855}{[D9]}——这与“多数作者只是用 AI 改稿”的现实叠加，意味着检测的难度正在系统性上升。
+\end{itemize}
+
+\end{justifying}
+
+% ============ 5 去除 ============
+\section{如何去除AI味}
+
+\begin{justifying}
+去除 AI 味的讨论必须区分两个目标：让文本更像自己写的（写作改进），与让文本骗过检测器（规避检测）。前者正当，后者涉及学术诚信，多数期刊明确禁止 \href{https://www.cjter.com/attached/file/20240420/20240420151441_458.pdf}{[P6]} \href{https://www.nsmc.edu.cn/xbbjb/info/1222/4071.htm}{[P7]}。本节的技术论述以写作为主，但对规避手段也如实呈现——审稿人需要知道攻击面在哪里。
+
+\subsection{两个被证伪的误区}
+
+误区一：换词。同义替换只改变表层词汇，不改变困惑度与突发性签名，对现代检测器几乎无效 \href{https://www.eyesift.com/blog/ai-humanizer/}{[E4]}。
+
+误区二：让 AI “写得更像人”。实验证据表明，要求模型输出更“人类化”并不使文本更难检测 \href{https://arxiv.org/abs/2412.05139}{[R3]}；甚至适得其反——动词多样性上升、统计复杂度升高，文本反而更易被检出 \href{https://arxiv.org/abs/2610.03110}{[R4]}。所谓“统计放大”：改动越多，偏离原分布越多，反而把文本推离人类分布。\footnote{这与直觉相反，但对检测器而言是合理的：人类文本的高突发性来自意图而非刻意的不规则，刻意制造的不规则仍是无规则。}
+
+误区三：堆砌词汇多样性。刻意引入生僻词或风格化措辞，只会增加检测器可见的“统计复杂度”，并不必然接近人类分布（R4 的结论）。
+
+\subsection{有效路径：把 AI 草稿变成自己的文字}
+
+文献支持的可行路径只有一条主线：人类深度参与。
+
+\begin{itemize}[leftmargin=2em,itemsep=1pt]
+\item \textbf{人类重写是最有效的去AI化。}在多项评测中，人类改写后的文本是检测器最难识别的 \href{https://arxiv.org/abs/2412.05139}{[R3]}；AI 编辑文本无稳定文体足迹 \href{https://arxiv.org/abs/2608.27855}{[D9]}。这印证了一个朴素的判断：人的节奏、人的立场、人的口误，是统计签名无法复制的。
+\item \textbf{针对统计靶点的结构化改写。}理解检测器在看什么之后，可以有针对性地重建节奏：有意拉大句长落差（长句铺陈后接短句收束），替换模板连接词，删除套语，引入具体的数字与实例替代抽象断言。注意，这些动作的正当动机是“让文本读起来更像人写的”，而不是“骗过 GPTZero”。
+\item \textbf{注入个人语料。}把自己的历史文章、审稿意见、笔记作为改写锚点，让 AI 的草稿向个人语料对齐。这在写作上等价于“用 AI 当秘书，不当代笔”。
+\item \textbf{人工核验认识论层。}把自信化断言降级为带边界的判断，为每个“研究表明”补上真实出处，删除无法核验的引文——这既是去 AI 味，也是科研诚信本身。
+\end{itemize}
+
+\subsection{humanizer 工具：本质与局限}
+
+针对 19 款 humanizer 工具的审计显示，这些工具的核心动作是调整 perplexity 与 burstiness，绕过检测器的统计阈值；但多数工具无法保持语义保真，质量分三档 \href{https://arxiv.org/abs/2501.03437}{[R1]}。更关键的是，检测侧已开始针对性训练——新一代检测器针对改写后的内容做了对抗增强。工具与检测器之间的军备竞赛仍在继续，但信号是：任何“一键去AI味”都不解决认识论层的空洞。文本逃过检测，并不等于文本像人写的。
+
+\subsection{伦理边界}
+
+把“去除AI味”用于正当写作（润色、组织、翻译），与用于规避检测（洗稿、伪造作者身份）之间只有一线之隔。期刊政策已划定清晰边界：AI 不得署名；AI 可用于辅助（文献检索、语言润色、格式规范），但核心观点、研究设计、数据分析与主要结论必须人类完成；AI 使用须披露 \href{https://onlinelibrary.wiley.com/pb-assets/assets/27711757/Generative-AI-Policy-1743486382650.pdf}{[P3]} \href{https://www.elsevier.cn/about/policies-and-standards/generative-ai-policies-for-journals/}{[P5]}。中文期刊（如《川北医学院学报》《贵州医药》）进一步细化：禁止用 AI 改写拼接他人成果规避检测，违规退稿并列入失信名单 \href{https://www.nsmc.edu.cn/xbbjb/info/1222/4071.htm}{[P7]} \href{http://gzyi.cbpt.cnki.net/portal/journal/portal/client/news/f5b426920bb15af72f52d1d7c62bf3a0}{[P8]}。知网对 AI 署名论文采取下架处理 \href{https://www.cernet.edu.cn/rd/zui_jin_geng_xin/202607/t20260716_2756633.shtml}{[P10]}。
+
+\end{justifying}
+
+% ============ 6 审稿人 ============
+\section{作为审稿人：如何识别一篇文章是否有AI味}
+
+\begin{justifying}
+审稿人的处境与检测器不同：不能把误报的代价转嫁给作者。识别流程应当是“证据导向的怀疑”，而非“看气质定罪”。以下是可操作的清单。
+
+\subsection{第一步：统计快检}
+
+对稿件运行检测器与文体计量指标（perplexity、burstiness、句长变异系数），但只把结果当作提示，不当判决。检测器的高分需要结合下面的定性信号交叉验证；低分不能排除 AI 编辑 \href{https://arxiv.org/abs/2608.27855}{[D9]}。
+
+\subsection{第二步：语篇与结构检查}
+
+\begin{itemize}[leftmargin=2em,itemsep=1pt]
+\item 段落是否全部遵循“主题句—展开—收束”的模板，是否缺少人类作者常见的话题偏离与论证迂回；
+\item 连接词密度是否异常（\textit{furthermore}、\textit{it is worth noting}、“值得注意的是”成片出现）；
+\item 结尾是否“回响”式复述前文，而非给出新落点。
+\end{itemize}
+
+\subsection{第三步：认识论检查（权重最高）}
+
+\begin{itemize}[leftmargin=2em,itemsep=1pt]
+\item 断言与证据是否匹配：普遍化断言是否配有具体、可核验的出处；
+\item 引用是否“示意式”：提到某研究但无作者年份、无边界条件、无法溯源；
+\item 不确定性是否真实：对冲是来自证据权衡，还是模板化的“平衡措辞”。
+\end{itemize}
+
+\subsection{第四步：词汇与表达检查}
+
+警惕高频模板词（\textit{delve}、\textit{underscore}、“值得注意的是”“综上所述”）的集中出现 \href{https://arxiv.org/abs/2404.01268}{[S1]} \href{https://www.medrxiv.org/content/10.1101/2024.05.14.24307373v1}{[S3]}；警惕全文零隐喻、零情感、零句法变化。但注意：单个模板词不是证据，词汇漂移随模型迭代而变，不能固化为黑名单。
+
+\subsection{第五步：交叉验证与沟通}
+
+疑点累积到阈值时，与作者直接沟通（要求提供数据与代码、描述写作过程），而非仅凭文本判定。参考文献中的提示：生物医学文献中 AI 段落高度集中于 Limitations 与讨论尾部 \href{https://www.richardshelab.com/fine-grained-detection-biorxiv.pdf}{[S4]}——优先检查这些区域的文本。若作者承认 AI 用于润色而未披露，按期刊政策处理而非定罪。
+
+审稿人识别 AI 味的根本约束是：误报会伤害真实作者（尤其非英语母语者），漏报会让 AI 文本混入学术记录。前者的成本远高于后者，因此“存疑时偏向证据，而非偏向怀疑”。
+
+\end{justifying}
+
+% ============ 7 写作建议 ============
+\section{符合人类写作习惯的建议}
+
+\begin{justifying}
+把前六章的实证结论转译成写作建议。人类写作的可记忆性来自四个来源，每一个都是 AI 文本的统计弱点：
+
+\begin{enumerate}[leftmargin=2em,itemsep=2pt]
+\item \textbf{具体性（specificity）。}用数字、实例、边界条件替代抽象断言。AI 说“显著提升”，人写“该方案在 5000 样本上把误报率从 8.2\% 降到 3.1\%，但未覆盖极端行情”。具体性是认识论层的最佳去 AI 味。
+\item \textbf{节奏（rhythm）。}有意制造句长落差：一句长句展开，一句短句收束。这是 burstiness 的人工重建，来自修辞意图而非统计操作。
+\item \textbf{立场（stance）。}说出你的判断、你的取舍、你不做的部分。AI 的对冲是模板，人的立场是选择。立场让文本从“关于主题”变成“来自作者”。
+\item \textbf{诚实的边界（honest hedging）。}区分“已知”“推断”“未知”。真正的人类写作会承认不确定性，并以证据强度控制断言强弱——这正是 scientific humanization 的核心规则：相关性不写证明，无检验不写显著。
+\end{enumerate}
+
+落到工作流：用 AI 起草，但把它当第一稿的秘书而非作者——重排论证顺序、替换模板表达、注入个人语料、逐句核验事实与引用。检测器难以识别、且更重要的，读者能读出一个真实的人在说话。
+
+\end{justifying}
+
+% ============ 8 结论 ============
+\section{结论与开放问题}
+
+\begin{justifying}
+“AI味”可被还原为低困惑度、低突发性、模板词汇、过度连贯与无立场认识论这五层信号，其根源是自回归的低熵偏好与 RLHF 的得体奖励造成的风格坍缩。检测技术已能可靠识别“纯 AI 生成”，但对“AI 编辑”与人类深度改写几乎无能为力；商业工具分化严重，误报对正式文本与非母语作者构成系统性伤害。去除 AI 味的唯一可靠路径是人的深度参与——这不是遗憾，而是把写作的主权交还给写作者。
+
+开放问题留待后续研究：其一，中文文本的 AI 味信号与英文存在何种差异，目前几乎没有实证；其二，AI 编辑（而非生成）的可检测性是否稳定（目前仅单篇多域证据 \href{https://arxiv.org/abs/2608.27855}{[D9]}）；其三，当主流文本本身被 AI 重塑之后，人类的统计签名是否会被重新定义——到那时，“AI味”或许不再是一个边界，而是一个新的基准。
+
+\end{justifying}
+
+% ============ 附录 ============
+\newpage
+\appendix
+\section{证据表（核心条目）}
+完整证据表（35 条）见配套文件。以下为核心文献速查。
+
+\begin{longtable}{L{3.4cm} L{2.2cm} L{5.6cm} L{2.8cm}}
+\toprule
+文献 & 出版状态 & 核心发现 & 链接 \\
+\midrule
+\endhead
+DAMAGE: Detecting Adversarially Modified AI Text & arXiv 2025 & 审计 19 款 humanizer 工具；多数检测器无法识别去AI化文本 & \href{https://arxiv.org/abs/2501.03437}{arXiv} \\
+Paraphrasing evades detectors & NeurIPS 2023 & DIPPER 将 DetectGPT 检出率 70.3\%$\to$4.6\% & \href{https://arxiv.org/abs/2303.13408}{arXiv} \\
+A Practical Examination of AI-Generated Text Detectors & arXiv 2025 & 7 检测器×7 任务；人类改写最难识别 & \href{https://arxiv.org/abs/2412.05139}{arXiv} \\
+The Paradox of “Humanizing” LLM Text & arXiv 2026 & 改写得更像人反而更易检出；形式化人类写作误报 76.3\% & \href{https://arxiv.org/abs/2610.03110}{arXiv} \\
+DetectGPT & ICML 2023 & 概率曲率零样本检测，AUROC 0.81$\to$0.95 & \href{https://arxiv.org/abs/2301.11305}{arXiv} \\
+Binoculars & arXiv 2024 & 交叉困惑度；检出率 >90\%，FPR 0.01\% & \href{https://arxiv.org/abs/2401.12070}{arXiv} \\
+On the Reliability of Watermarks & ICLR 2024 & 水印抗人类改写，~800 token 检出 & \href{https://arxiv.org/abs/2306.04634}{arXiv} \\
+NEULIF (stylometric lightweight) & arXiv 2025 & 25MB 模型 97\% 准确率 & \href{https://arxiv.org/abs/2511.21744}{arXiv} \\
+Can You Detect the Difference? & arXiv 2025 & 扩散模型文本贴近人类统计，检测器漏报 & \href{https://arxiv.org/abs/2507.10475}{arXiv} \\
+AI Writers Have a Footprint, AI Editors Do Not & arXiv 2026 & AI 生成有稳定文体足迹；AI 编辑没有 & \href{https://arxiv.org/abs/2608.27855}{arXiv} \\
+Mapping the Increasing Use of LLMs in Scientific Papers & Nat.\ Hum.\ Behav.\ 2025 & 语料级统计；delve 等词异常升频 & \href{https://arxiv.org/abs/2404.01268}{arXiv} \\
+Sensitivity of Free AI-detector Tools & Indian J.\ Psychol.\ Med.\ 2024 & 10 款工具灵敏度 0\%–100\% & \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC11572508/}{PMC} \\
+Editors’ Statement on Responsible Use of GenAI & AJOB Neurosci.\ 2023 & 跨期刊政策共识：AI 不署名、须披露 & \href{https://pmc.ncbi.nlm.nih.gov/articles/PMC11027931/}{PMC} \\
+《中国组织工程研究》AI 使用规则 & 中文期刊 2025 & 系统梳理国际期刊与 COPE/WAME 立场 & \href{https://www.cjter.com/attached/file/20240420/20240420151441_458.pdf}{PDF} \\
+《贵州医药》GenAI 声明 & 中文期刊 2026 & 9 类禁止情形；披露模板；失信名单 & \href{http://gzyi.cbpt.cnki.net/portal/journal/portal/client/news/f5b426920bb15af72f52d1d7c62bf3a0}{声明} \\
+\bottomrule
+\end{longtable}
+
+\section{统一比较矩阵（摘要）}
+完整矩阵见配套文件。检测方法维度：困惑度/曲率类对改写鲁棒性低，误报对正式文本偏高；深度分类器泛化受限；水印有统计保证但可被颜色感知攻击与黑盒逆向绕过；检索式防御最稳但仅覆盖自家 API；商业工具分化严重。改写维度：换词与提示工程被证伪；DIPPER 式改写逃逸强但可被检索防御识别；humanizer 工具语义保真参差；人类深度改写最难检测且正当。
+
+\section{结论置信度（摘要）}
+高置信度：低困惑度/低突发性是 AI 文本统计签名；改写显著削弱检测；人类改写最难检测；AI 不署名已成跨出版方共识。中置信度：特定词汇升频与 LLM 使用相关但词表漂移；扩散文本贴近人类统计；商业检测器可靠性整体存疑。低置信度/争议：五类信号框架与 Nature 子刊研究仅二手核验；检测器绝对准确率多为受控基准数字；AI 编辑不可检测仅单篇证据。
+
+\section{可复现实验建议（摘要）}
+四项建议：改写逃逸重建（对照 DIPPER 结论）；中文 AI 味信号测量（填补空白）；三分类可检测性实验（纯生成/生成+人类改写/AI 编辑草稿）；审稿人识别流程可用性测试。通用要求：固定检测器版本与种子、报告置信区间、区分受控基准与真实分布。
+
+\vspace{10pt}
+\noindent 配套文件：\texttt{证据表与比较矩阵.md}（含 35 条来源、两个比较矩阵、置信度分级、核验记录、可复现实验细节）。检索与核验日期 2026-10-06。
+
+\end{document}

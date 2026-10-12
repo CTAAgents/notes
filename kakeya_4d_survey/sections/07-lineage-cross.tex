@@ -1,0 +1,102 @@
+\section{技术谱系（二）：跨门派借入与谱系内首次使用}
+
+本章处理四分类法里最有信息量的两类：C 跨门派借入与 D 谱系内首次系统使用。前者回答“哪些技术是挂谷门派没有用过的”，后者回答“哪些构造成套出现在这份手稿里像第一次”。两条线索最后合并成 7.3 节的词频证据表——一张可以逐格复核的对照表。
+
+\subsection{跨门派借入清单}
+
+\begin{table}[t]
+\centering
+\caption{跨门派借入：来源、门内先前状态与手稿中的用途}
+\label{tab:cross}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{2.9cm}L{2.6cm}L{2.6cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{技术} & \textbf{来源门派/子学科} & \textbf{门内先前状态} & \textbf{在手稿中的用途} \\
+\midrule
+条件熵与互信息账本 & 信息论（Cover--Thomas）；分形几何的熵方法（Hochman--Shmerkin 谱系）\upcite{coverthomas2006,hochmanshmerkin2012} & 未见（门内两篇主力文献零命中） & 三维篇 §6--§7 的动帧熵增量、坐标熵率下界；四维篇 §5 高阶喷流拟合中的熵估计与密度账本 \\
+概率耦合与乘积律比较 & 概率论 & 未见 & 三维篇 §8 双帧实验：实际联合律与乘积律作比较，约束失败则乘积律以多项式小概率逃出支撑，逼出正的互信息需求，与其上界矛盾 \\
+投影钉住（pinning）bootstrap & 分形投影理论（Shmerkin--Wang；Orponen--Shmerkin--Wang）\upcite{shmerkinwang2025,orponensw2024} & 未见；手稿自述 adapts & 三维篇 §9 乘积斜率 $\Delta t\,\Delta\vartheta$ 的有限尺度估计 \\
+乘法卷积的 Fourier 衰减估计 & 分形几何/Fourier 衰减（Orponen--de Saxc\'e--Shmerkin）\upcite{orponend2024} & 未见 & 四维篇 Proposition 7.6 之前的构造：标量系数的小区间概率，服务平面刚性 \\
+图版本 Balog--Szemer\'edi--Gowers 与和集演算 & 极值组合/加法组合（Sudakov--Szemer\'edi--Vu；Tao--Vu）\upcite{ssv2005,taovu2006} & 非图版 BSG 已经 Bourgain 1999 内化；图版本及其“保留原始关联边”的用法未见 & 四维篇 §7 保边平面刚性：把拟合出的平面结构回填到原始轨迹的关联边上 \\
+实代数几何的定量纪律 & 实代数几何/逼近论（Basu--Pollack--Roy 的半代数算法；Roytwarf--Yomdin 的 Bernstein 类）\upcite{bpr2006,roytwaryomdin1997} & 未见（门内多项式方法只用到次数界与 Bézout 型事实） & “温和数据”（tempered data）装置；端点比值的有界性论证；次数恢复中的多项式 Remez 迭代 \\
+Nikodym/弯曲挂谷转移 & 几何测度与投影（Keleti--M\'ath\'e；Gao--Liu--Xi；Nadjimzadah）\upcite{keletimathe2023,gaoliuxi2025,nadjimzadah2026,nadjimzadah2026b} & 近年内新兴 & 两篇稿件的推论章：常曲率流形上的 Nikodym 集、固定相位下的弯曲挂谷族 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+表 \ref{tab:cross} 的阅读方式建议从第三列看起：这一列是本文试图回答的“门派有没有用过”。七个条目里，四个此前几乎与挂谷主线无交集（熵账本、耦合、Fourier 衰减、实代数几何纪律），两个属于“同属组合数学但具体形态未见”（图版本 BSG、钉住改造），一个属于近年新工具的正常借用（转移定理）。
+
+其中两处借用值得多写两句。其一，熵账本的性质与以往门内工具都不同：发刷、划分、板条都是关于“几何对象如何分布”的陈述，熵是关于“信息在坐标间如何携带”的陈述。三维篇把一根管子的两个时刻视为同一指标的两次观测，用条件熵与互信息预测“两帧之间的差异必须携带多少信息”，再把它与“可得信息量的上界”对撞。这是把物理学的“信息守恒”直觉形式化为不等式，在挂谷文献里此前没有这种笔法。其二，实代数几何的引入解决的是一类此前被回避的“脏活”：证明中反复需要“某个比值是一维半代数函数，因而有多项式增长界”这样的定量事实，以维持全局约定的温和性（多项式界的复杂度不爆炸）。门内传统对此通常选择绕开——用更粗的估计掩盖；手稿选择正面建立纪律，这是工程口味很重的选择（本文判断，\cfM）。
+
+\subsection{谱系内首次系统使用的构造}
+
+\begin{table}[t]
+\centering
+\caption{谱系内首次系统使用的构造成套（D 类）}
+\label{tab:novel}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{3.0cm}XL{1.4cm}@{}}
+\toprule
+\rowcolor{lightbg}\textbf{构造} & \textbf{内容与检索依据} & \textbf{置信度} \\
+\midrule
+地平线框架 & 把“局部拟合精度”量化为时间代价并取极值资源（$H(E)>0$ 的逼出与“改进即矛盾”的对撞）。门内两篇主力文献与 Zahl 综述均无对应机制 & 高 \\
+二次图卡体系 & 移动盒 + 时间区间 + 二次测试 + 质量约束（按选定时间轴对度量）+ 可嵌套归一化。词频佐证：chart 在门内文献 0 次，在两篇稿件分别 123、179 次 & 高（作为词汇与对象）／中（作为机制，与划分、Remez 存在亲缘） \\
+代数叶片比较原理 & 用标量叶片的列表匹配与端点映射体积论证做跨尺度延拓；两色匹配控制失配。未见等价先例，警惕与“列表译码”类思想的潜在相似性 & 中 \\
+次数恢复（圆锥障碍） & 识别势函数残余的三次、四次项，用闲置隐藏坐标编码为二次修正，恢复图卡所需的次数（Proposition 6.8） & 中高 \\
+三区间与临界速率装置 & 水平模型 $Y'=-Z+tv$ 的 $H\times H^{2}$ 盒型；$2k=1$ 的三腿切换；$2k<1$ 的自举；无界窄度下密度指数漂移在比值中抵消 & 中高 \\
+双帧投影约束实验（三维篇） & 同一标记载体取两个事件构造剪切变换，比较实际联合律与乘积律，配合乘积斜率钉住导出投影约束 & 中高 \\
+保边回填（Lemma 4.12 类） & 把分析子测度上的有限列表回填到原测度，用基网格全变差控制误差；保证局部拟合升级为原问题上的改进 & 中 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+表 \ref{tab:novel} 的置信度差异本身就是一份诚实的边界声明：词汇与对象层面的新颖（地平线、图卡）证据最硬——门内文献完全不使用这些词；机制层面的新颖（比较原理、次数恢复）只能靠机制结构与检索范围来支持，无法排除“某些技巧在未广泛传播的工作中出现过”。凡此含糊处，本文统一取较低一档置信度。地平线、图卡、两色匹配与改进候选的精确定义及命题形态，转录于附录 C.1，供逐条核对。
+
+\subsection{词频证据表：门派工具箱的定量对照}
+
+对四篇论文全文做小写化词频统计（Wang--Zahl 127 页、Guth--Wang--Zahl 47 页、OpenAI 三维篇 97 页、四维篇 175 页），结果如表 \ref{tab:wordfreq}。表头缩写：W--Z 为 Wang--Zahl 2025；G--W--Z 为 Guth--Wang--Zahl 2026；OA 三维、OA 四维为 OpenAI 两篇稿件。
+
+\begin{table}[t]
+\centering
+\caption{关键技术在四篇文献中的词频对照（全文、小写化、大小写不敏感）}
+\label{tab:wordfreq}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}Xrrrr@{}}
+\toprule
+\rowcolor{lightbg}\textbf{关键词} & \textbf{W--Z 2025} & \textbf{G--W--Z 2026} & \textbf{OA 三维} & \textbf{OA 四维} \\
+\midrule
+entropy（熵） & 0 & 0 & 65 & 33 \\
+mutual information（互信息） & 0 & 0 & 4 & 3 \\
+coupling（耦合） & 0 & 0 & 10 & 0 \\
+pinning（钉住） & 0 & 0 & 15 & 0 \\
+Bernstein（类） & 0 & 0 & 0 & 2 \\
+semialgebraic（半代数） & 0 & 0 & 0 & 21 \\
+quantifier elimination（量词消去） & 0 & 0 & 0 & 4 \\
+Remez（多项式迭代） & 0 & 0 & 0 & 17 \\
+Balog--Szemer\'edi（BSG） & 0 & 0 & 0 & 3 \\
+Fourier decay（Fourier 衰减） & 0 & 0 & 0 & 1 \\
+sumset（和集） & 0 & 0 & 0 & 7 \\
+\midrule
+chart（图卡） & 0 & 0 & 123 & 179 \\
+sheet（叶片） & 0 & 0 & 0 & 33 \\
+shading（阴影） & 144 & 77 & 48 & 1 \\
+prism（棱柱） & 335 & 6 & 0 & 0 \\
+plank（板条） & 0 & 71 & 82 & 24 \\
+convex（凸） & 192 & 74 & 24 & 7 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+表 \ref{tab:wordfreq} 给出三条读数。第一条：全部“外门派”词汇（entropy、mutual information、coupling、pinning、Bernstein、semialgebraic、quantifier elimination、Remez、BSG、Fourier decay、sumset）在门内两篇主力文献中命中为零，在 OpenAI 两篇中集中出现——这是“门派没有用过这些技术”最直接的语言层证据。第二条：门内主力词汇的迁移轨迹清晰可见——棱柱从 335 次衰减到 0，板条在流线化证明中成为新单位（71 次），阴影语言在两篇 OpenAI 稿件中逐渐退场（144$\to$77$\to$48$\to$1）。第三条：chart 与 sheet 两个词在门内为零、在稿件中高密度出现，说明图卡与叶片不是翻译过来的旧对象，而是稿件自造的工作词汇。
+
+\begin{cautbox}[词频证据的限度]
+词频测量的是语言，不是思想。它支持“某词汇体系未被门内使用”这类断言，却无法单独证明“某思想未被门内使用”；概念可能以别名出现在未进入本文检索范围的工作中。正因如此，表 \ref{tab:wordfreq} 只被用来支撑 C 类判断（表 \ref{tab:cross} 第三列），D 类判断（表 \ref{tab:novel}）另行采用机制结构对照，并保留更低一档置信度。
+\end{cautbox}
+
+\subsection{小结：一次距离更远的借入}
+
+把本章与前章合起来看：手稿在门内继承的是刚出厂的三代资产（板条、流线化、加权），向外借的是信息论、分形几何与实代数几何三家的语言。门内历史上每次借入（加法组合、多项式方法、多线性估计）都花了一代人的时间才完成消化；本次借入的距离更远——从“几何对象的分布”跨到了“信息的携带”，从“次数界”跨到了“半代数复杂度纪律”。这既解释了手稿的体量（175 页），也预示了它的消化成本（第 9、10 章）。
+
+\begin{keybox}[可记忆主句]
+门派内部从未见过熵、耦合与半代数纪律进入挂谷问题的主线：这一次借入的不仅是工具，还有一整套记账方式与证明纪律。
+\end{keybox}

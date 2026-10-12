@@ -1,0 +1,69 @@
+\section{记号与依赖图}
+
+\subsection{记号速查表}
+
+\begin{table}[ht]
+\centering
+\caption{本文与两篇稿件共用的主要记号}
+\label{tab:notation}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{3.5cm}L{5.6cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{记号} & \textbf{含义} & \textbf{出处/备注} \\
+\midrule
+$K,\ E$ & $\mathbb{R}^n$ 中的挂谷集（含每个方向的单位线段） & 第 2 章；两篇稿件通用 \\
+$\dim_{\mathrm{H}},\ \underline{\dim}_{\mathrm{M}},\ \overline{\dim}_{\mathrm{M}}$ & Hausdorff、下/上 Minkowski 维数 & 第 2 章式 (2.1) \\
+$T_\delta(a,e)$ & 中心 $a$、方向 $e$、长 $1$、半径 $\delta$ 的细管 & 四维篇 §1.1 \\
+$K_\delta$ & 挂谷极大算子（对细管内平均取方向上的上确界） & 两篇稿件通用 \\
+$Y(T),\ \lambda$ & 细管的阴影及其占管体积的比例 & 三维篇 (1.1) \\
+$N_0,\ r,\ L$ & 原问题分辨率、观察深度、终端深度 & 四维篇 §2.1 \\
+$p_r,\ \bigl[w\bigr]_{a_r/B}$ & 深度 $r$ 的观察；隐藏坐标 $w$ 的分箱 & 四维篇式 (2.3) \\
+$n(r)=N_0^{-f(r)}$ & 典型入射密度；$f$ 非降、1-Lipschitz & 四维篇 §2.1 \\
+$d<1$ & 容量类 $\mathcal{C}(d)$ 的密度退化率：$f(L)-f(r)\le d(L-r)$ & 四维篇 Definition 2.6 \\
+$h,\ H(E)$ & 图卡的时间代价；地平线（正时间代价下确界） & 四维篇 §1.2、§2 \\
+$k,\ \ell$ & 临界路径的时间速率；最优窄度（$\ell=0$ 各向同性，$0<\ell<\infty$ 有限窄度，$\ell=\infty$ 无界窄度） & 四维篇 §1.2、§4 \\
+版本 1/版本 2 & 精确问题的两个模型：标量模型（$j=1$）与四维模型（$j=2$） & 四维篇 Definition 2.1 \\
+$Y'=-Z+tv$ & 有限窄度区间的水平模型；盒型水平尺度 $H$、横向 $H^2$ & 四维篇 §1.2、§8 \\
+$h(p,z)$ & 三维篇的临界指数（“极大定理成立”等价于 $h=0$） & 三维篇 Definition 2.3 \\
+$F(s)=\beta(s-\tau)_{+}$ & 取等配置的规范时间剖面（平段 + 恒定亏空斜率） & 三维篇 §1.2、§5 \\
+$X,Y,U,V$ & 双帧实验的四坐标（法向位置/切向位置/法向速度/切向速度） & 三维篇 §1.2、§7 \\
+$\Delta t\,\Delta\vartheta$ & 双帧的乘积斜率（钉住估计的控制对象） & 三维篇 §1.2、§9 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{依赖图}
+
+图 \ref{fig:deplink} 把第 2--5 章涉及的主要依赖画成一张图：主干是“历史下界演进 → 三维全解 → OpenAI 三维篇 → OpenAI 四维篇 → 三区间改进”的纵向链条；右侧虚线是四维篇从其他门派借入的工具（第 7 章逐一分析）；右下角的虚线框是三维篇与球面 Fourier 限制篇之间的旁路。
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  node distance = 5.6mm,
+  box/.style = {draw = lightline, line width = 0.4pt, fill = lightbg, rounded corners = 2pt,
+    align = center, font = \footnotesize, inner sep = 3.2pt, text width = 76mm},
+  sidebox/.style = {draw = lightline, line width = 0.4pt, fill = lightbg, rounded corners = 2pt,
+    align = center, font = \scriptsize, inner sep = 3pt, text width = 46mm},
+  flow/.style = {-{Stealth[length = 2.1mm]}, draw = navy, line width = 0.7pt},
+  side/.style = {-{Stealth[length = 2.1mm]}, draw = sky, dashed, line width = 0.6pt}
+]
+\node[box] (h1) {Wolff 1995 发刷：$\mathbb{R}^4$ 下界 $3$；多项式 Wolff 公理时代：$3+\frac{1}{40}$；平面刷：$3.059$};
+\node[box, below = of h1] (h2) {Wang--Zahl 2022--2025（粘性 $\to$ 三维全解）；Guth--Wang--Zahl 2026 流线化（凸聚类并集估计）};
+\node[box, below = of h2] (o3) {OpenAI 三维篇：$\lambda^{3}$ 极大估计；加权全时段板条界（其 Lemma 2.3）};
+\node[box, below = of o3] (o4) {OpenAI 四维篇 Theorem 2.17：正地平线 $H(E)>0$ 的加权问题};
+\node[box, below = of o4] (rr) {三区间改进（各向同性 / 有限窄度 / 无界窄度）$\Rightarrow$ 与极值性矛盾 $\Rightarrow \dim_{\mathrm{H}}K=4$};
+\draw[flow] (h1) -- (h2);
+\draw[flow] (h2) -- (o3);
+\draw[flow] (o3) -- (o4);
+\draw[flow] (o4) -- (rr);
+
+\node[sidebox, right = 16mm of o4] (s1) {多元 Kakeya（行列式形式）；Wang--Zahl 限制三元组点积定理};
+\node[sidebox, below = 6mm of s1] (s2) {Orponen--de Saxc\'e--Shmerkin 乘法卷积 Fourier 衰减；图版本 BSG 与和集演算；实代数几何与 Bernstein 类};
+\node[sidebox, below = 6mm of s2] (s3) {三维篇旁路：球面 Fourier 限制篇（独立路径，虚线）};
+\draw[side] (s1.west) -- (o4.east);
+\draw[side] (s2.west) -- (o4.east);
+\draw[side] (s3.west) -- (o3.east);
+\end{tikzpicture}
+\caption{核心依赖图。实线为主干依赖，虚线为跨门派工具输入（第 7 章）与旁路（球面 Fourier 限制篇）。}
+\label{fig:deplink}
+\end{figure}

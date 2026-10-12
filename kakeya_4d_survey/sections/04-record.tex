@@ -1,0 +1,78 @@
+\section{OpenAI 工作的核验档案}
+
+本章不谈数学，只做一件事：把与两篇稿件有关的事实固定下来，并把“未验证”写成可核对的条目，而不是一句笼统的保留意见。
+
+\subsection{发布事实与时间线}
+
+\begin{table}[t]
+\centering
+\caption{发布与修订时间线（2026 年 9 月--10 月）}
+\label{tab:timeline-release}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{2.6cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{时间} & \textbf{事件} \\
+\midrule
+2026-09-23 & 三维挂谷极大函数稿件成文（97 页，作者栏 OpenAI）\upcite{openai3d2026} \\
+2026-09-24 & 四维挂谷集稿件成文（175 页）；另有一篇球面 Fourier 限制稿件同日成文，后被三维篇引为独立路径\upcite{openai4d2026,openaielliptic2026} \\
+2026-10-06 & 官方发布“Sharing AI progress in mathematics”，仓库 openai/math 上线，共 372 个结果族；发布前曾咨询 IAS 的数学与人工智能咨询组（AGMAI）\upcite{openairelease2026,agmai2026} \\
+2026-10-07 & 修订记录：撤回 3 篇（同一符号错误连带两篇依赖文献）、修订 14 篇、新增形式化 6 项；目录更新为 719 篇、Lean 覆盖 300/719\upcite{openairepo2026} \\
+2026-10-07 & AHM（Association for Human Mathematics）发布声明并由陶哲轩博客转载，公开质疑发布方式\upcite{ahm2026,tao2026} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+关于发布规模，仓库说明给出的是“719 篇手稿、372 个结果族，约 42\% 的顶层结果完成 Lean 形式化；平均每个结果消耗约 3 小时 ChatGPT Pro 思考算力；评测过程共投喂约 4000 道题”\upcite{openairepo2026}。这次放量发布并非首次：同年 5 月已有单位距离猜想否证的先例，8 月的十项进展则首次配套了 Lean 形式化\upcite{openaiunit2026,openaiten2026}。仓库同时释放了 10 份推理摘要，覆盖的是乘法函数两点关联、$\pi$ 的无理性指数等族，不包括第 074 族。仓库还披露两类例外：黎曼 $\zeta$ 函数零点自由区的写作经过人工润色，Hodge 猜想（CM 型阿贝尔簇）的结果不走统一流程\upcite{openairepo2026}。
+
+\subsection{两篇稿件的参数与主定理}
+
+\begin{table}[t]
+\centering
+\caption{第 074 族两篇稿件的基本参数（据稿件与目录信息整理）}
+\label{tab:ms-params}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{2.5cm}L{2.6cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{项目} & \textbf{三维篇} & \textbf{四维篇} \\
+\midrule
+标题 & The Kakeya maximal conjecture in three dimensions & Every four-dimensional Kakeya set has full Hausdorff dimension \\
+成文日期 & 2026-09-23 & 2026-09-24 \\
+篇幅 & 97 页 & 175 页 \\
+主定理 & $K_\delta$ 把 $L^3(\mathbb{R}^3)$ 映入 $L^3(S^2)$，范数至多 $C_\varepsilon\delta^{-\varepsilon}$；等价地，阴影密度幂从 $\lambda^{K(\varepsilon)}$ 提升到 $\lambda^{3}$\upcite{openai3d2026} & 任意含每个方向单位线段的 $K\subset\mathbb{R}^4$ 满足 $\dim_{\mathrm{H}}K=4$，不设可测性、紧性、粘性假设\upcite{openai4d2026} \\
+形式化状态 & 未列入 Lean 清单 & 未列入 Lean 清单 \\
+评审状态 & 未经同行评审 & 未经同行评审 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+三维篇的定位需要一句话说清楚：它解决的不是王虹--Zahl 已经拿下的集合维数问题，而是与之并列、更强的一档——极大函数猜想。用稿件自己的话说，Wang--Zahl 定理给出的阴影密度依赖是某个幂 $\lambda^{K(\varepsilon)}$，“换成 $\lambda^{3}$ 的需要”在他们定理之后就被明确写了出来\upcite{openai3d2026}。三维篇声称把这一步补齐；四维篇随后把三维篇的一条加权引理当作输入。两篇稿件在目录中被编为同一族，依赖关系见图 \ref{fig:deplink}（见附录 A）。
+
+\subsection{依赖链：为什么两篇稿件必须一起评估}
+
+\begin{evbox}[证据：依赖链的关键节点]
+四维篇导言明确记载：归约中使用的三维估计是“OpenAI [24, Lemma 2.3] 的加权全时段板条界”，它在三维篇中由 Guth--Wang--Zahl 并集估计出发、经加权凸聚类证明得到；四维篇将其记为 Lemma 2.15。除此之外，四维篇还独立引入多元 Kakeya（行列式形式）、Wang--Zahl 的限制三元组点积定理、Orponen--de Saxc\'e--Shmerkin 的乘法卷积估计、图版本 Balog--Szemer\'edi--Gowers 论证与和集演算等输入\upcite{openai4d2026}。
+\end{evbox}
+
+这条链的后果直白：四维命题的成立，至少以三维篇的一条核心引理为前提；而三维篇又立在 Guth--Wang--Zahl 的并集估计之上\upcite{gwz2026}。核验四维稿件时，最省力的入口不是它的第 6 至 10 章（三区间分析），而是先把“三维加权板条引理”这一段单独读通——这也是本文附录 B 核验清单把该引理排在第一优先级的原因。
+
+\subsection{验证状态：数字化读数}
+
+\begin{evbox}[证据：可核对的三组读数]
+（i）仓库的 Lean 形式化清单中不存在任何 Kakeya 相关条目，第 074 族两篇稿件均未形式化\upcite{openairepo2026}；（ii）同一批次已有撤回先例——3 篇 Hodge 相关稿件因一个符号错误导致稳定化迹抵消论证失效而撤回，其中两篇是因依赖该错误结果连带撤回，说明未形式化的稿件确实可能带着实质性缺陷通过内部流程\upcite{openairepo2026}；（iii）人类侧对照：三维挂谷猜想（Wang--Zahl）的证明已由中国科学院数学与系统科学研究院 MMAT 团队与开源组织 Project Numina 等合作完成 Lean 4 形式化\upcite{numina2026}——同一题材、同等量级的证明可以被形式化，这使 074 族的空白无法用“技术不可行”来解释。
+\end{evbox}
+
+三组读数指向同一个结论：074 族的验证负担完全落在人类数学家身上，且验证对象是一篇 175 页、自造术语密集、与另一篇 97 页稿件耦合的文本。稿件自身对这一风险的措辞是坦率的：“部分未形式化的结果可能存在问题，我们会尽快修复”\upcite{openairepo2026}。
+
+\subsection{发布引发的争议（事实记录）}
+
+AHM 的声明是目前最系统的一份反对文本，其要点为：数学家没有要求这类工作；在 AGMAI 的初始建议明确反对拿内部模型测试高级难题的前提下，OpenAI 仍以咨询组作为合法性来源；一次发布 700 余份文件“展示的不是学术，而是权力”；呼吁数学家停止与 OpenAI 合作、回到以人类理解为中心的科学愿景\upcite{ahm2026,tao2026}。声明由陶哲轩博客以客座帖转载，他本人既未署名、也未表态支持；帖子以下的讨论呈现明显的两极（有人赞赏结果、有人质疑发布方式），这场争论本身在第 9 章还会回到。
+
+OpenAI 一侧的口径是：发布前咨询 AGMAI 并采纳其公开建议；为稿件建立修订与引用协议；为部分证明提供 Lean 形式化；将资助系列研讨会帮助学界理解这些结果\upcite{openairelease2026,agmai2026}。在其更早的“十项进展”发布中，公司对责任边界的表述是：数学论证由系统生成，他们负责整理与形式化，并为正确性负责\upcite{openaiten2026}。
+
+\begin{cautbox}[边界：三件不能混淆的事]
+第一，“未形式化”不等于“错误”，但它改变了举证责任的分布——主张成立的一方需要提供可核验的路径；第二，“未见公开错误”不等于“已验证”——175 页文本中，公开的专业审读记录目前几乎为零；第三，发布方的快速修订机制（撤稿与补丁）说明流程具备纠错能力，但纠错发生在发布之后，与“本文写作完成时结论是否成立”无关。
+\end{cautbox}
+
+\begin{keybox}[可记忆主句]
+这份档案的核心只有一句话：两篇稿件、272 页、零形式化、零审评，且四维篇与三维篇共用一条未经核验的引理——所有关于四维挂谷的讨论，都必须从这里出发。
+\end{keybox}

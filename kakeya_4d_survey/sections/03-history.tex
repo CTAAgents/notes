@@ -1,0 +1,107 @@
+\section{历史脉络与门派图谱：从挂谷宗一到王虹--Zahl}
+
+四维稿件的每一件工具都能在历史上找到来处，而每一处来处又都对应一个研究门派。本章先把主干时间线铺一遍（表 \ref{tab:timeline}），再把门派与工具对号入座（表 \ref{tab:schools}），最后交代四维下界的演进位置（表 \ref{tab:r4bounds}）与一条贯穿全史的现象：挂谷问题本身就是一部跨门派借入史。
+
+\subsection{主干时间线}
+
+\begin{table}[t]
+\centering
+\caption{挂谷问题主干里程碑（1917--2026）}
+\label{tab:timeline}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{1.5cm}L{4.2cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{年份} & \textbf{进展} & \textbf{方法要点与出处} \\
+\midrule
+1917 & 针的翻转问题 & Fujiwara--挂谷宗一提出定宽曲线与针转动的最小面积问题\upcite{fujiwara1917} \\
+1928 & 零测度挂谷集 & Besicovitch 构造面积任意小、可含全部方向的集合\upcite{besicovitch1928} \\
+1971 & 平面情形解决 & Davies 证明平面挂谷集 Hausdorff 维数为 2\upcite{davies1971} \\
+1971 & 与 Fourier 分析接通 & Fefferman 用管族重叠构造球乘子反例\upcite{fefferman1971} \\
+1977 & 平面极大函数 & C\'ordoba 给出平面极大估计\upcite{cordoba1977} \\
+1991 & 高维机制 & Bourgain 建立高维极大估计与限制猜想的联系\upcite{bourgain1991} \\
+1995 & 发刷界 $(n+2)/2$ & Wolff 的“发刷”方法在 $\mathbb{R}^4$ 给出维数下界 3\upcite{wolff1995} \\
+1999 & 加法组合入场 & Bourgain 把线关联与和集、差集估计挂钩\upcite{bourgain1999} \\
+2000 & 三结构分类 & Katz--\L aba--Tao 识别粘性、平面性、颗粒性三种极端结构\upcite{klt2000} \\
+2001 & 中维改进 & \L aba--Tao 在 $n\ge 4$ 把 Minkowski 下界推过 $(n+2)/2$\upcite{labatao2001} \\
+2002 & 和差集迭代 & Katz--Tao 发展迭代式算术方法\upcite{katztai2002} \\
+2006 & 多线性化 & Bennett--Carbery--Tao 建立多线性 Kakeya 定理\upcite{bct2006} \\
+2009 & 多项式方法 & Dvir 解决有限域挂谷猜想\upcite{dvir2009} \\
+2010 & 多线性端点 & Guth 给出端点形式\upcite{guth2010} \\
+2015 & 多项式划分 & Guth--Katz 的多项式划分技术成形\upcite{guthkatz2015} \\
+2018 & 多项式 Wolff 公理 & Guth--Zahl、Zahl、Katz--Rogers 联合给出 $\mathbb{R}^4$ 下界 $3+1/40$\upcite{guthzahl2018,zahl2018,katzrogers2018} \\
+2021 & 平面刷 & Katz--Zahl 在 $\mathbb{R}^4$ 把 Hausdorff 下界推到 3.059\upcite{katz2021} \\
+2022 & 粘性情形 & Wang--Zahl 证明粘性挂谷猜想\upcite{wangz2022} \\
+2024 & Assouad 维数 & Wang--Zahl 给出 $\mathbb{R}^3$ 的 Assouad 维数定理\upcite{wangz2025assouad} \\
+2025 & 三维全解 & Wang--Zahl 的 127 页论文解决三维集合猜想\upcite{wangz2025} \\
+2026 & 三维简化 & Guth--Wang--Zahl 给出流线化证明\upcite{gwz2026} \\
+2026 & OpenAI 手稿 & 三维极大函数与四维 Hausdorff 维数（后续章节讨论）\upcite{openai3d2026,openai4d2026} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+时间线上有两个转折值得单独指出。第一个是 1971 年前后：Fefferman 的反例把“管族重叠”这个几何对象与球乘子这类分析算子的有界性绑在一起\upcite{fefferman1971}，从此挂谷问题不再只是组合几何的智力游戏，而成为调和分析的基础设施问题。第二个是 2009 年前后：Dvir 用多项式方法解决有限域版本\upcite{dvir2009}，随后 Guth--Katz 的多项式划分技术在欧氏空间“落地”\upcite{guthkatz2015}，到 2018 年演化为多项式 Wolff 公理体系\upcite{guthzahl2018,katzrogers2018}。这两次转折都不是挂谷内部自生的——第一次借的是 Fourier 分析的问题意识，第二次借的是有限域与组合几何的多项式方法。
+
+\subsection{门派图谱}
+
+\begin{table}[t]
+\centering
+\caption{挂谷问题相关门派与核心工具}
+\label{tab:schools}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{2.6cm}L{4.4cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{门派} & \textbf{核心工具} & \textbf{代表工作与角色} \\
+\midrule
+组合几何与几何测度 & 发刷、投影、Wolff 公理、近失（near-miss）反例 & Wolff\upcite{wolff1995}；Heisenberg 群、$SL_2$ 与二次超曲面反例界定了各方法的能力边界\upcite{zahl2025survey} \\
+调和分析/极大算子 & 极大函数、限制估计、多线性 Kakeya & Fefferman、C\'ordoba、Bourgain、Bennett--Carbery--Tao；Bourgain--Guth 的多线性$\to$线性论证\upcite{fefferman1971,cordoba1977,bourgain1991,bct2006,bourgainguth2011} \\
+加法组合 & 和差集迭代、Balog--Szemer\'edi 型定理 & Bourgain 1999 与 Katz--Tao 2002 把算术结构引入管族分析\upcite{bourgain1999,katztai2002} \\
+多项式方法 & 多项式划分、Wolff 公理、Severi 型代数几何 & Dvir 2009 起点；Guth--Zahl、Zahl 把它做成 $\mathbb{R}^4$ 的主力工具\upcite{dvir2009,guthzahl2018,zahl2018} \\
+极值与加权纲领 & 粘性、阴影（shading）、加权计数、极值反证 & Katz--Zahl 平面刷、Wang--Zahl 粘性与加权纲领、Guth--Wang--Zahl 流线化\upcite{katz2021,wangz2022,wangz2025,gwz2026} \\
+分形几何与熵投影（邻近门派） & 熵平均、投影定理、Furstenberg 型估计、Fourier 衰减 & Hochman--Shmerkin、Ren--Wang、Orponen 系列；此前主要服务距离集与投影问题\upcite{hochmanshmerkin2012,renwang2025,orponend2024} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+表 \ref{tab:schools} 的最后一栏是本文的一个铺垫：分形几何与熵投影这一门派，长期与挂谷问题相邻但并未深度介入主线。它们研究的是“集合在投影、距离、卷积之后还剩多少复杂度”，工具是熵与 Fourier 衰减；挂谷主线关心的是“方向的几何如何制造重叠”。两边的对象不同、语言不同，交流不多。对希望进入此题的读者，Wolff 的讲义至今仍是门内的标准入门读物\upcite{wolffbook2003}；OpenAI 手稿最引人注目的一点，正是把前一个门派的语言大规模翻译进挂谷问题——细节留到第 7 章。
+
+\subsection{三维是怎么被拿下的}
+
+三维的胜利来自极值纲领与结构分类的合流。Katz--\L aba--Tao 早就指出，逼近极端的管族要么在跨尺度上保持成组（粘性），要么在交点附近近似共面（平面性），要么并集组织成薄片（颗粒性）\upcite{klt2000}。Katz--Zahl 后来把三维 Hausdorff 下界推过 $5/2$\upcite{katz2019}，为粘性纲领补上了最后的中间台阶。此后二十年，业界始终无法把这三类结构做成一整套证明。
+
+Wang--Zahl 分三步走完了这段路。2022 年先攻粘性情形\upcite{wangz2022}，2024 年拿下 Assouad 维数版本\upcite{wangz2025assouad}，2025 年 2 月的 127 页论文同时解决三维的 Hausdorff 与 Minkowski 维数\upcite{wangz2025}。随后 Guth--Wang--Zahl 给出流线化证明，把关键结构提炼为“凸聚类”条件下的并集估计——这条估计后来成为 OpenAI 两篇稿件共同的入口\upcite{gwz2026}。
+
+三维的胜利有一个容易被忽略的特征：它的核心工具（凸聚类、棱柱、阴影、多尺度归纳）几乎全部来自门内。Nets Katz 评价 2025 年的结果“百年一遇”\upcite{guangming2026}，而这个结果本身是挂谷研究传统内部工具链成熟的产物。
+
+\subsection{四维的现状：下界演进}
+
+四维的情形完全不同。表 \ref{tab:r4bounds} 汇总了手稿出现之前的下界演进。
+
+\begin{table}[t]
+\centering
+\caption{$\mathbb{R}^4$ 挂谷问题的下界演进（手稿发布前）}
+\label{tab:r4bounds}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{2.4cm}L{2.2cm}L{2.2cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{年份/工作} & \textbf{Hausdorff 下界} & \textbf{极大参数下界} & \textbf{方法} \\
+\midrule
+Wolff 1995\upcite{wolff1995} & $3$ & —— & 发刷 \\
+\L aba--Tao 2001\upcite{labatao2001} & $>3$（上 Minkowski） & —— & 多尺度几何结构 \\
+Guth--Zahl 等 2018\upcite{guthzahl2018,zahl2018,katzrogers2018} & $3+\frac{1}{40}\approx 3.025$ & —— & 多项式 Wolff 公理 \\
+Katz--Zahl 2021\upcite{katz2021} & $3.059$ & $3.049$ & 平面刷 \\
+Borges 等 2025\upcite{borges2025} & —— & $\frac{159+\sqrt{145}}{56}\approx 3.0543$ & 平面刷 + 两端 Furstenberg 估计 \\
+Rai Choudhuri 2026（粘性集）\upcite{raichoudhuri2026} & $\frac{13}{4}=3.25$（限粘性） & —— & 粘性纲领 \\
+OpenAI 手稿 2026\upcite{openai4d2026} & 声称 $4$ & ——（未触及四维极大） & 二次图卡 + 地平线 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+两个细节值得留意。其一，四维 Hausdorff 下界从 3 爬到 3.059 用了二十六年，改进幅度不到 2\%，说明门内手段接近枯竭；其二，粘性情形的 3.25 是条件性结果，对任意挂谷集无效\upcite{wangz2025,raichoudhuri2026}。手稿若成立，等于把停在小数点后第二位的量直接推到理论上限，这一跨度的可信度评估必须结合验证状态一并看（第 9 章）。
+
+\subsection{一条贯穿全史的现象}
+
+回看表 \ref{tab:timeline}：加法组合来自 Bourgain 的算术视角\upcite{bourgain1999}，多项式方法来自有限域与组合几何\upcite{dvir2009}，多线性估计来自限制理论\upcite{bct2006}。挂谷问题每一次大踏步，背后都是一次跨门派借入。这条规律给第 7 章的谱系分析提供了参照系：OpenAI 手稿引入熵、耦合与实代数几何工具，并非异类，而是延续了同一个传统；问题只在于，这次借入的工具距离门内语言更远，消化成本更高。
+
+\begin{keybox}[可记忆主句]
+三维的解法是勾稽传统工具的集大成之作；四维的下界几十年只挪了小数点后两位，而防线之间的距离悬殊，正是 OpenAI 手稿引发关注的根源。
+\end{keybox}

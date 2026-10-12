@@ -13,6 +13,7 @@
 | [ai_flavor_survey](ai_flavor_survey) | 生成式文本“AI 味”的成因、表现、检测与去除方法综述，附核心证据表与统一比较矩阵 | tex + pdf + html + 图表 |
 | [期货交易策略深度综述](期货交易策略深度综述) | 按利润来源把期货策略重构为趋势、均值回归、Carry、截面四支主干，正文约两万字，附可复现实验建议 | tex + pdf + 分页图 |
 | [精神分析金融交易综述](精神分析金融交易综述) | 精神分析视角在金融交易行为研究中的文献综述，含普通版与深度版两个成稿及文献检索脚本 | docx（两版）+ 脚本 |
+| [kakeya_4d_survey](kakeya_4d_survey) | 《OpenAI 四维挂谷猜想工作综述》：核验两篇 OpenAI 手稿的事实状态与依赖链，重建四维证明的技术骨架，以四分类法梳理核心技术的继承、门内改造与跨门派借入，附装置精确定义与极值原理对比附录 | tex + pdf + 修改说明 |
 
 ## 系统教程
 
@@ -54,6 +55,7 @@
       xelatex market_regime_tutorial
 
 - 统一编译环境为 XeLaTeX 加 ctex 宏包，纸张 A4，不适用 pdflatex。
+- `kakeya_4d_survey` 另附 `build.ps1`（PowerShell 7）：多遍 XeLaTeX 自动收敛、日志体检（零错误、零 Overfull、零缺字、零书签告警）与 `-Clean` 中间文件清理；手工编译时主文件名为 `OpenAI四维挂谷猜想工作综述`。
 - `精神分析金融交易综述` 为 docx 成品，没有 LaTeX 源文件；`ai_flavor_survey` 另提供可直接阅读的 HTML 版本。
 
 ## 使用与引用

@@ -1,0 +1,52 @@
+\section{核验优先级清单}
+
+本附录把第 9.4 节的路线图落成可打勾的清单，供核验小组直接使用。每条给出：核验对象、依赖、建议投入量级、完成标志（DoD，Definition of Done）与常见陷阱。
+
+\subsection{第一优先级：链条根部（建议先行）}
+
+\begin{table}[ht]
+\centering
+\caption{第一优先级核验清单}
+\label{tab:check1}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{2.4cm}L{2.4cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{对象} & \textbf{依赖} & \textbf{完成标志与陷阱} \\
+\midrule
+三维篇加权板条引理段（含加权凸聚类推导） & Guth--Wang--Zahl 并集估计原文\upcite{gwz2026} & DoD：自足推导一份，专家复核无缺环；陷阱：凸聚类条件与阴影密度阈值之间的换算是全链最容易“差一个幂”的位置 \\
+四维篇 M1（Theorem 2.17 归约） & 上一条 + 四维篇第 2 章 & DoD：逐步假设审计表（E2）；陷阱：外层测度可数次可加性选段处的可测性处理、容量类两条条件的导出顺序 \\
+三维篇极大估计的主定理路线（$h(p,z)=0$） & 三维篇 §2--§10 & DoD：把“临界指数为正 $\Rightarrow$ 取等配置”的机件复演一遍；陷阱：规范剖面 $F(s)=\beta(s-\tau)_{+}$ 的最小推迟论证 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{第二优先级：机制密度最高的两处}
+
+\begin{table}[ht]
+\centering
+\caption{第二优先级核验清单}
+\label{tab:check2}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{2.4cm}L{2.4cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{对象} & \textbf{依赖} & \textbf{完成标志与陷阱} \\
+\midrule
+四维篇 M2（比较原理，第 3 章） & M1 & DoD：列表匹配的体积论证逐步复核；陷阱：导数/采样界的边界情形（列表“频繁取值一致”的定量含义） \\
+四维篇 M3（Proposition 4.11 与 Lemma 4.12） & M1、M2 & DoD：回填步骤的全变差估计独立推导；陷阱：原律恢复时“不向列表规则暴露未观测标签”的约定 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{第三优先级：三区间与收口（可并行）}
+
+M4--M7 按第 9.4 节的表 \ref{tab:modules} 执行；配套独立课题 E1--E5 的验收标准见第 10 章的表 \ref{tab:entrypoints}。三区间内部的建议顺序：各向同性（M4，含次数恢复）$\to$ 有限窄度（M6，含水平模型与临界速率）$\to$ 无界窄度（M7，含收口）。
+
+\subsection{通用核验规范（建议）}
+
+\begin{dirbox}[核验工作规范]
+（i）每一步的结论必须写成“假设 → 断言 → 常数依赖”的三元组，禁止转述性省略；（ii）任何“明显地”“容易看出”手稿用语，一律展开为显式推导；（iii）所有指数比较必须给出正间隙的数值下界（手稿的全局约定是在分辨率趋于无穷前保持固定正间隙，核验时沿用\upcite{openai3d2026,openai4d2026}）；（iv）每日核验记录以“可复核的最小反例搜索”收尾：对小规模离散模型做一轮反例扫描；（v）发现缺口时按手稿的修订协议格式登记（对象、位置、缺口类型、最小修复猜想），便于与发布方版本管理对接\upcite{openairepo2026}。
+\end{dirbox}
+
+\begin{cautbox}[三张账分开记]
+正确性账：按本清单走；理解账：概念蒸馏与再表述（第 10 章轨道二第 3 条）；影响账：独立审读周期与概念复用率的长期跟踪（第 10 章轨道四第 3 条）。三张账混记，是当前讨论最大的方法论混乱之源。
+\end{cautbox}

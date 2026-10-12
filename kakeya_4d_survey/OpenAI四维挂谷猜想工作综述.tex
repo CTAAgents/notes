@@ -1,0 +1,187 @@
+% !TeX program = xelatex
+% ============================================================
+%  OpenAI 四维挂谷猜想工作综述
+%  数学思想脉络、核心技术谱系与验证状态
+%  作者：TRAE-Work、Deepseek-V4.1-Flash
+%  编译：xelatex 多遍自动收敛（见 build.ps1）
+% ============================================================
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage{geometry}
+\geometry{left=2.4cm,right=2.4cm,top=2.6cm,bottom=2.6cm}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{array,booktabs,tabularx,multirow}
+\usepackage[dvipsnames,table]{xcolor}
+\usepackage{enumitem}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+\usepackage{caption}
+\usepackage[section]{placeins}
+\usepackage{hyperref}
+
+% ---------- 配色（藏青主色 + 天蓝辅助 + 浅底） ----------
+\definecolor{navy}{HTML}{1F3864}
+\definecolor{sky}{HTML}{2E75B6}
+\definecolor{lightbg}{HTML}{F2F6FB}
+\definecolor{lightline}{HTML}{D6E4F0}
+\definecolor{warnc}{HTML}{9C4221}
+\definecolor{tealc}{HTML}{1F6F63}
+\definecolor{greyx}{HTML}{5A6472}
+
+% ---------- 中英文间距 0.22em ----------
+\xeCJKsetup{CJKecglue={\hskip 0.22em}}
+
+% ---------- 版式 ----------
+\linespread{1.35}
+\setlength{\parindent}{2em}
+\renewcommand{\arraystretch}{1.35}
+
+% 浮动体参数：允许每页多放表格，避免堆积到文末
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.5}
+\renewcommand{\textfraction}{0.08}
+\renewcommand{\floatpagefraction}{0.75}
+
+% 表格列类型：raggedright，避免窄列单元格拉伸产生 Underfull
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\ctexset{
+  section = {format = {\color{navy}\bfseries\large}, beforeskip = {14pt plus 3pt minus 2pt}, afterskip = {9pt plus 2pt minus 2pt}},
+  subsection = {format = {\color{navy}\bfseries}, beforeskip = {10pt plus 2pt minus 2pt}, afterskip = {6pt plus 1pt minus 1pt}},
+  subsubsection = {format = {\color{sky}\bfseries}, beforeskip = {8pt plus 2pt minus 2pt}, afterskip = {5pt plus 1pt minus 1pt}}
+}
+
+% ---------- 定理环境（标题上色，正文正体） ----------
+\newtheoremstyle{navystyle}{0.6em}{0.6em}{\normalfont}{}{\color{navy}\bfseries}{}{0.6em}{}
+\newtheoremstyle{skystyle}{0.6em}{0.6em}{\normalfont}{}{\color{sky}\bfseries}{}{0.6em}{}
+\theoremstyle{navystyle}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{corollary}[theorem]{推论}
+\theoremstyle{skystyle}
+\newtheorem{definition}[theorem]{定义}
+\newtheorem{remark}[theorem]{注}
+\newtheorem{example}[theorem]{例}
+
+% ---------- 卡片（标签独立成行，避免与正文重叠） ----------
+\newtcolorbox{keybox}[1][关键判断]{breakable, enhanced, frame hidden, colback = lightbg,
+  left = 3.2mm, right = 2.4mm, top = 0.8mm, bottom = 1.6mm,
+  borderline west = {1.6pt}{0pt}{navy},
+  coltitle = navy, colbacktitle = lightbg, fonttitle = \bfseries\small,
+  titlerule = 0pt, title = {#1},
+  before skip = 7pt, after skip = 7pt,
+  fontupper = \normalfont\small
+}
+\newtcolorbox{evbox}[1][证据]{breakable, enhanced, frame hidden, colback = lightbg,
+  left = 3.2mm, right = 2.4mm, top = 0.8mm, bottom = 1.6mm,
+  borderline west = {1.6pt}{0pt}{sky},
+  coltitle = sky, colbacktitle = lightbg, fonttitle = \bfseries\small,
+  titlerule = 0pt, title = {#1},
+  before skip = 7pt, after skip = 7pt,
+  fontupper = \normalfont\small
+}
+\newtcolorbox{cautbox}[1][边界与不确定性]{breakable, enhanced, frame hidden, colback = lightbg,
+  left = 3.2mm, right = 2.4mm, top = 0.8mm, bottom = 1.6mm,
+  borderline west = {1.6pt}{0pt}{warnc},
+  coltitle = warnc, colbacktitle = lightbg, fonttitle = \bfseries\small,
+  titlerule = 0pt, title = {#1},
+  before skip = 7pt, after skip = 7pt,
+  fontupper = \normalfont\small
+}
+\newtcolorbox{dirbox}[1][方向建议]{breakable, enhanced, frame hidden, colback = lightbg,
+  left = 3.2mm, right = 2.4mm, top = 0.8mm, bottom = 1.6mm,
+  borderline west = {1.6pt}{0pt}{tealc},
+  coltitle = tealc, colbacktitle = lightbg, fonttitle = \bfseries\small,
+  titlerule = 0pt, title = {#1},
+  before skip = 7pt, after skip = 7pt,
+  fontupper = \normalfont\small
+}
+
+% ---------- 置信度标签 ----------
+\newcommand{\cfH}{\textcolor{navy}{\textbf{〔置信度：高〕}}}
+\newcommand{\cfM}{\textcolor{sky}{\textbf{〔置信度：中〕}}}
+\newcommand{\cfL}{\textcolor{warnc}{\textbf{〔置信度：低〕}}}
+
+% ---------- 上标引用 ----------
+\newcommand{\upcite}[1]{\textsuperscript{\citep{#1}}}
+\newcommand{\upcites}[1]{\textsuperscript{[#1]}}
+
+% ---------- 参考文献 ----------
+\renewcommand{\refname}{参考文献}
+\newcommand{\bibtype}[1]{[#1]}
+
+% ---------- 超链接 ----------
+\hypersetup{
+  colorlinks = true,
+  linkcolor = navy,
+  citecolor = sky,
+  urlcolor = sky,
+  bookmarksnumbered = true,
+  pdftitle = {OpenAI 四维挂谷猜想工作综述：数学思想脉络、核心技术谱系与验证状态},
+  pdfauthor = {TRAE-Work, Deepseek-V4.1-Flash}
+}
+
+\begin{document}
+
+% ---------- 标题区 ----------
+\begin{center}
+  {\LARGE\bfseries\color{navy} OpenAI 四维挂谷猜想工作综述}\\[7pt]
+  {\large\color{navy} 数学思想脉络、核心技术谱系与验证状态}\\[12pt]
+  {\normalsize TRAE-Work、Deepseek-V4.1-Flash}\\[12pt]
+  {\color{navy}\rule{0.86\textwidth}{1.1pt}}\\[2pt]
+  {\color{sky}\rule{0.86\textwidth}{0.5pt}}
+\end{center}
+
+\vspace{4pt}
+\noindent\textbf{\color{navy}摘\quad 要}：\input{sections/00-abstract-zh}
+\vspace{4pt}
+
+\noindent\textbf{\color{navy}关键词}：挂谷猜想；Kakeya 集；Hausdorff 维数；极大函数；调和分析；AI 辅助数学；形式化验证
+
+\vspace{4pt}
+\noindent\textbf{\color{navy}MSC (2020)}：42B25；28A78；42B10；68V20
+
+\vspace{6pt}
+\noindent\textbf{\color{navy}Abstract.}\ \input{sections/00-abstract-en}
+
+\vspace{4pt}
+\noindent\textbf{\color{navy}Keywords}：Kakeya conjecture; Kakeya set; Hausdorff dimension; maximal function; harmonic analysis; AI for mathematics; formal verification
+
+\vspace{10pt}
+\noindent\textbf{\color{navy}阅读约定}：本文所有涉及 OpenAI 稿件的结论一律表述为“手稿声称”，与已证定理严格区分；涉及事实性断言的句子以上标编号给出出处；分析性判断在正文中明示“本文判断”字样。数学记号见附录 A。
+
+% ---------- 目录 ----------
+\vspace{8pt}
+{\setlength{\parskip}{2pt}\tableofcontents}
+
+\clearpage
+
+\input{sections/01-intro}
+\input{sections/02-essence}
+\input{sections/03-history}
+\input{sections/04-record}
+\input{sections/05-skeleton}
+\input{sections/06-lineage-inherit}
+\input{sections/07-lineage-cross}
+\input{sections/08-matrix}
+\input{sections/09-gap}
+\input{sections/10-next}
+\input{sections/11-conclusion}
+
+\appendix
+\input{sections/A-notation}
+\input{sections/B-checklist}
+\input{sections/C-devices}
+
+% 参考文献前强制清空浮动队列，防表格漂入文献区
+\FloatBarrier
+\input{refs}
+
+\end{document}

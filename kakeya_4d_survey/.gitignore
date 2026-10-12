@@ -1,0 +1,6 @@
+# LaTeX 编译中间文件
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz

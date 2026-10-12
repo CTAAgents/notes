@@ -1,0 +1,67 @@
+\section{技术谱系（一）：直系继承与门内改造}
+
+第 5 章重建了“怎么证”，本章回答“从哪来”。用户关心的问题是：在手稿使用的全部核心技术里，哪些是挂谷研究门派内部已有的资产，哪些是门派没有用过的东西；哪些跨了门派、跨了子学科。先把分类法与证据规则立好，再逐条归档。
+
+\begin{keybox}[四分类法]
+\textbf{A 直系继承}：门内成熟工具，角色基本不变或仅有加强；\textbf{B 门内改造}：能找到门内前身，但对象或角色被结构性替换；\textbf{C 跨门派借入}：工具来自挂谷传统之外，需要翻译才能使用；\textbf{D 谱系内首次系统使用}：以现有检索范围未见等价先例。A、B 归本章，C、D 归第 7 章。
+\end{keybox}
+
+证据规则有三条，全部可复核。第一，以手稿自述为准绳：稿件在标明来源时使用 adapts、built on、uses 之类的措辞，本文直接采信并标注；第二，以门内综述（Zahl 2025 挂谷综述）描述的“工具箱清单”为基线，判断某工具是否属于门派内标准装备\upcite{zahl2025survey}；第三，对门内两篇主力文献（Wang--Zahl 127 页、Guth--Wang--Zahl 47 页）做全文关键词扫描，用词频对照为“未使用”类断言提供量化证据（扫描结果见第 7.3 节）。三条规则解决不了的情形（例如某工具以别名出现、或只在小范围讨论中出现过），一律降低置信度并写明理由。
+
+\subsection{直系继承清单}
+
+\begin{table}[t]
+\centering
+\caption{直系继承的门内资产}
+\label{tab:inherit}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{3.1cm}L{4.2cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{门内资产} & \textbf{来源} & \textbf{在手稿中的角色} \\
+\midrule
+发刷方法与近失反例传统 & Wolff 1995；Heisenberg、$SL_2$、二次超曲面反例\upcite{wolff1995,zahl2025survey} & 划定四维障碍的形状（二次曲面可载三维线族），为“二次图卡”提供问题意识 \\
+多项式 Wolff 公理谱系 & Guth--Zahl、Zahl、Katz--Rogers\upcite{guthzahl2018,zahl2018,katzrogers2018} & 直接继承为“对低次代数曲面聚集的控制”这一主题；对象层面经改造（见 6.2 节） \\
+Guth--Wang--Zahl 并集估计 & 流线化证明的第 1.1 节估计\upcite{gwz2026} & 经三维篇的加权板条引理进入四维归约，是依赖链的根 \\
+多元 Kakeya（行列式形式） & Bennett--Carbery--Tao、Guth、Carbery--Valdimarsson\upcite{bct2006,guth2010,carberyvaldimarsson2013} & 各向同性区间的方向独立性控制与组合工具 \\
+平面刚性输入 & Wang--Zahl 限制三元组点积定理；Ren--Wang 平面 Furstenberg 估计（Wang--Wu 形式）；Orponen--Shmerkin--Wang 投影估计\upcite{wangz2022,renwang2025,wangwu2024,orponensw2024} & 三维篇的平面填充与四维篇的平面刚性（“保边”改造见第 7 章） \\
+阴影与加权计数语言 & Katz--Zahl 平面刷的 shadow 计数；Wang--Zahl 的 shading 体系\upcite{katz2021,wangz2022} & 三维篇仍用阴影语言（全文 48 次），四维篇转写为“入射选择 + 覆盖量”的测度语言 \\
+棱柱—板条工具箱 & Wang--Zahl 的 prism 体系（全文 335 次）→ Guth--Wang--Zahl 的 plank（71 次）\upcite{wangz2025,gwz2026} & 三维篇的“全时段板条 + 加权聚类”（82 次），再传入四维篇 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+表 \ref{tab:inherit} 里藏着一个值得单独指出的传递现象：门内的空间记账单位经历了一条清晰的演化——\textbf{棱柱（prism）}在 Wang--Zahl 处是主力对象，到 Guth--Wang--Zahl 被\textbf{板条（plank）}取代（词频从 335 次降到 71 次），到 OpenAI 三维篇进一步变成\textbf{加权全时段板条}（plank 82 次、prism 归零）。四维篇拿到的，其实不是王虹--Zahl 的原始工具，而是经过 Guth--Wang--Zahl 流线化、再由 OpenAI 三维篇加权化之后的第三代资产。这份手稿在数学继承上的“血缘”相当近。
+
+\subsection{门内改造清单}
+
+\begin{table}[t]
+\centering
+\caption{门内改造：可辨认的前身与结构性替换}
+\label{tab:modify}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{3.1cm}L{4.4cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{改造项} & \textbf{门内前身} & \textbf{替换内容} \\
+\midrule
+三窄度区间 & Katz--\L aba--Tao 的粘性/平面性/颗粒性三形态分类\upcite{klt2000} & 形态穷举换为参数分层：按最优窄度 $\ell$ 划三区间，用极值选择导出一致的改进目标，规避“四维聚集形态可能穷举不尽”的风险 \\
+二次图卡体系 & 多项式划分与多项式 Wolff 公理\upcite{guthkatz2015,guthzahl2018} & 全局“划分 + 排除坏集”换为局部“移动盒 + 二次测试 + 质量约束 + 可嵌套归一化”；对二次结构的利用从抑制改为拟合 \\
+密度幂接力 & Wang--Zahl 定理后遗留的 $\lambda^{K(\varepsilon)}\to\lambda^{3}$ 问题\upcite{openai3d2026,wangz2025} & 三维篇按文献线索原样接管该问题，把“补一个尖锐幂次”当作独立目标完成 \\
+极值机制的转写 & 近失反例的构造传统；粘性纲领的极值配置分析\upcite{zahl2025survey,wangz2022} & 把“构造反例测试方法极限”转写为“反例逼出正时间代价（地平线），再用改进与极值性对撞”的证明资源 \\
+连续化记账 & 门内的离散尺度层级（dyadic 尺度上逐层归纳） & 时间代价 $h$ 与密度剖面 $f(r)$ 的连续指数记账（含 Lipschitz 剖面与容量类 $\mathcal{C}(d)$） \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+表 \ref{tab:modify} 中前两行是本章最重要的判断（\cfM）：四维篇对门内范式的替换，集中在“分类对象”与“拟合载体”两处。三维的粘性/平面性/颗粒性分类，本质上是对近极端管族做形态学穷举；这套方法在三维有效，是因为低维空间中可利用的代数退化形态有限。四维里能承载大量线族的代数集合骤然增多（二次超曲面只是开端），穷举路线前景暗淡，于是手稿改用参数分层：不问“形态是什么”，改问“最优窄度参数落在哪一段”。类似地，多项式划分把“低次多项式零点集”当作抑制聚集的工具（划分单元、排除坏集），而图卡把“二次多项式测试”当作拟合聚集的载体（在移动盒上让测试保持在允许厚度内）——同属多项式语言，姿态从防守转为进攻。
+
+第三行的“接力”值得补充一个细节：三维篇导言明确写着，$\lambda^{K(\varepsilon)}$ 换成 $\lambda^{3}$ 的需要在 Wang--Zahl 定理之后被明确提出，并给出定位\upcite{openai3d2026,wangz2025}。这不是事后附会——遗留问题写在文献里，手稿把它捡起来做完了。这类“拾遗式”选题与四维篇的“跨越式”选题（从 3.059 直接声称到 4）性质不同，验证负担也不同：三维篇若成立，是一次完成度很高的接力；四维篇若成立，则是一次范式级的推进。
+
+\subsection{继承的边界}
+
+\begin{cautbox}[未继承的东西]
+手稿把门内的数学资产继承得相当完整，却没有继承门内的验证标准。三维挂谷证明（王虹--Zahl）的 Lean 4 形式化已由中科院 MMAT 团队与 Project Numina 等合作完成\upcite{numina2026}，而 074 族两篇稿件在仓库形式化清单中不存在任何条目\upcite{openairepo2026}。“继承数学、不继承验证”这一点，是本文对谱系分析给出的第一个带判断的结论（\cfH）——它的后果在第 9 章展开。
+\end{cautbox}
+
+\begin{keybox}[可记忆主句]
+这份手稿在门内的血缘比表面看起来更近：它继承的不是二十年前的发刷，而是刚刚流线化、又被自己加权化的第三代板条工具；真正的替换只发生在两处——分类对象与拟合载体。
+\end{keybox}

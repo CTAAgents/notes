@@ -1,0 +1,174 @@
+\section{核心装置：精确定义、极值原理与语言映射}
+
+本附录为第 5、7、11 章提供精确支撑，分三部分：C.1 转录四维篇关键装置的定义与命题形态（含编号定位，便于逐条核对）；C.2 把“地平线”与传统极值反证做形式化对比；C.3 给出三套外门派语言的映射表。需要先声明一句：以下定义与命题均属\textbf{手稿声称的结构}，本文转录它们是为了说明“装置长什么样”，不构成对其正确性的背书。
+
+\subsection{装置的精确定义（依四维篇编号）}
+
+\subsubsection*{图卡、真图卡与已知图集（Definition 2.8）}
+
+图卡系统在深度 $r\in(0,L]$ 上把一个公共二分时间划分成区间 $I$，长度
+\begin{equation}
+q=N_0^{-h+o(1)},\qquad h\ge 0,
+\end{equation}
+在每个世界与每个区间内把不相交的轨迹集 $A_c$ 分配给图卡标签 $c$，选定入射的总质量至少 $K_0^{-1}$。每张图卡配一组几何数据：仿射空间中心 $y_c(t)$ 与可逆矩阵 $D_c$，满足
+\begin{equation}
+\|D_c\|\le qK_0,\qquad J_c=|\det D_c|,\qquad \sup_{t\in I}\bigl|D_c^{-1}(y(t)-y_c(t))\bigr|\le K_0\quad (l\in A_c),
+\end{equation}
+并配一个二次多项式测试 $P$（“测试保持在允许厚度内”的精确含义）：
+\begin{equation}
+\begin{aligned}
+&\sup_{t\in I}|P(t,y(t),w(t))|\le K_0a_r,\qquad
+\sup_{t\in I}|\partial_wP|\le K_0B,\\
+&|\partial_wP|\ge B/K_0\ \text{（在选定入射上）},\qquad
+|\partial_{ww}P|\le K_0B^2/a_r .
+\end{aligned}
+\end{equation}
+两条质量分别记录：分配轨迹测度 $\nu_c$ 与选定入射测度 $m_c$。\textbf{真图卡}的条件是
+\begin{equation}
+\frac{m_c}{q}\;\ge\;K_0^{-1}\,n(r)\,J_c,
+\label{eq:true}
+\end{equation}
+即“单位时间内的入射质量”不低于典型密度乘空间体积代理；系统全由真图卡组成时称为真系统。\textbf{已知图集}是标签可由观察（按 $p_L$）从一份确定性列表读出的图卡系统，它保留分配、覆盖与温度性（temperedness）要求，但不必满足式 \eqref{eq:true}。三个量的分工在这里已经清楚：$q$ 是时间分辨率，$m_c$ 是覆盖证据，而式 \eqref{eq:true} 把“局部理解”变成了可加比较的量化陈述——这正是它区别于“几何形态假设”（如粘性）的地方。
+
+\subsubsection*{地平线（§1.2 与第 2 章）}
+
+把区间长度写成 $N_0^{-h+o(1)}$ 时的 $h$ 称为\textbf{时间代价}。记 $\mathcal{T}(E)$ 为加权问题 $E$ 的全部真终端图卡系统，$m(\Sigma)$ 为系统 $\Sigma$ 的覆盖量（$N_0^{-o(1)}$ 量级称实质覆盖），则\textbf{地平线}定义为
+\begin{equation}
+H(E)\;=\;\inf\bigl\{\,h(\Sigma)\;:\;\Sigma\in\mathcal{T}(E),\ m(\Sigma)\ge N_0^{-o(1)}\,\bigr\}.
+\label{eq:horizon}
+\end{equation}
+归约定理（Theorem 2.17）的形态是：若 $K\subset\mathbb{R}^4$ 含每个方向的单位线段且 $\dim_{\mathrm{H}}K<4$，则存在 $d<1$ 与属于容量类 $\mathcal{C}(d)$ 的温和齐次精确问题 $E$，使 $H(E)>0$。注意这里的“极值化”是双层结构：外层是 $H(E)$ 对系统的下确界；内层是容量类对密度退化率 $d<1$ 的约束——$d<1$ 恰是比较原理（C.1 下一小节）得以启动的前提。
+
+\subsubsection*{代数叶片与两色匹配（Lemma 3.1--3.3）}
+
+\textbf{代数叶片}指二次测试的局部图像所给出的解析分支：在某条比较路径的邻域内，测试方程的解是函数变量上的仿射函数、线性方程的根或二次方程的简单根，这些分支沿路径可解析延拓。手稿给出的关键定量事实（Lemma 3.2，\emph{延拓的多项式代价}）是：在 $A^{-1}$ 邻域内、端点比较球（半径 $c/A$）上，延拓函数的范数双向比较损失至多 $A^{C}$（$C$ 与方程系数无关），固定阶导数由这些范数控制；该一致界经“半代数描述 + 量词消去”得到——即\emph{常数纪律本身被写成可验证的代数事实}。
+
+两色匹配（Lemma 3.3）是全部列表匹配的定量前提，其否定式陈述为：固定 $D\ge1$、整数 $J>D$、$d_0<1$，不存在 $N\to\infty$ 的序列，同时满足
+\begin{equation}
+\#\{\text{每个列表}\}\le N^{d+o(1)}\ (d\le d_0),\qquad
+\|f\|_{C^{J+1}}\le K=N^{o(1)},\qquad
+\text{边际约束}\ \le K\,\pi_{\kappa,i}\,dt,
+\end{equation}
+\begin{equation}
+|f_{1,i_1}(t)-f_{2,i_2}(t)|\le KN^{-1}
+\quad\text{且}\quad
+\max_{1\le j\le D}\bigl|f^{(j)}_{1,i_1}(t)-f^{(j)}_{2,i_2}(t)\bigr|\ge K^{-1}
+\quad\text{（在保留下来的事件上）}.
+\end{equation}
+直白地说：值接近（$N^{-1}$ 精度）与导数分离（$K^{-1}$ 下限）在同一采样律下不可长期共存，只要列表规模小于任何完整幂（$d<1$）。证明机制是“交替路径 + 端点映射的 Jacobian”：沿两列表交替取样构成多项式端点映射，其像迫使记录数超过列表规模允许的上限；手稿自述这一用法与 Christ 的 incidence 算子细化法（method of refinements）类比\upcite{openai4d2026}。
+
+\subsubsection*{改进的定量定义与转换（Definition 4.10、Proposition 4.11、Lemma 4.6）}
+
+\textbf{时间改进候选}：在准备好的切父块中，对厚度 $a=N^{-s}$、时间长度 $q_s$、轨迹质量 $\nu_Q$ 的路径包 $Q$，一个增益 $c>0$ 的时间改进候选是宽度 $a'=aN^{-c}$ 上的二次测试，满足
+\begin{equation}
+\begin{aligned}
+&|P|\le Ka',\qquad |P_w|\le K,\qquad |P_{ww}|\le K/a',\qquad
+|P_w|\ge K^{-1}\ \text{（计数入射上）},\\
+&m\ge K^{-1}N^{-dc}\nu_Q .
+\end{aligned}
+\end{equation}
+当 $0<\ell<\infty$ 时，记 $g=N^{-\ell s}$，\textbf{条带改进候选}是对固定行 $R$ 要求 $|Y'-R\cdot(1,v)|\le KgN^{-c}$，且作用在质量至少 $K^{-1}\nu_Q$ 的轨迹片上。两句解释性原文值得直译：时间改进候选“在不改变时间块的前提下改进隐藏坐标拟合”，条带改进候选“改进横向速度预测”——改进不是模糊的“更精细”，而是两个具体自由度（隐藏坐标拟合、横向速度）上的定量收益。
+
+\textbf{转换与排除}：Proposition 4.11 把“每个实质残余上都存在候选”升级为原分辨率下的改进输出（含 Lemma 4.12 的列表回填）；Lemma 4.6 则是一份“有限样本排除”清单：它排除的那类原分辨率输出不允许存在。两者相扣，候选假设即不可能——这是四维证明的最终矛盾形态。
+
+\subsubsection*{极值临界路径与三区间的收口（Proposition 4.3、Theorem 6.1、Proposition 10.1）}
+
+Proposition 4.3（\emph{临界路径}）把“极大序列”规范化：长度为一的精确问题的每个最大化序列满足相对密度剖面线性化（斜率 $d^{*}$），且对每个有限有序深度网格存在嵌套真系统，其累积地平线趋于 $kr$、按自身长度单位的分段地平线趋于 $k$——$k$ 即“时间速率”。另一参数 $\ell$ 是同一极值安排下“较小空间轴的优化窄度”。三区间的收口分别落在：各向同性（$\ell=0$）由 Theorem 6.1 给出改进——在每个实质残余中找到厚度 $a=N^{-s}$、长度 $h\sim_{\log,N}a^{k}$ 的包，以及厚度
+\begin{equation}
+a_2=a\,h^{e_2}\quad (e_2>0),\qquad
+m\ge \frac{h\nu_Q}{K}\Bigl(\frac{a_2}{a}\Bigr)^{d},
+\end{equation}
+的时间改进候选；有限窄度（$0<\ell<\infty$）由第 8--9 章的标量投影、水平模型与临界速率 $2k=1$ 处理；无界窄度（$\ell=\infty$）由 Proposition 10.1 排除——在第二模型的极值设置下全局优化窄度 $\ell$ 有限。
+
+\begin{keybox}[为什么这些构成“发明”而非“换名”]
+以三条判据自查，四件装置都过关（本文判断，\cfM）：\textbf{（i）对象此前不存在}——图卡、地平线、两色匹配、改进候选在门内文献中零命中（第 7.3 节词频证据）；\textbf{（ii）角色不可替代}——真性条件 \eqref{eq:true} 堵住“只拟合例外族”的漏洞，两色匹配供给跨尺度延拓的定量前提，改进定义 \eqref{eq:horizon} 之后的候选--转换对才是矛盾引擎；\textbf{（iii）非旧物换名}——“真图卡”是拟合质量判据，与“粘性”这类几何形态假设在逻辑角色上不同：前者可被逐块量化比较，后者是对象的整体性质。判据（iii）也给出反面对照：如果某装置只是把已知对象改换名称，它应当能直接继承旧对象的既有定理；而这四件装置都需要伴随的定量引理（式 \eqref{eq:true}、Lemma 3.2、Lemma 3.3、Lemma 4.6）才能工作。
+\end{keybox}
+
+\subsection{地平线与传统极值反证：形式化对比}
+
+\subsubsection*{两种范式的形式骨架}
+
+\textbf{传统型（取等分析作引擎）}——同一批稿件中的三维篇就是现成样本：假设临界指数 $h(p,z)>0$，由失败导出\textbf{取等序列}（equality sequences）；取等配置的几何被逼进一条规范时间剖面 $F(s)=\beta(s-\tau)_{+}$ 与“同一指标双帧”的投影约束实验；最后按形态逐类排除，与熵需求矛盾\upcite{openai3d2026}。其形式骨架是：
+\begin{equation}
+\text{(T1)}\ \text{估计失败}\; \Longrightarrow\; \exists\ \text{取等序列};\qquad
+\text{(T2)}\ \text{取等对象落在有限个形态类};\qquad
+\text{(T3)}\ \text{逐类矛盾}.
+\end{equation}
+极值对象是\emph{几何配置}（管族、阴影、棱柱、板条）；(T2) 的可行性依赖紧性与极限结构，把“列不出形态”视为主要风险。
+
+\textbf{地平线型（以代价下降为引擎）}——四维篇的骨架是：
+\begin{equation}
+\text{(H1)}\quad \dim_{\mathrm{H}}K<4\ \Longrightarrow\ \exists E:\ H(E)>0,
+\end{equation}
+\begin{equation}
+\text{(H2)}\quad \text{极大路径规范化：相对剖面线性、时间速率 } k \text{、优化窄度 } \ell ,
+\end{equation}
+\begin{equation}
+\begin{aligned}
+&\text{(H3)}\quad \text{在每个实质残余上存在改进候选}\\
+&\qquad\Longrightarrow\ \text{(Prop 4.11) 原分辨率改进输出}\ \Longrightarrow\ \text{(Lemma 4.6) 排除}.
+\end{aligned}
+\end{equation}
+极值对象从\emph{配置}换成了\emph{描述系统} $(\Sigma,h,m)$：被极值化的是“把拟合做到终端厚度”的时间代价 \eqref{eq:horizon}，矛盾项不是“某类形态不可能”，而是“下确界的任何逼近都可被严格改进”。
+
+\subsubsection*{三条本质区别}
+
+\textbf{对象之变：从配置到“描述--代价对”。}传统型的变量是研究对象本身（管族如何重叠、在哪里聚集）；地平线型的变量是关于对象的局部知识（图卡系统对轨迹的拟合质量与覆盖）。把知识状态而非几何状态当作极值对象，是这套机制与门内一切既有反证的第一个断点。
+
+\textbf{引擎之变：从分类排除到普适下降。}传统型的矛盾靠“形态类有限且逐类可杀”；地平线型不需要形态清单，它证明的是一句全称命题——\emph{任何}近乎极值的系统都存在下降方向（时间代价降低，或固定时间下的窄度增益）。分类式论证怕“漏掉新形态”（四维聚集形态可能列不尽），下降式论证不怕：它只需在每个残片制造一次收益，收益本身就是矛盾。
+
+\textbf{前提之变：从紧性到一致性比较。}取等分析需要序列收敛到可分析的极限对象，因此依赖紧性、正则性与极限理论；下降论证不构造极限对象，它依赖的是“局部候选 -> 原问题改进”的转换（Proposition 4.11 与 Lemma 4.12），其技术前提是列表一致性（两色匹配、全变差回填）与指数账目的一致性。用一致性与记账替代紧性，是这套机制可以绕开“四维没有可用紧类”这一死结的原因（本文判断，\cfM）。
+
+\begin{table}[t]
+\centering
+\caption{两种极值反证范式的对照}
+\label{tab:extremal}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{2.7cm}L{5.3cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{维度} & \textbf{传统型（取等分析）} & \textbf{地平线型（代价下降）} \\
+\midrule
+极值对象 & 几何配置（管族/阴影/板条） & 描述系统：图卡系统与其覆盖、时间代价 $h$ \\
+反证输入 & 估计失败或临界指数为正 & 维数亏空 $\Rightarrow H(E)>0$ \\
+存在性原理 & 失败 $\Rightarrow$ 取等序列（需要极限对象） & 亏空 $\Rightarrow$ 正代价（下确界下界；不构造极限对象） \\
+矛盾引擎 & 形态分类 $\to$ 逐类排除 & 普适下降：每个实质残余存在改进候选 $\to$ 转换 $\to$ 排除 \\
+技术前提 & 紧性、正则性、极限理论 & 两色匹配、全变差回填、指数账目一致性 \\
+结论形态 & “不存在取等对象” $\Rightarrow$ 估计成立 & “下确界不可被逼近” $\Rightarrow$ 正下界不可能 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{cautbox}[诚实的边界]
+三条区别描述的是机制结构，不是绝对的谱系断绝。地平线型与“最小反例归纳法”“变分直接方法”都有亲缘：它同样以“极值不可达”收尾，也借用了“改善方向”的直觉。真正的差别在于：它没有把极值对象嵌入紧空间，也没有欧拉--拉格朗日方程，下降发生在离散的描述系统上，由组合与指数账目驱动。因此本文把它定位为\textbf{思想性新意}而不是新范式（\cfM）：它给“极值反证”这一古老工具增加了一个新维度——“关于知识的代价”这一维度。另一个值得记录的旁证是：在同一批稿件内部，三维篇仍走传统取等路线（$F(s)=\beta(s-\tau)_{+}$ 剖面），四维篇才切换为地平线——两代机制的对照在同一系统内部完成，说明这不是评审语言的复制，而是对四维障碍的定向回应（本文判断，\cfM）。
+\end{cautbox}
+
+\subsection{三套外门派语言的映射表}
+
+判断七所称“三套语言”指信息论、分形几何（熵与投影）与实代数几何。表 \ref{tab:langmap} 逐条给出它们的挂谷侧对象与落点命题；三条备注说明分寸：映射不是名词替换，每条都在手稿中被重新证明为定量形式（均有专节）；第四项小借入（极值组合的图版 BSG 与和集演算）见 §7，不纳入三语言框架；钉住（pinning）与乘法卷积是分形几何语言的内部构件，故并入第二行组。
+
+\begin{table}[t]
+\centering
+\caption{三套外门派语言与四维挂谷问题的映射}
+\label{tab:langmap}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}L{2.5cm}L{4.4cm}Y@{}}
+\toprule
+\rowcolor{lightbg}\textbf{语言与构件} & \textbf{挂谷侧对象} & \textbf{映射与落点命题} \\
+\midrule
+信息论：条件熵、互信息 & 观察的鉴别力（隐藏坐标分箱携带的信息量） & 三次、四次项失配的检测与“熵窗口”选择（四维篇 §5，Lemma 5.3 型熵界）；参数分辨率提升的自举（§9） \\
+信息论：联合律与乘积律的耦合比较 & 同一指标的两次观测（双帧） & 两事件共享指标时，实际联合律与乘积律的偏差逼出正互信息需求，与其上界矛盾（三维篇 §8） \\
+信息论：熵链式法则 & 跨尺度记账（动帧熵增量） & 坐标熵率的定义与下界需求（三维篇 §7，四维篇 §5） \\
+分形几何：径向投影 bootstrap & 跨帧参数刚性 & 乘积斜率 $\Delta t\,\Delta\vartheta$ 的钉住估计（三维篇 §9；手稿自述 adapts Shmerkin--Wang 与 Orponen--Shmerkin--Wang）\upcite{shmerkinwang2025,orponensw2024} \\
+分形几何：Furstenberg 型估计 & 平面填充与平面刚性 & 近共面短块上的密度输入与保边平面刚性（三维篇 §4，四维篇 §7）\upcite{renwang2025,wangwu2024} \\
+分形几何：乘法卷积的 Fourier 衰减 & 标量系数的小区间概率 & 平面刚性工具的前置构造（四维篇 Prop 7.6 之前）\upcite{orponend2024} \\
+分形几何：投影与熵平均 & 非集中性与降维 & 标量投影定理（四维篇 Theorem 8.2）与条件非集中估计\upcite{hochmanshmerkin2012} \\
+实代数几何：半代数描述、量词消去 & 论证的复杂度纪律 & “温和数据”装置（Definition 2.2）与全局一致有界性（Lemma 3.2 的证明）\upcite{bpr2006} \\
+实代数几何：Bernstein--Remez 类 & 多项式拟合的导数与端点控制 & 次数恢复（Prop 6.8）：Remez 迭代 + 四方向 Vandermonde 求逆定出三次项\upcite{roytwaryomdin1997} \\
+实代数几何：解析分支与延拓 & 代数叶片的路径延拓 & 端点比较球上的一致范数界（Lemma 3.2；本附录 C.1） \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{keybox}[可记忆主句]
+三套语言各自承担不可替代的职责：信息论把“失配”变成可计算的信息量，分形几何供给投影与刚性输入，实代数几何规定一致性与常数的纪律——借入的不是定理，而是看问题的方式，而每种方式都被重新证明成了定量形式。
+\end{keybox}

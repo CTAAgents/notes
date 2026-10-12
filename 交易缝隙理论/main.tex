@@ -1,0 +1,58 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{xltabular}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=black
+}
+
+\captionsetup{font=small,labelfont=bf}
+\newtheorem{definition}{定义}[section]
+\newtheorem{proposition}{命题}[section]
+\newtheorem{corollary}{推论}[section]
+\newtheorem{remark}{注}[section]
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+\setlist{topsep=0.3em,itemsep=0.15em,parsep=0.15em}
+
+\title{\bfseries 交易缝隙的观测理论\\\large 时间尺度、参照系与可交易性判据}
+\author{\large 叨客宁宁}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\input{sections/abstract}
+
+\tableofcontents
+
+\input{sections/intro}
+\input{sections/economics}
+\input{sections/definition}
+\input{sections/measurement}
+\input{sections/reference}
+\input{sections/criteria}
+\input{sections/empirical}
+\input{sections/limits}
+\input{sections/conclusion}
+
+\newpage
+\input{sections/references}
+
+\end{document}

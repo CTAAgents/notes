@@ -1,0 +1,81 @@
+% 第5章 参照系与分解公式
+\section{观测的参照系：分解公式}\label{sec:reference}
+
+尺度解决“你以什么频率看”，参照系解决“这算不算你的”。本章要把一句资产定价的常识——$\alpha$ 相对于基准而定义——做成一条可计算的分解公式，并用它把定义 \ref{def:gap} 里悬置的风险补偿项 $\vartheta(\pi)$ 显式化。
+
+\subsection{参照系是什么}
+
+一个策略的收益，总要和一个“对照”比较才有意义。这个对照在实践里通常由几件东西组成：计价单位（钱、指数点位、还是某条净值线）、基准组合（等权全市场、市值加权指数、行业中年位数），以及一组可用于对冲的参照工具（指数期货、行业 ETF、风格多空组合）。本文把后两项合称\textbf{参照系}，记作 $\mathcal{F}$，把它理解为“一组可交易的收益序列”，策略收益相对它们做分解。
+
+形式化一步到位：设 $r_\pi$ 与 $r_{\mathcal{F}}$（向量）均为超额收益，把 $r_\pi$ 在参照系与常数项上做正交投影，
+\begin{equation}
+  r_\pi \;=\; \alpha_{\mathcal{F}} \;+\; \beta_{\mathcal{F}}'\,r_{\mathcal{F}} \;+\; \varepsilon, \qquad \mathbb{E}[\varepsilon]=0,\quad \mathbb{E}[\varepsilon\,r_{\mathcal{F}}]=0 .
+  \label{eq:projection}
+\end{equation}
+$\alpha_{\mathcal{F}}$ 即惯常意义的 $\alpha$，$\beta_{\mathcal{F}}$ 是暴露。定义 \ref{def:gap} 里的风险补偿 $\vartheta(\pi)$ 至此有了具体身份：它是“所承担的可对冲暴露应得的那部分溢价”，即 $\beta_{\mathcal{F}}'\mathbb{E}[r_{\mathcal{F}}]$；扣除它之后的净缝隙是
+\begin{equation}
+  G_{\mathcal{F}}(\pi) \;=\; \alpha_{\mathcal{F}} - C(\pi) ,
+  \label{eq:Gf}
+\end{equation}
+前提是暴露可按 $\beta_{\mathcal{F}}$ 对冲——工具可得性属于“可实施性”，第 \ref{sec:criteria} 章会把它列进核验清单。
+
+这里已经藏着联合假设问题\cite{fama1970}的当代形式：$\alpha_{\mathcal{F}}$ 的下标 $\mathcal{F}$ 是不可省的，换一组参照工具，同一个 $r_\pi$ 会分解出不同的 $\alpha$。Roll（1977）\cite{roll1977} 把这件事推到极致——真实市场组合不可观测，一切以它为基准的检验都悬在代理选择上。本文的选择是把参照系限定为\emph{可交易}工具：好处是 $\alpha$ 变成可测、可对冲的量，代价是它成为“相对可交易参照系”的量——这个代价不是缺陷，而恰是研究对象本身：能被可交易工具解释掉的，本来就不该叫缝隙。
+
+\subsection{分解公式}
+
+现在看参照系扩张时 $\alpha$ 怎么变，这是本章的核心技术结果。
+
+设参照系从 $\mathcal{F}$ 扩张为 $\mathcal{F}'=\mathcal{F}\cup\{g\}$，$g$ 是一件新增的参照工具（如一条动量多空组合）。约定记号：把 $g$ 自身对新参照系（即 $(1,r_{\mathcal{F}})$）做投影，
+\begin{equation}
+  g \;=\; \alpha_{\mathcal{F}}(g) \;+\; b'\,r_{\mathcal{F}} \;+\; \nu, \qquad \mathbb{E}[\nu]=0,\quad \mathbb{E}[\nu\,r_{\mathcal{F}}]=0,
+  \label{eq:newtool}
+\end{equation}
+读作：\textbf{新工具自身在旧参照系下也有一条 $\alpha$}（记 $\alpha_{\mathcal{F}}(g)$），$\nu$ 是它不能被旧参照系复制的部分。
+
+\begin{proposition}[参照系分解]\label{prop:decomp}
+设 $r_\pi$ 对 $\mathcal{F}'$ 的分解为 $r_\pi=\alpha_{\mathcal{F}'}+\beta' r_{\mathcal{F}}+\gamma g+\varepsilon'$，其中 $\gamma$ 是策略对 $\nu$ 的暴露，
+\begin{equation}
+  \gamma \;=\; \frac{\operatorname{cov}(r_\pi,\nu)}{\operatorname{var}(\nu)} .
+\end{equation}
+则新旧参照系下的 $\alpha$ 满足
+\begin{equation}
+  \boxed{\;\alpha_{\mathcal{F}'} \;=\; \alpha_{\mathcal{F}} \;-\; \gamma\,\alpha_{\mathcal{F}}(g)\;}
+  \label{eq:decomp}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+把 \eqref{eq:newtool} 代入扩张后的分解式：
+\[
+  r_\pi=\bigl[\alpha_{\mathcal{F}'}+\gamma\alpha_{\mathcal{F}}(g)\bigr]+\bigl(\beta+\gamma b\bigr)'r_{\mathcal{F}}+\gamma\nu+\varepsilon' .
+\]
+由矩条件 $\mathbb{E}[\nu]=0$、$\mathbb{E}[\nu r_{\mathcal{F}}]=0$ 与 $\mathbb{E}[\varepsilon'(1,r_{\mathcal{F}})]=0$，右端对 $(1,r_{\mathcal{F}})$ 投影的截距恰为 $\alpha_{\mathcal{F}'}+\gamma\alpha_{\mathcal{F}}(g)$；而由分解 \eqref{eq:projection} 该截距即 $\alpha_{\mathcal{F}}$。移项得 \eqref{eq:decomp}。
+\end{proof}
+
+一行的代数，三句解释。
+
+\textbf{第一，公式把“$\alpha$ 随基准消长”变成了乘法。}消长量是两项之积：策略对新增工具的暴露 $\gamma$，乘以新增工具自身的 $\alpha_{\mathcal{F}}(g)$。两者都不是抽象概念——“某策略的 $\alpha$ 在加入动量因子后消失”这句实务黑话，对应的事实就是该策略对动量多空组合有正暴露（$\gamma>0$），而动量组合自身带正溢价（$\alpha_{\mathcal{F}}(g)>0$），乘积从原 $\alpha$ 里被扣掉。
+
+\textbf{第二，两种不敏感情形有清楚的条件。}若新工具是纯对冲工具（自身无溢价，$\alpha_{\mathcal{F}}(g)=0$），$\alpha$ 不变——对冲只是让你换个冒险方式，不改变缝隙大小；若策略与新工具正交（$\gamma=0$），$\alpha$ 也不变——不相关的基准不构成竞争性解释。这两种情形的共同含义是：\textbf{参照系只在“既有溢价、又有暴露”时才吞掉缝隙}。
+
+\textbf{第三，公式对扩张链可迭代。}反复应用 \eqref{eq:decomp}，参照系从 $\mathcal{F}$ 一路扩到 $\mathcal{F}_m$，$\alpha$ 的变化等于逐件工具贡献之和。这意味着“把能想到的基准都放进去看 $\alpha$ 还剩多少”不是一种土办法，而是分解式的逐步执行。
+
+\subsection{两个极端情形}
+
+分解公式的两端各有一个值得写下来的极端。
+
+\textbf{左端：参照系仅含无风险资产。}此时 $\alpha$ 就是毛超额收益均值，缝隙最大——但这显然是最脆弱的定义，几乎所有市场暴露都会被记为缝隙。
+
+\textbf{右端：参照系足够丰富，直到策略收益完全落在参照系的张成空间内。}此时残差消失，$\alpha\to 0$。这不是极限的怪谈，而是无套利定价的标准结构：在完备市场里存在唯一风险中性测度，一切自融资策略的折现收益在它之下都是鞅，超额期望为零；计价变换与测度变换之间有一一对应（Geman、El Karoui 与 Rochet 1995\cite{geman1995}；随机折现因子的视角见 Cochrane 2001\cite{cochrane2001}）。翻译成本文的语言：\textbf{“换参照系”就是换计价、换测度；“参照系的丰富度”就是市场可复制性的代理；可交易缝隙的存在空间，恰是“不可被可交易工具复制的收益”这块地基}。完备市场里没有缝隙，不完备市场里的缝隙有多大，取决于复制缺口的形状——这是分解公式的极限含义。
+
+实际操作里，两个极端都不可取：参照系太贫（只有现金），什么都是缝隙；太富（硬塞进几十条因子做正交），缝隙被定义性地抹掉，而每条因子的 $t$ 值又未必经得起检验。合理的做法是让参照系由\emph{可实施}的工具构成，并用分解公式检查 $\alpha$ 的衰减路径：\textbf{一条稳健的缝隙，应该在参照系逐步扩张时缓慢衰减，而不是在某一件工具加入时骤然归零}——骤然归零的，是暴露，不是缝隙。
+
+\subsection{把“不反号”升格}
+
+定义 \ref{def:gap} 里有一条限定：样本外与跨样本不反号。参照系视角给出了它的理论升格——把“跨样本”扩成\textbf{跨参照系}。一个缝隙声明应当写成 $\alpha_{\mathcal{F}}>0$（多重检验校正后）成立，并且在参照系集合 $\{\mathcal{F}_1,\mathcal{F}_2,\dots\}$ 上不反号。检验的构造是分解链的批量执行：从等权基准出发，逐件加入市值加权、行业中性、风格与动量工具，记录 $\alpha$ 的路径 $(\alpha_{\mathcal{F}_1},\alpha_{\mathcal{F}_2},\dots)$；路径的形状（衰减速度、是否反号）比单个数值承载更多信息。
+
+到这一步，两个观测维度各自就位：尺度决定“能看见多少”，参照系决定“算不算你的”。第 \ref{sec:criteria} 章把两者与成本、统计纪律合起来，写成一份完整的核验流程。
+
+\subsection{本章要点}
+
+参照系把风险补偿项显式化为“暴露乘溢价”，分解公式 \eqref{eq:decomp} 则把 $\alpha$ 的基准依赖性做成一行的代数：$\alpha_{\mathcal{F}'}=\alpha_{\mathcal{F}}-\gamma\,\alpha_{\mathcal{F}}(g)$。参照系只在“有溢价、有暴露”时吞掉缝隙；完备参照系下缝隙归零，不完备处才是缝隙的地基。“跨样本不反号”由此升格为“跨参照系不反号”——这是比多切几个样本更锋利的检验。

@@ -1,0 +1,694 @@
+{
+ "meta": {
+  "digest": "781cadd68dfbd170",
+  "window": [
+   20190102,
+   20261008
+  ],
+  "T": 1881,
+  "N": 400,
+  "deltas": [
+   1,
+   2,
+   3,
+   5,
+   10,
+   20
+  ],
+  "capital": 100000000.0
+ },
+ "results": {
+  "1日反转": {
+   "多空": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 321.56861268740516,
+      "sharpe_zero": 1.2937282364045328,
+      "sharpe_impact": -7.689738416599748
+     },
+     {
+      "delta": 2,
+      "turnover": 159.8846604182135,
+      "sharpe_zero": 1.3283799886727499,
+      "sharpe_impact": -3.237661805380906
+     },
+     {
+      "delta": 3,
+      "turnover": 106.64565342138644,
+      "sharpe_zero": 1.110880060079644,
+      "sharpe_impact": -2.1311127834705097
+     },
+     {
+      "delta": 5,
+      "turnover": 64.52399230645945,
+      "sharpe_zero": 0.4658425499584235,
+      "sharpe_impact": -1.5021277430261153
+     },
+     {
+      "delta": 10,
+      "turnover": 32.38051511984685,
+      "sharpe_zero": 0.19803040111963818,
+      "sharpe_impact": -0.8961262540576004
+     },
+     {
+      "delta": 20,
+      "turnover": 16.21864853831312,
+      "sharpe_zero": -0.15281944238477044,
+      "sharpe_impact": -0.6978570910301386
+     }
+    ]
+   },
+   "仅多头": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 321.76754534743844,
+      "sharpe_zero": 0.30987773250911654,
+      "sharpe_impact": -2.983129490812692
+     },
+     {
+      "delta": 2,
+      "turnover": 159.29637892493062,
+      "sharpe_zero": 0.43260203686061466,
+      "sharpe_impact": -1.2185931339536
+     },
+     {
+      "delta": 3,
+      "turnover": 106.26519207098421,
+      "sharpe_zero": 0.5062622644260939,
+      "sharpe_impact": -0.5950231286531835
+     },
+     {
+      "delta": 5,
+      "turnover": 64.12530607617622,
+      "sharpe_zero": 0.2631502217063794,
+      "sharpe_impact": -0.40405330793313216
+     },
+     {
+      "delta": 10,
+      "turnover": 32.24774049434993,
+      "sharpe_zero": 0.3124731386728014,
+      "sharpe_impact": -0.028189192649313456
+     },
+     {
+      "delta": 20,
+      "turnover": 16.025092272507436,
+      "sharpe_zero": 0.31577218405080704,
+      "sharpe_impact": 0.1478622740386908
+     }
+    ]
+   }
+  },
+  "5日动量": {
+   "多空": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 152.0399408578137,
+      "sharpe_zero": 2.1498709408147176,
+      "sharpe_impact": -0.8788395970257316
+     },
+     {
+      "delta": 2,
+      "turnover": 108.09694934714773,
+      "sharpe_zero": 1.8685358373107532,
+      "sharpe_impact": -0.6442030883847192
+     },
+     {
+      "delta": 3,
+      "turnover": 88.17381788041638,
+      "sharpe_zero": 1.8519001116672107,
+      "sharpe_impact": -0.408072488390973
+     },
+     {
+      "delta": 5,
+      "turnover": 67.00019917175247,
+      "sharpe_zero": 1.3737089142908916,
+      "sharpe_impact": -0.6016688952112144
+     },
+     {
+      "delta": 10,
+      "turnover": 33.20592703745451,
+      "sharpe_zero": 0.861720153591873,
+      "sharpe_impact": -0.1658324312612953
+     },
+     {
+      "delta": 20,
+      "turnover": 16.584436556790298,
+      "sharpe_zero": 0.4072425341579384,
+      "sharpe_impact": -0.14231083318768623
+     }
+    ]
+   },
+   "仅多头": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 148.8961126384105,
+      "sharpe_zero": 0.6133788035264875,
+      "sharpe_impact": -0.6532760597831384
+     },
+     {
+      "delta": 2,
+      "turnover": 105.05513646192533,
+      "sharpe_zero": 0.5294168160917467,
+      "sharpe_impact": -0.4587804168786365
+     },
+     {
+      "delta": 3,
+      "turnover": 85.52997121659791,
+      "sharpe_zero": 0.6775823482914975,
+      "sharpe_impact": -0.1696346178201227
+     },
+     {
+      "delta": 5,
+      "turnover": 65.1937592898524,
+      "sharpe_zero": 0.5250771010716987,
+      "sharpe_impact": -0.15650440721470535
+     },
+     {
+      "delta": 10,
+      "turnover": 32.220587801378706,
+      "sharpe_zero": 0.3781566676582629,
+      "sharpe_impact": 0.043776945860649785
+     },
+     {
+      "delta": 20,
+      "turnover": 16.016636439786133,
+      "sharpe_zero": 0.372955707655695,
+      "sharpe_impact": 0.2049234557989061
+     }
+    ]
+   }
+  },
+  "20日动量": {
+   "多空": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 76.74549578043144,
+      "sharpe_zero": 1.6302088118099722,
+      "sharpe_impact": 0.45866851848728823
+     },
+     {
+      "delta": 2,
+      "turnover": 54.61935674458034,
+      "sharpe_zero": 1.4754460507998635,
+      "sharpe_impact": 0.5240334068539388
+     },
+     {
+      "delta": 3,
+      "turnover": 45.13653677462732,
+      "sharpe_zero": 1.3942197623756794,
+      "sharpe_impact": 0.545564931120177
+     },
+     {
+      "delta": 5,
+      "turnover": 34.88971209669369,
+      "sharpe_zero": 1.0291789954857775,
+      "sharpe_impact": 0.3029277303767058
+     },
+     {
+      "delta": 10,
+      "turnover": 24.464701581097792,
+      "sharpe_zero": 0.6928003041781569,
+      "sharpe_impact": 0.09722671392855452
+     },
+     {
+      "delta": 20,
+      "turnover": 16.907459945632542,
+      "sharpe_zero": 0.5577498838437097,
+      "sharpe_impact": 0.08728444668325253
+     }
+    ]
+   },
+   "仅多头": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 74.37928098272813,
+      "sharpe_zero": 0.6775236810126173,
+      "sharpe_impact": 0.14717564326980945
+     },
+     {
+      "delta": 2,
+      "turnover": 52.71192313758104,
+      "sharpe_zero": 0.6480232024139954,
+      "sharpe_impact": 0.22821503749833116
+     },
+     {
+      "delta": 3,
+      "turnover": 43.3089452048093,
+      "sharpe_zero": 0.6803688414733601,
+      "sharpe_impact": 0.3175919831823543
+     },
+     {
+      "delta": 5,
+      "turnover": 33.4846279369768,
+      "sharpe_zero": 0.5771864981026065,
+      "sharpe_impact": 0.27635449653061595
+     },
+     {
+      "delta": 10,
+      "turnover": 23.324562134352945,
+      "sharpe_zero": 0.5447161416338776,
+      "sharpe_impact": 0.3147389575571777
+     },
+     {
+      "delta": 20,
+      "turnover": 16.14090760690372,
+      "sharpe_zero": 0.598311347793577,
+      "sharpe_impact": 0.42603321075023703
+     }
+    ]
+   }
+  },
+  "60日动量": {
+   "多空": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 45.54733402702386,
+      "sharpe_zero": 1.3935569792672242,
+      "sharpe_impact": 0.8024491584858173
+     },
+     {
+      "delta": 2,
+      "turnover": 32.39246589088141,
+      "sharpe_zero": 1.3284855995228262,
+      "sharpe_impact": 0.8593406270861813
+     },
+     {
+      "delta": 3,
+      "turnover": 26.69268994208727,
+      "sharpe_zero": 1.1128073393990703,
+      "sharpe_impact": 0.7017103812225185
+     },
+     {
+      "delta": 5,
+      "turnover": 20.766801642972837,
+      "sharpe_zero": 1.007931839034762,
+      "sharpe_impact": 0.6608879785288427
+     },
+     {
+      "delta": 10,
+      "turnover": 14.488077012671404,
+      "sharpe_zero": 0.7809987707151208,
+      "sharpe_impact": 0.5068267560334897
+     },
+     {
+      "delta": 20,
+      "turnover": 10.163204550163705,
+      "sharpe_zero": 0.5537261845118253,
+      "sharpe_impact": 0.3328871976091113
+     }
+    ]
+   },
+   "仅多头": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 43.696919076649046,
+      "sharpe_zero": 0.735118150530189,
+      "sharpe_impact": 0.45942828303670635
+     },
+     {
+      "delta": 2,
+      "turnover": 30.9995065884033,
+      "sharpe_zero": 0.7147827412139626,
+      "sharpe_impact": 0.49844369181836823
+     },
+     {
+      "delta": 3,
+      "turnover": 25.52511562774281,
+      "sharpe_zero": 0.6870487842759412,
+      "sharpe_impact": 0.4991345136773554
+     },
+     {
+      "delta": 5,
+      "turnover": 19.683508226334425,
+      "sharpe_zero": 0.647414648555989,
+      "sharpe_impact": 0.4921058121985424
+     },
+     {
+      "delta": 10,
+      "turnover": 13.628545272235696,
+      "sharpe_zero": 0.5830247090109254,
+      "sharpe_impact": 0.4657223596975638
+     },
+     {
+      "delta": 20,
+      "turnover": 9.409007002557717,
+      "sharpe_zero": 0.5774881655138224,
+      "sharpe_impact": 0.48921599718738207
+     }
+    ]
+   }
+  },
+  "波动率": {
+   "多空": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 27.99146346668994,
+      "sharpe_zero": 1.122767306435281,
+      "sharpe_impact": 0.7277569240940956
+     },
+     {
+      "delta": 2,
+      "turnover": 23.186490898390005,
+      "sharpe_zero": 1.081008864474077,
+      "sharpe_impact": 0.7163576626391304
+     },
+     {
+      "delta": 3,
+      "turnover": 20.692543698027702,
+      "sharpe_zero": 0.9624849544846328,
+      "sharpe_impact": 0.6074756047158612
+     },
+     {
+      "delta": 5,
+      "turnover": 17.886528279107353,
+      "sharpe_zero": 0.9564944215075468,
+      "sharpe_impact": 0.6182051042690672
+     },
+     {
+      "delta": 10,
+      "turnover": 14.455034186193608,
+      "sharpe_zero": 0.7447059672430625,
+      "sharpe_impact": 0.4286692225794993
+     },
+     {
+      "delta": 20,
+      "turnover": 11.024166317372682,
+      "sharpe_zero": 0.5170429980447775,
+      "sharpe_impact": 0.23839977758286177
+     }
+    ]
+   },
+   "仅多头": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 25.162871084335947,
+      "sharpe_zero": 0.8665786703601639,
+      "sharpe_impact": 0.665779445971391
+     },
+     {
+      "delta": 2,
+      "turnover": 20.458598148055643,
+      "sharpe_zero": 0.8504158489869879,
+      "sharpe_impact": 0.6728999354007128
+     },
+     {
+      "delta": 3,
+      "turnover": 17.984347647184027,
+      "sharpe_zero": 0.8057080941119849,
+      "sharpe_impact": 0.641522441359309
+     },
+     {
+      "delta": 5,
+      "turnover": 15.213601648333752,
+      "sharpe_zero": 0.823679884249408,
+      "sharpe_impact": 0.6736319102117063
+     },
+     {
+      "delta": 10,
+      "turnover": 11.90969250014982,
+      "sharpe_zero": 0.743641438443064,
+      "sharpe_impact": 0.6159269252951495
+     },
+     {
+      "delta": 20,
+      "turnover": 8.886517766958795,
+      "sharpe_zero": 0.7010181982108897,
+      "sharpe_impact": 0.5981129382447975
+     }
+    ]
+   }
+  },
+  "量比": {
+   "多空": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 154.36123561717056,
+      "sharpe_zero": 3.4221598079465174,
+      "sharpe_impact": -0.3548332272717293
+     },
+     {
+      "delta": 2,
+      "turnover": 96.40315039100676,
+      "sharpe_zero": 2.7119796252035013,
+      "sharpe_impact": 0.07391700287292081
+     },
+     {
+      "delta": 3,
+      "turnover": 71.00791414230972,
+      "sharpe_zero": 2.2617768933488933,
+      "sharpe_impact": 0.1758350673259658
+     },
+     {
+      "delta": 5,
+      "turnover": 47.44135175944202,
+      "sharpe_zero": 2.0072008925991525,
+      "sharpe_impact": 0.48342093615733933
+     },
+     {
+      "delta": 10,
+      "turnover": 26.951222981510032,
+      "sharpe_zero": 1.4203659016475116,
+      "sharpe_impact": 0.4123562003799069
+     },
+     {
+      "delta": 20,
+      "turnover": 15.108624415342073,
+      "sharpe_zero": 0.7631251255084327,
+      "sharpe_impact": 0.12423854243141713
+     }
+    ]
+   },
+   "仅多头": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 117.70349935679833,
+      "sharpe_zero": 0.7950019901233744,
+      "sharpe_impact": -0.1670254825627505
+     },
+     {
+      "delta": 2,
+      "turnover": 70.96637472937232,
+      "sharpe_zero": 0.6695300570574885,
+      "sharpe_impact": 0.06048463471821347
+     },
+     {
+      "delta": 3,
+      "turnover": 51.711965235730815,
+      "sharpe_zero": 0.6463994538347476,
+      "sharpe_impact": 0.1922238651640088
+     },
+     {
+      "delta": 5,
+      "turnover": 34.458094675257016,
+      "sharpe_zero": 0.6324200501587917,
+      "sharpe_impact": 0.3203044549039172
+     },
+     {
+      "delta": 10,
+      "turnover": 19.967457503641263,
+      "sharpe_zero": 0.5701448485859273,
+      "sharpe_impact": 0.3820068829960391
+     },
+     {
+      "delta": 20,
+      "turnover": 11.613425893639224,
+      "sharpe_zero": 0.5430034393325383,
+      "sharpe_impact": 0.42798205962869407
+     }
+    ]
+   }
+  },
+  "距均线偏离": {
+   "多空": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 92.14940133741698,
+      "sharpe_zero": 1.9982279355326553,
+      "sharpe_impact": 0.49846892098394724
+     },
+     {
+      "delta": 2,
+      "turnover": 65.59434342256183,
+      "sharpe_zero": 1.763688922834939,
+      "sharpe_impact": 0.5415053488346391
+     },
+     {
+      "delta": 3,
+      "turnover": 54.16827804139461,
+      "sharpe_zero": 1.6090889639857804,
+      "sharpe_impact": 0.5113419842297371
+     },
+     {
+      "delta": 5,
+      "turnover": 41.93823401207301,
+      "sharpe_zero": 1.3355572696525333,
+      "sharpe_impact": 0.3820690402267654
+     },
+     {
+      "delta": 10,
+      "turnover": 28.3520036449961,
+      "sharpe_zero": 0.8413955149132084,
+      "sharpe_impact": 0.08395633276177794
+     },
+     {
+      "delta": 20,
+      "turnover": 16.63987078707036,
+      "sharpe_zero": 0.43007852405572644,
+      "sharpe_impact": -0.07212258984923621
+     }
+    ]
+   },
+   "仅多头": {
+    "direction": "-",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 81.16915123316998,
+      "sharpe_zero": 0.6804183172603165,
+      "sharpe_impact": 0.11204142292267304
+     },
+     {
+      "delta": 2,
+      "turnover": 58.174423074080096,
+      "sharpe_zero": 0.6078194642370034,
+      "sharpe_impact": 0.15399652389801888
+     },
+     {
+      "delta": 3,
+      "turnover": 48.65407073733183,
+      "sharpe_zero": 0.6968760853218917,
+      "sharpe_impact": 0.2938904778873494
+     },
+     {
+      "delta": 5,
+      "turnover": 38.12840013287333,
+      "sharpe_zero": 0.5832613603406646,
+      "sharpe_impact": 0.24253987149006573
+     },
+     {
+      "delta": 10,
+      "turnover": 26.676877560238243,
+      "sharpe_zero": 0.45155093076886993,
+      "sharpe_impact": 0.18947771255232315
+     },
+     {
+      "delta": 20,
+      "turnover": 16.008731977050395,
+      "sharpe_zero": 0.4585856745594456,
+      "sharpe_impact": 0.2916007351408388
+     }
+    ]
+   }
+  },
+  "非流动性": {
+   "多空": {
+    "direction": "+",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 13.771023517779323,
+      "sharpe_zero": 1.2206742276758196,
+      "sharpe_impact": 1.0139190929053699
+     },
+     {
+      "delta": 2,
+      "turnover": 10.462677875844367,
+      "sharpe_zero": 1.20642929519557,
+      "sharpe_impact": 1.0297943111944399
+     },
+     {
+      "delta": 3,
+      "turnover": 9.044589594878104,
+      "sharpe_zero": 1.194139088431834,
+      "sharpe_impact": 1.031429354515447
+     },
+     {
+      "delta": 5,
+      "turnover": 7.640536422274327,
+      "sharpe_zero": 1.1662762765115202,
+      "sharpe_impact": 1.0170236911005486
+     },
+     {
+      "delta": 10,
+      "turnover": 6.111578693776903,
+      "sharpe_zero": 1.1639749815632037,
+      "sharpe_impact": 1.0266944615779665
+     },
+     {
+      "delta": 20,
+      "turnover": 4.641314741055355,
+      "sharpe_zero": 1.24465508429527,
+      "sharpe_impact": 1.130650040290039
+     }
+    ]
+   },
+   "仅多头": {
+    "direction": "+",
+    "rows": [
+     {
+      "delta": 1,
+      "turnover": 18.3956956939893,
+      "sharpe_zero": 1.0227440138939403,
+      "sharpe_impact": 0.8896080851081991
+     },
+     {
+      "delta": 2,
+      "turnover": 14.044438382480578,
+      "sharpe_zero": 1.022724862858426,
+      "sharpe_impact": 0.9056628858184658
+     },
+     {
+      "delta": 3,
+      "turnover": 12.22157594993873,
+      "sharpe_zero": 1.0137447300687583,
+      "sharpe_impact": 0.9036928060069723
+     },
+     {
+      "delta": 5,
+      "turnover": 10.282933028032847,
+      "sharpe_zero": 1.010365969124101,
+      "sharpe_impact": 0.9085136120908339
+     },
+     {
+      "delta": 10,
+      "turnover": 8.173133943447588,
+      "sharpe_zero": 1.0109176475532977,
+      "sharpe_impact": 0.9174494721704392
+     },
+     {
+      "delta": 20,
+      "turnover": 6.161868254058027,
+      "sharpe_zero": 1.0763940394602503,
+      "sharpe_impact": 0.9985700057768139
+     }
+    ]
+   }
+  }
+ }
+}

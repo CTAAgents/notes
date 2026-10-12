@@ -1,0 +1,133 @@
+% 第4章 时间尺度与尺度窗口
+\section{观测的时间尺度：尺度窗口}\label{sec:measurement}
+
+上一章的 $\Delta$ 是一个自由参数，观测网格被当成给定的。这一章把它变成变量：把“在什么频率上看市场”从实现细节升级为装置结构，然后证明三件事——太密的网格会被统计分辨力挡住，太疏的网格会被信息衰减放走，两端之间夹出一个窗口；窗口内净收益的形状由两个可测速度的赛跑决定。
+
+\subsection{从“周期”到“装置”}
+
+“在尺度 $\Delta$ 上观测”意味着什么？给一个可操作的说法：\textbf{观测与决策只发生在网格点 $\{0,\Delta,2\Delta,\dots\}$ 上，网格之间不获取新信息、不调整仓位。}这不是对现实的苛刻假设，而是对一类真实安排的最小刻画——日频策略每天收盘后更新一次，周频策略每周更新一次，网格之间它们对市场的新变化是“盲”的。持有期内权重冻结，是这种“盲”的直接后果。
+
+于是一个观测装置至少由三个数刻画：最小可行网格 $\Delta_{\min}$（数据与执行设施的分辨率下限）、执行延迟 $\tau_e$（从决策到成交的时滞）、以及单格观测的噪声水平 $\nu_0$（信号的毛收益里夹带的、与预测无关的波动）。把这个三元组记作时间维度的观测装置
+\begin{equation}
+  \mathbb{T} = (\Delta_{\min},\ \tau_e,\ \nu_0),
+\end{equation}
+第 \ref{sec:reference} 章会补上装置的另一半——参照系 $\mathcal{F}$，两者合起来记作 $\mathcal{O}=(\mathbb{T},\mathcal{F})$。
+
+信号从诞生到被交易的期望延迟变成 $d(\Delta)=\Delta/2+\tau_e$：网格越疏，信号从出现到“轮到它被看见”的平均等待越长。有效幅度相应变成 $\delta_0 e^{-\lambda d(\Delta)}$，这正是上一章 $\delta_0 e^{-\lambda\Delta/2}$ 的推广（$\tau_e=0$ 时退回原式）。
+
+\subsection{三条既有线索}
+
+尺度不是新话题，只是此前很少与“缝隙的存在性”直接挂钩。三条线索值得在此收拢。Clark（1973）\cite{clark1973} 的从属过程模型指出，价格在“信息时间”上展开，交易活跃度是日历时间与信息时间之间的变换——同样的日历间隔，信息含量可以相差数倍。Müller 等（1993）\cite{muller1993} 的异质市场假说把这一点推到市场结构层面：不同时间尺度的参与者共存，各自在自己的地平线上交易，市场是多尺度活动的叠加，因此“某频率上的规律”天然可以是频率依赖的。Working（1960）\cite{working1960} 则给出了一个更根本的技术事实：对随机过程做时间聚合，会改变其可观测的自相关结构——聚合是一次运算，它不保持规律。
+
+第三条线索来自更近的计量文献。Working（1960）\cite{working1960} 的技术事实后来被做成了直接的统计工具：方差比检验用不同持有期上方差的缩放关系判断随机游走，选一个持有期，就等于选了一个观测尺度\cite{lo1988}。Aït-Sahalia、Mykland 与 Zhang（2005）\cite{atisahalia2005} 研究高频采样下的波动率估计，发现存在一对相反的力量：采样越密，离散化误差越小，但微观结构噪声越大；二者权衡给出一个最优采样频率。本文要做的权衡与它同型，只是对象不同——他们估的是波动率，这里检测的是信号幅度：\textbf{网格越密，信息越新鲜，但每次“看见”的统计分辨力越低。}
+
+\subsection{检测门与盈利门}\label{sec:twogates}
+
+把两股力量写成两个门。
+
+\textbf{盈利门}延续上一章：有效幅度必须盖过单次成本，
+\begin{equation}
+  \delta_0\,e^{-\lambda(\Delta/2+\tau_e)} > c .
+  \label{eq:profitgate}
+\end{equation}
+
+\textbf{检测门}是新的。要在噪声中把一个幅度为 $\delta_0 e^{-\lambda d}$ 的信号认出来，得看它在统计上是否站得住。在尺度 $\Delta$ 上，可用于平均的独立观测数正比于 $\Delta$，故幅度估计的标准误约为 $\nu_0/\sqrt{\Delta}$。信号要被认出来，须
+\begin{equation}
+  \delta_0\,e^{-\lambda(\Delta/2+\tau_e)} \;\ge\; z\,\frac{\nu_0}{\sqrt{\Delta}},
+  \label{eq:detectgate}
+\end{equation}
+$z$ 为置信分位（如单侧 $95\%$ 对应约 $1.645$）。整理成核心统计量
+\begin{equation}
+  \Phi(\Delta) \;=\; \delta_0\sqrt{\Delta}\,e^{-\lambda(\Delta/2+\tau_e)} \;\ge\; z\nu_0 .
+  \label{eq:Phi}
+\end{equation}
+
+\begin{proposition}[检测集合的形状]\label{prop:detect}
+$\Phi$ 在 $(0,\infty)$ 上单峰，唯一极大点在
+\begin{equation}
+  \Delta^\circ = \frac{1}{\lambda},
+\end{equation}
+极大值 $\Phi_{\max}=\delta_0 e^{-\lambda\tau_e}/\sqrt{e\lambda}$。因此检测集合 $D=\{\Delta:\Phi(\Delta)\ge z\nu_0\}$ 若非空，必为一个闭区间 $[\Delta_{\mathrm{lo}},\Delta_{\mathrm{hi}}^{\mathrm{det}}]$；它非空当且仅当
+\begin{equation}
+  \delta_0\,e^{-\lambda\tau_e} \;\ge\; z\nu_0\sqrt{e\lambda}.
+  \label{eq:detectfeasible}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+对 $\ln\Phi$ 求导：$\frac{d}{d\Delta}\bigl[\tfrac12\ln\Delta-\tfrac{\lambda\Delta}{2}-\lambda\tau_e\bigr]=\frac{1}{2\Delta}-\frac{\lambda}{2}$，在 $\Delta=1/\lambda$ 处为零，左正右负，故极大点唯一且为全局最大。代入得 $\Phi_{\max}=\delta_0 e^{-\lambda\tau_e}\cdot\sqrt{1/\lambda}\cdot e^{-1/2}$。由单峰性与连续性，上水平集为区间；区间非空等价于极大值不小于阈值 $z\nu_0$。
+\end{proof}
+
+两个门合起来，给出本章的第一个主结果。
+
+\begin{proposition}[尺度窗口]\label{prop:window}
+记盈利集合 $P=(0,\Delta_{\mathrm{hi}}^{\mathrm{prof}})$，其中
+\begin{equation}
+  \Delta_{\mathrm{hi}}^{\mathrm{prof}} \;=\; \frac{2}{\lambda}\Bigl(\ln\frac{\delta_0}{c}-\lambda\tau_e\Bigr),
+\end{equation}
+（$P$ 非空当且仅当 $\delta_0 e^{-\lambda\tau_e}>c$）。则存在可用的观测尺度（即 $D\cap P\cap[\Delta_{\min},\infty)$ 非空）当且仅当
+\begin{equation}
+  \max\bigl(\Delta_{\min},\,\Delta_{\mathrm{lo}}\bigr) \;<\; \min\bigl(\Delta_{\mathrm{hi}}^{\mathrm{det}},\,\Delta_{\mathrm{hi}}^{\mathrm{prof}}\bigr),
+  \label{eq:window}
+\end{equation}
+此时可行尺度集合为一个区间，称\emph{尺度窗口}。当 $\Delta_{\min}\to 0$、$\tau_e\to 0$、$\nu_0\to 0$（装置趋于理想）时，窗口条件退化为第 \ref{sec:necessary} 节的 $\delta_0>c$。
+\end{proposition}
+
+\begin{proof}
+$D$ 由命题 \ref{prop:detect} 为非空闭区间 $[\Delta_{\mathrm{lo}},\Delta_{\mathrm{hi}}^{\mathrm{det}}]$；$P$ 由 \eqref{eq:profitgate} 为开区间 $(0,\Delta_{\mathrm{hi}}^{\mathrm{prof}})$；两者与 $[\Delta_{\min},\infty)$ 的交为非空当且仅当 \eqref{eq:window}。退化情形：$\nu_0\to 0$ 时 $D\to(0,\infty)$，$\tau_e\to0,\ \Delta_{\min}\to0$ 时窗口非空条件即 $\delta_0>c$。
+\end{proof}
+
+这条命题值得停一下看它的分量。它说：\textbf{缝隙的存在性不是过程的性质，而是过程与装置共同的谓词}。同一个信号，换一套观测装置（更慢的数据、更迟的执行、更噪的估计），窗口可能整体消失——不是因为市场变了，而是因为看的方式变了。\eqref{eq:detectfeasible} 还给出一个有意思的约束：$\delta_0\ge z\nu_0 e^{\lambda\tau_e}\sqrt{e\lambda}$，右端对 $\lambda$ 与 $\tau_e$ 都单调增——\textbf{衰减越快的信号，越要求干净的观测与低的执行延迟，否则它在你认出它之前就已经消失。}
+
+\subsection{窗口内的形状：两个速度的赛跑}
+
+窗口回答了“哪里可行”，没回答“哪里最好”。命题 \ref{prop:necessary} 的“越密越好”是被装置约束截断的，但在窗口内部，形状仍然取决于更细的结构。这里给出一个足够一般、且能直接检验的刻画。
+
+在窗口内，净年化收益是两股力的差：毛收益年化随尺度衰减（信息衰减），成本年化随尺度摊薄（交易次数减少）。两者在局部都近似是 $\Delta$ 的幂函数。于是设
+\begin{equation}
+  A(\Delta)=a\,\Delta^{-p},\qquad C(\Delta)=c_0\,\Delta^{-q},\qquad a,c_0>0,\ p,q\ge 0,
+  \label{eq:twopower}
+\end{equation}
+$p$ 是毛收益的尺度衰减指数（$p=0$ 表示信号完全不衰减，年化收益与尺度无关；$p$ 越大衰减越快），$q$ 是成本的摊薄指数（$q=1$ 对应每周期换手恒定的纯比例成本；冲击成本的凹凸性会使实际 $q$ 偏离 $1$）。
+
+\begin{proposition}[双幂形状]\label{prop:twopower}
+在模型 \eqref{eq:twopower} 下，净收益 $N=A-C$ 的形状与 $p,q$ 的次序一一对应：
+\begin{enumerate}
+  \item 若 $p<q$：$N$ 在 $\Delta\to0$ 时趋于 $-\infty$，在 $\Delta\to\infty$ 时从上方趋于 $0$，并在
+  \begin{equation}
+    \Delta^\star \;=\; \Bigl(\frac{q\,c_0}{p\,a}\Bigr)^{\frac{1}{q-p}}
+    \label{eq:deltastar}
+  \end{equation}
+  处取得唯一内点最大；该最大值恒为正。
+  \item 若 $p>q$：$N$ 无内点最大（$\Delta\to0$ 时 $N\to+\infty$，越小越好）。
+  \item 若 $p=q$：$N=(a-c_0)\Delta^{-p}$，单调。
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+$N'(\Delta)=\Delta^{-q-1}\bigl(qc_0-pa\,\Delta^{q-p}\bigr)$。当 $q>p$ 时，$N'<0$ 等价于 $\Delta<\Delta^\star$，符号左负右正，故 $\Delta^\star$ 为全局最大点。代入：由 $\Delta^{\star\,q-p}=qc_0/(pa)$ 得 $c_0\Delta^{\star\,-q}=pa\Delta^{\star\,-p}/q$，于是
+$N(\Delta^\star)=a\Delta^{\star\,-p}\bigl(1-p/q\bigr)>0$。
+端点行为由幂次比较直接得到：$q>p$ 时 $\Delta\to0$（$c_0$ 项主导）为 $-\infty$、$\Delta\to\infty$（$a$ 项主导）为 $0^+$；$p>q$ 时相反。$p=q$ 为纯幂单调。
+\end{proof}
+
+三个推论，按可用性排序。
+
+其一，\textbf{内点最优的存在性与信息衰减直接挂钩}：只有当成本在密端涨得比毛收益快（$q>p$），净收益才会在窗口内部出现峰值；若信号衰减极慢（$p\to0$，如纯流动性类信号），曲线在窗口内近似单调，最优趋向右端。这给“快信号与慢信号适合不同频率”一个不靠直觉的表述。
+
+其二，\textbf{峰位对成本水平有显式弹性}。对 \eqref{eq:deltastar} 取对数再对 $\ln(c_0/a)$ 求导，得
+\begin{equation}
+  \frac{\partial\ln\Delta^\star}{\partial\ln(c_0/a)}=\frac{1}{q-p}>0,
+\end{equation}
+即\textbf{成本相对毛收益越重，最优观测尺度越大（越该放慢）}；且 $q\to p$ 时弹性发散——两个速度接近时，峰位对成本水平异常敏感，这是判断一个策略“处于悬崖边”还是“尚有缓冲”的诊断量。
+
+其三，\textbf{$\Delta^\star$ 是否落在窗口内，是“存在缝隙”的第一层含义}。窗口（命题 \ref{prop:window}）只保证可行，双幂（命题 \ref{prop:twopower}）指出评价点；若窗口非空但 $N(\Delta^\star)<0$ 或 $\Delta^\star$ 落在窗口外，缝隙仍然不成立。两层条件合起来，才把“这条信号在这个装置下有没有缝隙”变成一个可以计算的问句。
+
+还要说清这个模型的地位：\eqref{eq:twopower} 是近似刻画而非微观推导，$p$ 与 $q$ 都要从数据里估。它的价值不在预测精确的峰位，而在把“最优频率”这个直觉词拆成两个可测速度的赛跑，并给出可以反驳的结构性含义——如果数据显示 $p>q$ 的候选也普遍存在内点峰值，这个刻画就该被换掉。
+
+\subsection{怎么检验}
+
+命题 \ref{prop:window} 与 \ref{prop:twopower} 原则上都可检验，做法直接：固定信号与成本口径，只改变观测网格 $\Delta$，得到三条曲线——零成本净收益（估 $p$）、成本曲线（估 $q$）、扣除成本后的净收益（看峰位与窗口）。第 \ref{sec:empirical} 章在八年 A 股日线上把这三条曲线对 8 个价量信号全部跑了一遍，操作定义与本节的“网格—冻结”设定一致：信号每日计算，调仓只在网格点发生，持有期内不响应新信息；成本在调仓日按真实换手逐笔收取。检验的关键纪律是两条：一是网格要从此前从未用过的中间尺度上取（$1,2,3,5,10,20$ 日），否则画不出形状；二是成本三档（零、费率、含冲击）要分别记，$p$ 与 $q$ 才互不污染。
+
+\subsection{本章要点}
+
+把观测网格变成装置参数之后，缝隙的可行性被一对相反的门夹住：密端是统计分辨力（$\nu_0/\sqrt{\Delta}$），疏端是信息衰减（$e^{-\lambda\Delta/2}$）。窗口位置由 $(\lambda,\tau_e,\nu_0,\delta_0,c)$ 决定，且在理想装置极限下退回 $\delta_0>c$。窗口内的最优位置由毛衰减指数 $p$ 与成本摊薄指数 $q$ 的赛跑决定——$q>p$ 才有内点最优，峰位对成本水平有 $1/(q-p)$ 的弹性。下一章处理另一个维度：就算这一切都在正确的尺度上成立，$\alpha$ 还得相对于正确的参照系才算无须。

@@ -1,0 +1,64 @@
+\section{统一比较矩阵}\label{sec:matrix}
+
+第~\ref{sec:unity}~节与第~\ref{sec:duality}~节分别给出了“同”与“异”的论证。本章把二者压缩成两张表：一张是定性的对偶矩阵，一张是“论断—证据—置信度”的映射表。前者用于速查，后者用于审计——它的作用是把正文每一个可争议的判断落到具体来源上，使读者能够独立复核。
+
+\subsection{对偶矩阵}
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{趋势跟踪与均值回归的逐维对偶（定性矩阵）}\label{tab:dual}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{6.1cm}>{\raggedright\arraybackslash}p{6.1cm}@{}}
+\toprule
+\textbf{比较维度} & \textbf{趋势跟踪} & \textbf{均值回归} \\
+\midrule
+信号构造 & $w_t=+\,g\!\left(s_t(L)/\sigma_t\right)$：顺过去走势 &
+$w_t=-\,g\!\left(s_t(L)/\sigma_t\right)$ 或 $w_t=-\,g\!\left((X_t-\mu)/\sigma\right)$：逆偏离 \\
+数学载体 & OU 族 $\theta<0$ 分支；带漂移随机游走 &
+OU 族 $\theta>0$ 分支；协整误差修正模型 \\
+统计前提 & 无独立门槛，正自相关即可 & \textbf{先验证}平稳性/协整，再交易 \\
+典型持有期 & 一至十二个月（中尺度） & 小时至周（短反转）、三至五年（长反转） \\
+换手量级 & 中低（信号平滑后可进一步压低） & 高，半衰期短者尤甚 \\
+成本敏感度 & 中 & 高；成本与最优带宽呈三次方根关系 \\
+收益偏度 & 总体右偏，但含深度左尾（动量崩溃） & 左偏，收敛失败时集中亏损 \\
+极端市场表现 & crisis alpha：危机中往往正收益 & 去杠杆中与同类策略同向巨亏 \\
+容量约束来源 & 拥挤与协调失败（信号同质化） & 交易成本与资金约束 \\
+失效模式 & 震荡市慢性出血 + 崩溃时跳崖 & 不收敛 + 被迫平仓，跳变式亏损 \\
+风险管理手段 & 波动率目标化有效 & 波动率目标可能有害；需止损与资金冗余 \\
+主导机制解释 & 风险溢价 / 信息延迟扩散 & 流动性补偿 / 过度反应 \\
+证据总体强度 & 中周期动量证据强；百年回测样本长 & 配对交易早期强、后期衰减；短反转证据强 \\
+数据窥探暴露 & 高（技术规则已被系统审查） & 高（超参数多、配对选择自由度高） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{矩阵读法：三行容易被误读的地方}
+
+\textbf{“风险管理手段”一行最反直觉}。波动率目标化被反复证明能提升动量/趋势策略的夏普\cite{barroso2015,harvey2018,moreiramuir2017}，但机械照搬到反转策略上是错的：趋势在波动率上升时信号质量下降（趋势被噪声打断），降敞口合理；反转的利润恰恰常来自高波动时段（偏离更大、回归空间更大），降敞口等于砍掉自己的收益来源。执行章（第~\ref{sec:execution}~节）展开这一点。
+
+\textbf{“统计前提”一行的实操后果}是反转的研发流程多一道\emph{样本消耗}——先筛出满足协整/平稳条件的配对或篮子，不合格的样本被丢弃。资产数量有限的市场里，反转的有效样本基础因此比趋势薄，统计显著性也更难建立。这是“入场门槛”对偶的操作含义。
+
+\textbf{“容量约束来源”一行最容易被忽略}。业界的直觉是“反转容量小、趋势容量大”；矩阵的画面更精细——反转的约束来自\emph{自己支付的成本}，确定、可测算；趋势的约束来自\emph{别人和你抢同一笔钱}，状态依赖、难以事前量化。容量研究（Stein 2009；Lou--Polk 2022）\cite{stein2009,loupolk2022}在过去十几年反复尝试却始终没有统一答案，根子就在这里。
+
+\subsection{论断—证据映射}
+
+下表把本文的核心论断逐条对上证据，并给出各自的置信度分级（分级口径见第~\ref{sec:confidence}~节）。
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{核心论断与证据映射}\label{tab:claim}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{6.4cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{2.9cm}@{}}
+\toprule
+\textbf{论断} & \textbf{主要证据} & \textbf{置信度} & \textbf{主要反方/边界} \\
+\midrule
+两策略共享同一信号，仅符号不同 & 自相关函数多尺度符号反转\cite{lomackinlay1988,cutler1991,famafrench1988} & \confhigh & 协整型反转含结构约束\cite{englegranger1987} \\
+收益自相关随持有期变号（U 形） & 短频反转\cite{lehmann1990,jegadeesh1990}、中频动量\cite{jegadeesh1993,mop2012}、长频反转\cite{debondt1985,poterbsummers1988} & \confhigh & 长周期反转证据受质疑\cite{richardson1993} \\
+趋势策略呈凸性/危机中获利 & 回溯跨式复制\cite{funghsieh2001}、百年样本\cite{hop2017} & \confmid & 动量崩溃显示深度左尾\cite{danielmoskowitz2016} \\
+反转策略呈凹性/收敛失败致灾 & LTCM\cite{lowenstein2000,jorion2000}、2007 量化危机\cite{khandanilo2011} & \confmid & 短期反转（流动性型）偏度未必为负 \\
+反转换手高于趋势、成本敏感 & 配对利润衰减\cite{dofaff2012}、成本分类\cite{novymarxvelikov2016,frazzini2018} & \confhigh & 低频价值型反转换手很低 \\
+趋势面临拥挤而非成本约束 & 协调失败\cite{stein2009}、comomentum\cite{loupolk2022}、拥挤度\cite{baltas2019} & \confmid & 容量约束的定量估计仍不统一 \\
+两策略均受数据窥探威胁 & 7846 规则 bootstrap\cite{sullivan1999}、Reality Check\cite{white2000}、$t>3$~门槛\cite{hlz2016} & \confhigh & 方法学上可部分校正\cite{hansen2005,romanowolf2005} \\
+发表后收益显著衰减 & 97 个因子实测\cite{mcleanpontiff2016} & \confmid & 衰减幅度因因子而异 \\
+时间序列动量稳健性存疑 & 逐资产再检验\cite{huang2020}、跨资产信号\cite{pitkajarvi2020} & \confmid & 百年样本持相反结论\cite{hop2017} \\
+\bottomrule
+\end{tabular}
+\end{table}

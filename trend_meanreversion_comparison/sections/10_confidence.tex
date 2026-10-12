@@ -1,0 +1,49 @@
+\section{结论置信度分级}\label{sec:confidence}
+
+本章对全文的核心结论给出置信度分级。分级不是修辞上的“我觉得”，而是按四条可操作的标准判定：\textbf{(i)} 证据是否来自多个独立来源；\textbf{(ii)} 是否经受过多重检验或样本外检验；\textbf{(iii)} 是否存在未解决的反方证据；\textbf{(iv)} 结论是机制判断还是可观测事实。四条标准中，“可观测事实”类的结论天然更容易达到高置信度，“机制解释”类的结论上限较低——因为机制不可直接观测（第~\ref{sec:mechanism}~节）。
+
+\subsection{分级结果}
+
+\newcommand{\lvA}{\textbf{高}}
+\newcommand{\lvB}{\textbf{中}}
+\newcommand{\lvC}{\textit{低}}
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{1.1cm}>{\raggedright\arraybackslash}p{4.3cm}>{\raggedright\arraybackslash}p{4.6cm}@{}}
+\caption{核心结论的置信度分级}\label{tab:conf}\\
+\toprule
+\textbf{结论} & \textbf{置信度} & \textbf{支撑理由} & \textbf{限制与反方} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{结论} & \textbf{置信度} & \textbf{支撑理由} & \textbf{限制与反方} \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+趋势与均值回归共享同一信号，唯一自由度是符号 & \lvA & 定义为可验证的构造事实；文献中的标准构造逐项对应\cite{mop2012,jegadeesh1993,gatev2006,lehmann1990} & 协整型反转含额外的结构约束，非纯粹符号翻转\cite{englegranger1987} \\
+收益自相关随持有期变号 & \lvA & 多源独立证据：短频负\cite{lehmann1990,jegadeesh1990}、中频正\cite{jegadeesh1993,mop2012}、长频负\cite{debondt1985,poterbsummers1988}；方差比检验提供统一统计量\cite{lomackinlay1988} & 长周期负自相关受小样本质疑\cite{richardson1993}；本文 A 股实证未复现短频反转（见第~\ref{sec:empirical}~节） \\
+趋势策略呈凸性、危机中获利 & \lvB & 期权复制\cite{funghsieh2001}、百年样本十年全正\cite{hop2017} & 动量崩溃显示深度左尾\cite{danielmoskowitz2016}；百年样本存在幸存者偏差 \\
+反转策略呈凹性、收敛失败致灾 & \lvB & 两起独立的重大事件（LTCM 1998、量化危机 2007）\cite{lowenstein2000,jorion2000,khandanilo2011} & 事件样本少（n=2），难以做统计检验；样本选择可能偏于戏剧性案例 \\
+反转策略换手高、成本敏感 & \lvA & 理论（带宽 $\propto$ 成本立方根\cite{martin2011}）与实证（利润衰减\cite{dofaff2012}、成本分类\cite{novymarxvelikov2016,frazzini2018}）一致 & 低频价值型反转换手极低，不适用本条 \\
+趋势策略面临拥挤约束 & \lvB & 理论\cite{stein2009}与拥挤度量实证\cite{loupolk2022,baltas2019} & 拥挤度的定量估计尚无统一口径；容量上限的估计分歧较大 \\
+波动率目标化对两策略作用不对称 & \lvB & 趋势侧多源验证\cite{barroso2015,harvey2018,moreiramuir2017} & 反转侧“波动率目标有害”缺少同等的系统实证，主要是机制推理 \\
+两策略均受数据窥探威胁 & \lvA & 方法论文献高度一致\cite{sullivan1999,white2000,hlz2016,mcleanpontiff2016}；校正工具成熟\cite{hansen2005,romanowolf2005,bailey2014} & 校正后的结论仍依赖模型假设 \\
+中周期时间序列动量真实存在 & \lvB & MOP12 的 58 合约证据\cite{mop2012}、百年样本\cite{hop2017} & 逐资产再检验质疑其稳健性\cite{huang2020,pitkajarvi2020}；矛盾未解决 \\
+阈值带宽度随成本立方根变化 & \lvB & 解析结果\cite{martin2011}与数值验证\cite{boguslavsky2004,zhangzhang2008} & 假设较理想（线性成本、OU 动态），实盘偏离未知 \\
+机制解释（行为 vs 风险）的归属 & \lvC & 两族解释均有模型支撑\cite{hongstein1999,bsv1998,dhs1998,hop2017} & 机制不可直接观测，无从判决\cite{cochrane2011,cochrane2005} \\
+本文实证支持“持有期决定归属” & \lvC & 期货侧时序趋势优于时序反转，呈单调结构 & 仅为单一市场、单一时期、未做多重检验校正；不构成统计显著结论 \\
+\end{longtable}
+
+\subsection{分歧最深的一条}
+
+表中“中周期时间序列动量真实存在”是整个比较中最分裂的结论。正方是 Moskowitz 等(2012) 的 58 个合约与 Hurst 等(2017) 的百年样本\cite{mop2012,hop2017}，反方是 Huang 等(2020) 的逐资产再检验与 Pitkäjärvi 等(2020) 的跨资产质疑\cite{huang2020,pitkajarvi2020}。本文不仲裁，只指出分歧的来源：Huang 等发现 TsMOM 的盈利与“按历史均值投资”几乎无差别，这一批评的实质是\emph{把“可预测性”与“策略盈利”分开}——策略可以盈利而预测性不显著，因为波动率缩放本身贡献收益（见 Kim 等 2016\cite{kim2016}）。因此这条结论应表述为：“中周期趋势策略在多数样本中盈利，但其中有多少来自时序预测、多少来自风险缩放，尚未定论。”
+
+\subsection{一个整体的判断}
+
+把分级结果汇总，可以看到一条清晰的分界：\emph{关于“是什么”的结论置信度高，关于“为什么”和“值多少”的结论置信度低}。
+
+“两策略共享信号”“自相关随尺度变号”“反转换手更高”——这些是构造事实或稳健的经验规律，置信度高。
+“趋势收益来自风险溢价”“反转收益来自流动性补偿”——这些是机制解释，置信度低。
+“某策略年化收益 X\%”——跨文献不可比，且受发表后衰减影响，置信度低。
+
+这条分界本身是本文最希望读者带走的东西。它意味着：\textbf{策略比较应当建立在高置信度的结构事实上（信号结构、尺度依赖、成本与容量约束），而对机制叙事与收益水平保持低信任。}

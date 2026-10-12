@@ -1,0 +1,99 @@
+\appendix
+
+\section{数学工具备查}\label{sec:appendix}
+
+正文多次使用 OU 过程、方差比与最优阈值带这三个工具，但只给出结论。本附录补齐推导要点与使用边界，使读者可以独立复现本文的数学论断。
+
+\subsection{OU 过程的离散估计与半衰期}
+
+连续时间的 OU 过程
+\begin{equation}
+dX_t=\theta(\mu-X_t)\,dt+\sigma\,dW_t
+\end{equation}
+在等间隔 $\Delta$ 上的精确解是
+\begin{equation}
+X_{t+\Delta}=\mu\left(1-e^{-\theta\Delta}\right)+e^{-\theta\Delta}X_t
++\sigma\sqrt{\frac{1-e^{-2\theta\Delta}}{2\theta}}\;\varepsilon_t,\qquad
+\varepsilon_t\sim \mathcal N(0,1).
+\end{equation}
+这是一个 AR(1)：
+\begin{equation}
+X_{t+\Delta}=c+\phi X_t+u_t,\qquad
+\phi=e^{-\theta\Delta},\quad
+c=\mu(1-\phi),\quad
+\mathrm{Var}(u_t)=\frac{\sigma^2}{2\theta}\left(1-e^{-2\theta\Delta}\right).
+\end{equation}
+因此参数的估计可以分两步完成：先用最小二乘或极大似然估计 $(\hat c,\hat\phi)$，再由
+\begin{equation}
+\hat\theta=-\frac{\ln\hat\phi}{\Delta},\qquad
+\hat\mu=\frac{\hat c}{1-\hat\phi},\qquad
+\hat\sigma^2=\frac{2\hat\theta\,\widehat{\mathrm{Var}}(u_t)}{1-e^{-2\hat\theta\Delta}}
+\end{equation}
+反解连续时间参数。
+
+\textbf{半衰期}由“偏离被拉回一半所需时间”定义，即解 $e^{-\theta H}=1/2$：
+\begin{equation}
+H=\frac{\ln 2}{\theta}.
+\end{equation}
+在离散口径下等价于 $H=\Delta\ln2/\ln(1/\phi)$。这一量在配对交易中是核心参数：它同时决定了持仓的期望时长与最优交易带的宽度量级。
+
+\textbf{使用边界}。三条常见误用值得点明。其一，$\hat\phi$ 在小样本下有向下偏误（Kendall 1954 提出过修正），因此短样本估出的 $\theta$ 往往偏大、半衰期偏短；Poterba 与 Summers(1988)、Fama 与 French(1988) 的长期反转结论之所以受到 Richardson(1993) 的质疑，根本原因正是长周期回归在小样本下的检验功效不足\cite{poterbsummers1988,famafrench1988,richardson1993}。其二，$\theta$ 的估计对是否含时间趋势、是否含结构断点极其敏感，而金融价格序列两者都常见。其三，OU 假设线性回复力与常数波动率；若偏离越大、回复力反而越弱（非线性均值回归），OU 估计会高估回归速度。
+
+\subsection{方差比统计量}
+
+设 $\{r_t\}$ 平稳，$q$ 期累计收益的方差与单期方差之比定义为
+\begin{equation}
+VR(q)=\frac{\mathrm{Var}\left(\sum_{k=0}^{q-1}r_{t-k}\right)}{q\,\mathrm{Var}(r_t)}.
+\end{equation}
+把分子展开为 $q$ 个方差项与 $q(q-1)$ 个协方差项，整理后得到
+\begin{equation}
+VR(q)=1+2\sum_{k=1}^{q-1}\left(1-\frac{k}{q}\right)\rho_k ,
+\end{equation}
+其中 $\rho_k=\mathrm{Corr}(r_t,r_{t-k})$。这一步是正文“统一框架”的关键：它把“策略归属”转化为“加权自相关之和是否大于 1”。
+
+三个立即的推论：
+
+\begin{itemize}[leftmargin=2.2em]
+  \item $VR(q)=1$ 对一切 $q$ 当且仅当所有 $\rho_k=0$（随机游走）。
+  \item 若 $\rho_1<0$ 而 $\rho_k\approx0\ (k\ge2)$，则 $VR(q)<1$ 且随 $q$ 单调逼近 $1-2|\rho_1|$ 的极限——$VR(q)$ 随 $q$ 上升，对应短期反转。
+  \item 若 $\rho_k>0$ 且衰减缓慢（长记忆），$VR(q)\gg1$ 且随 $q$ 持续增长，对应趋势。
+\end{itemize}
+
+\textbf{检验统计量}。在同方差假设下，Lo 与 MacKinlay(1988) 给出
+\begin{equation}
+z(q)=\frac{VR(q)-1}{\sqrt{\dfrac{2(2q-1)(q-1)}{3q\,n}}}\ \xrightarrow{d}\ \mathcal N(0,1),
+\end{equation}
+$n$ 为样本量。异方差稳健版本 $z^*(q)$ 用估计的 $\hat\delta_j$ 替换渐近方差（构造见原文）。对本文的启示有两条：其一，$z(q)$ 的分母随 $q$ 增大而增大，\emph{长周期检验的功效天然低于短周期}——这解释了为什么长期反转的证据总是比短期反转脆弱；其二，个股层面的 $|\rho_k|$ 被特质噪声稀释，因此 $z(q)$ 在个股上难以显著，而在组合/指数上容易显著\cite{lomackinlay1988,richardson1993}。
+
+\subsection{最优交易带与成本的三次方根}
+
+反转策略不能连续交易——每次穿越阈值都要付成本。考虑价差 $X_t$ 服从 OU 过程，目标是在线性交易成本下最大化长期收益。Martin 与 Sch\"oneborn(2011) 的结果是：最优策略是一个\emph{无交易带}（no-trade band），当 $|X_t-\mu|$ 落在带内时仓位不变；带宽 $b$ 满足
+\begin{equation}
+b\;\propto\;\left(\frac{\text{单位交易成本}}{\text{风险厌恶}\times \text{回归强度}}\right)^{1/3}.
+\end{equation}
+三次方根的来源可以直觉地理解：成本上升时，为避免频繁交易必须加宽带；但加宽带意味着等待更久、承担更多偏离风险，因此带宽随成本上升的弹性小于线性。这一结论有很强的实操含义——它把“多高的成本对应多宽的带宽”变成一个可计算的量，代价是假设线性成本与已知的 OU 动态。
+
+在极端情形下，若加入止损退出（防线不可无限等待），问题变为双停时最优控制，Leung 与 Li(2015) 给出了解析的进出场价格区间\cite{leungli2015}；若允许幂效用，Boguslavsky 与 Boguslavskaya(2004) 给出阈值带的解析解\cite{boguslavsky2004}；若目标是“低买高卖”的直接阈值形式，Zhang 与 Zhang(2008) 给出了最优规则及其性质\cite{zhangzhang2008}。三者的共同结构是：\emph{反转策略的核心决策变量是带宽，而非方向}。
+
+\subsection{GARCH 与波动率均值回归}
+
+价格方向之外还有二阶矩的均值回归。Bollerslev(1986) 的 GARCH(1,1) 模型
+\begin{equation}
+h_t=\omega+\alpha\,\varepsilon_{t-1}^2+\beta\,h_{t-1},\qquad
+\varepsilon_t=\sqrt{h_t}\,z_t,\ z_t\sim \mathcal N(0,1)
+\end{equation}
+的条件方差期望收敛于
+\begin{equation}
+\bar h=\frac{\omega}{1-\alpha-\beta}\qquad(\alpha+\beta<1),
+\end{equation}
+偏离以 $\alpha+\beta$ 的速率衰减。这就是“波动率均值回归”的计量载体。
+
+为何把它单列？因为它与价格方向的均值回归在\emph{载体}上不同：$\theta>0$ 刻画的是“价格回到均值”，$h_t\to\bar h$ 刻画的是“波动幅度回到其长期水平”。二者可以同时成立、也可以互相矛盾（例如价格趋势强、而波动率均值回归正常）。第~\ref{sec:unity}~节的符号统一框架只覆盖前者；把它硬套到波动率上会得到错误推论。
+
+与交易直接相关的是方差风险溢价：Carr 与 Wu(2009) 用指数期权定价出方差风险溢价并验证其与收益的关系\cite{carrwu2009}，Bollerslev 等(2009) 进一步发现它可显著预测短期股票收益\cite{bollerslev2009}。这两项工作构成了“做空波动率均值回归”这一策略族的理论依据，也解释了为什么波动率类策略与方向性策略的相关性通常很低。
+
+\subsection{本文实证对称性的形式化陈述}
+
+第~\ref{sec:empirical}~节的 G1/G2 门禁写成式子只需一行。设某 $L$ 下的目标权重为 $w_t$，趋势与反转的权重分别为 $+w_t$ 与 $-w_t$，则换手 $|w_t-w_{t-1}|$ 相同、毛收益 $w_t^\top r_{t+1}$ 与 $-w_t^\top r_{t+1}$ 互为相反数，而净收益两侧各扣除同一个 $c\cdot\text{换手}_t$（$c$ 为不区分方向的单边成本）。毛利夏普因此严格镜像为 $+S$ 与 $-S$，净夏普则约为 $(+S-\kappa)$ 与 $(-S-\kappa)$，$\kappa$ 为成本拖累对应的夏普损失——\textbf{成本把两侧差距从 $2S$ 放大到约 $2S+2\kappa$}：好的一侧被削去 $\kappa$，差的一侧再多压一个 $\kappa$。第~\ref{sec:empirical}~节已用实测数字验证这一结构（$L=5$ 时为 $+0.20$ 与 $-0.60$，而非 $\pm0.20$）。
+
+这条式子可推广：任何“信号符号翻转”型的策略对偶，在扣除不区分方向的成本后，都会表现出“胜者优势被削弱、败者劣势被放大”的不对称。它与具体市场无关，是成本对策略比较的结构性影响。

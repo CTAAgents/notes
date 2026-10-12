@@ -1,0 +1,81 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue, citecolor=black}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.35em}
+\setlength{\parindent}{2em}
+\setlength{\emergencystretch}{3em}
+\setlength{\tabcolsep}{4pt}
+\setlist{nosep}
+\renewcommand{\arraystretch}{1.15}
+
+\newcommand{\confhigh}{\textbf{高}}
+\newcommand{\confmid}{中}
+\newcommand{\conflow}{\textit{低}}
+
+\title{\bfseries 趋势跟踪与均值回归：\\
+\large 同一自相关结构的两侧剪影\\[2pt]
+\large ——本质异同、执行分野与统一口径实证的全景比较}
+\author{叨客宁宁}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent 趋势跟踪与均值回归被普遍表述为两种相反的策略：前者追涨杀跌，后者买跌卖涨。
+本综述主张一个可能令人不适的论断——这种"相反"是表层修辞，二者在数学上共享同一份原料，
+即收益序列的自相关结构；它们不是两套世界观，而是同一预测信号的两种符号选择。
+为支撑该论断，本文做了三件事。
+第一，把两条各自独立生长近百年的文献脉络并置编年：从 Bachelier(1900) 与
+Uhlenbeck--Ornstein(1930) 的数学源头，经 Cowles(1933)、Kendall(1953)、Fama(1970) 的效率市场检验，
+到 De Bondt--Thaler(1985) 的过度反应、Jegadeesh--Titman(1993) 的截面动量、
+Gatev 等(2006) 的配对交易、Moskowitz--Ooi--Pedersen(2012) 的时间序列动量、
+Hurst--Ooi--Pedersen(2017) 的百年回溯，直至 2020 年代的机器学习再挖掘。
+第二，给出"统一—对偶"的分析框架：用一个含符号的回归强度参数、
+方差比 $VR(q)$ 与半衰期/趋势持续期把两策略装入同一数学容器，
+再逐条论证七组本质差异（平稳性假设、收益偏度、时间尺度、风险来源、
+容量与换手、失效模式、入场门槛），并解释二者为何长期共存。
+第三，用一个统一口径的对照回测检验上述论断：在中国期货主力连续与 A 股两个资产池上，
+令趋势与反转共享同一资产池、同一调仓频率、同一成本模型，
+唯一区别是信号的符号；结果支持"时间尺度决定归属"的核心预测。
+全文收录 $80+$ 条逐条核验的来源（DOI/arXiv/官方仓库），附证据表、统一比较矩阵、
+结论置信度分级、评测数据污染与不可比设定审计、可复现实验路线图。
+本文对争议结论如实标注反方证据与边界，未获全文复核的具体数字一律标明，不作臆测。
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\input{sections/01_intro}
+\input{sections/02_genealogy}
+\input{sections/03_unity}
+\input{sections/04_duality}
+\input{sections/05_evidence_matrix}
+\input{sections/06_mechanism}
+\input{sections/07_execution}
+\input{sections/08_empirical}
+\input{sections/09_audit}
+\input{sections/10_confidence}
+\input{sections/11_reproduce}
+\input{sections/12_future}
+\input{sections/91_appendix}
+\input{sections/90_evidence}
+\input{sections/99_bibliography}
+
+\end{document}

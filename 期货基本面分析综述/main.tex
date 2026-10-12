@@ -1,0 +1,375 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\emergencystretch=3em
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.4em}
+\pagestyle{headings}
+\title{\heiti 期货品种基本面分析法及交易策略深度综述\\[4pt]\Large 从供需平衡到期限结构：四类分析法与策略证据的统一考察}
+\author{叨客宁宁}
+\date{}
+\begin{document}
+\maketitle
+\begin{center}\vspace{-7.2pt}{\small\bfseries 摘要}\vspace{-11.7pt}\end{center}
+\begin{quotation}\small
+期货市场的基本面分析长期生活在两套互不引用的话语体系里：学术文献讲期限结构、便利收益与风险溢价，实务研报讲平衡表、库存与基差，两边各有各的术语、各有各的证据标准。本文把商品期货与金融期货放在同一个框架下，按信息载体把基本面分析法归为四类——供需平衡法、期限结构法、成本曲线法、事件与政策法——逐一追溯其理论源头、数据基础、可操作信号与实证证据，并说明每一类方法从“分析”走到“策略”时在哪一步开始漏气。全文纳入100 条文献，学术条目经Crossref、OpenAlex 与arXiv 逐条核验元数据，机构报告与制度文本标注公开来源与核验状态；在此基础上给出统一比较矩阵、分层结论置信度，以及一套防数据窥探的可复现实验建议。本文不作任何投资推荐，所有实证结论均标注样本期与边界条件。
+\end{quotation}
+\vspace{-6.2pt}\noindent 关键词：期货基本面；供需平衡；期限结构；成本曲线；对冲压力；金融期货；文献综述
+\vspace{-1.7pt}
+\section{引言}
+
+股票投资界谈论基本面，通常指一件事：把公司的内在价值算出来，然后等价格靠过来。这套语言移植到期货市场会立刻失灵，原因不在于分析者不够努力，而在于期货合约本身就是一种不同的东西。股票背后是永续经营的现金流，可以谈估值锚；期货背后是一张限期交割的合约，它的价格同时被持有成本、便利收益、对冲供需和交割制度塑形。同一个“库存下降”，在铜上意味着现货紧张，在利率期货上根本没有对应物；同一个“估值偏低”，在股指期货上可以由分红和融券成本精确算出，在螺纹钢上只能靠成本曲线和历史分位作粗糙的类比\cite{44, 71, 19}。基本面分析在期货里不是一个方法，而是四种方法共用了一个名字。
+
+第二层麻烦来自文献的分布。商品期限结构的理论源头在1930--1950 年代的《经济学》《美国经济评论》与《政治经济学杂志》\cite{01, 05, 02, 06}，库存与横截面收益的实证发表在2000 年之后的资产定价期刊\cite{11, 12, 28}，国内最可用的平衡表与基差实践则躺在期货公司与券商的内部研报里\cite{57, 59, 61}，三者几乎互不引用。金融期货又自成一派：股指基差的文献在1980 年代的《期货市场杂志》与《金融分析杂志》\cite{71, 73}，利率期限溢价的研究在《金融经济学杂志》与《美国经济评论》\cite{66, 67}，与商品研究共享词汇表的部分只有“对冲压力”一词\cite{10, 38}。结果是，想系统了解“期货怎么做基本面”的读者必须同时读三套材料，还得自己完成术语对齐。
+
+第三层麻烦是证据标准参差。公开发表的预测力在样本外平均缩水约四分之一，部分研究缩水过半\cite{101}，2010 年之前的策略文献大多没有做多重检验校正\cite{98}，而实务研报的回测窗口、成本假设与样本选择常常不作披露。不加甄别地把“文献说有效”和“研报说有效”并排引用，比不引用更危险——这不是修辞，本文第十章的比较矩阵会把这三类证据分列呈现。
+
+基于此，本文的目标有三个。第一，给商品期货与金融期货的基本面分析一个统一的分类框架，四类方法各自回答什么问题、依赖什么数据、失效在什么地方。第二，对每条核心文献标注来源类型与核验状态，把学术证据与机构实践放进同一张比较矩阵，让读者一眼看出哪些结论是多方交叉验证的、哪些只有单一来源支撑。第三，给出可复现的实验设计，把“信文献”变成“能自己验”。
+
+结构上，第二章重建理论骨架，说明期限结构为什么是商品基本面的中枢语言；第三章梳理数据与信息源体系；第四至第七章分别展开四类分析法——供需平衡、期限结构、成本曲线、事件与政策；第八章单独处理金融期货这一需要特殊对待的分支；第九章把分析信号落到策略构造与实证证据；第十章给出比较矩阵与置信度分级；第十一章是可复现实验建议；第十二章交代边界与开放问题。
+
+一句话预告全文的判断：\heiti{在期货市场，基本面信息几乎从不直接进入价格，它先被翻译成期限结构和基差，再由交易}\heiti{者消化}——理解了这个翻译机制，商品与金融期货的许多“不同做法”其实是在说同一件事。
+
+\section{理论骨架：期限结构为什么是中枢语言}
+
+\subsection{一场持续三十年的论战：正常backwardation 对倒转持有费}
+
+凯恩斯在《货币论》里提出，套保者需要投机者承接风险，因此愿意付出代价，期货价格系统性低于预期现货价，这段价差叫正常backwardation\cite{01}。这个说法直觉上顺耳，逻辑上却有个漏洞：如果价差是对风险的补偿，它的方向应该随市场而变，不该永远单边。卡尔多从另一侧切入，认为期货价格由现货与期货的联合均衡决定，套保者与投机者的头寸结构共同定价格差\cite{05}。
+
+把这场论战扳回实证轨道的是霍尔曼·沃金。他在1948 年的论文里指出，升贴水的第一解释根本不是风险补偿，而是存储成本：当期库存充足时，持有现货要付仓储与资金成本，期货价格自然高于现货，形成倒转持有费（contango）；库存紧张时，现货的便利收益抬高现货价，期货贴水（backwardation）随之出现\cite{02}。1949 年他进一步把仓储价格理论做成完整框架，1953 年又提出“套保本质上是基差投机”——套保者放弃方向风险的同时承担了基差风险，这让基差本身成为可交易的对象\cite{03, 04}。布伦南在1958 年把风险溢价重新放回存储模型：库存供给曲线不仅由仓储成本决定，还由持有库存的风险报酬决定，便利收益与风险补偿从此可以在同一张图上讨论\cite{06}。
+
+这场论战的当代结论可以压缩成三句话：升贴水的主体部分由存储技术与库存状态解释，风险溢价存在但不占主导，且其符号随对冲供需翻转。泰尔瑟1958 年对棉花与小麦的研究是对“套保说”最早的正面检验，结论同样偏向存储解释\cite{07}。
+
+\subsection{对冲压力：谁在付钱}
+
+如果套保者整体是净空头（如原油生产商、螺纹钢钢厂），期货必须贴水才能吸引投机者接盘；如果套保者整体是净多头（如航空公司对燃油、保险资金对权益），期货就会升水。这个逻辑称为对冲压力，赫希利菲尔1988 年给出了它的均衡定价条件——风险溢价取决于套保者转移风险的意愿与投机者承接风险的报价\cite{09}；贝森宾德1993 年证明期货溢价同时由系统性风险与对冲压力交互决定，并且期货的零贝塔收益率接近于零，这解释了为什么单纯“做多商品指数”长期拿不到显著溢价\cite{10}。康、鲁文霍斯特与唐2020 年把两种溢价拆开实证：套保者与投机者的净头寸各自独立地预测期货收益，且两者的预测力在商品与金融期货上都成立\cite{38}。沃金1953 年那句“套保即基差投机”在这里获得量化形态\cite{04}。
+
+\subsection{库存的实证形态：从理论曲线到横截面收益}
+
+库存理论的第一个大规模检验来自法玛与弗伦奇1987 年的经典论文：期限结构的斜率对现货价格有预测力，贴水结构下期货收益更高，升水结构下相反，这与存储理论的预测一致\cite{08}。戈顿与鲁文霍斯特2006 年给出商品配置的“事实清单”，其中最重要的两条是：商品的长期收益与通胀意外正相关，而库存存量（stocks）是稀缺性的核心度量\cite{11}。戈顿、林与鲁文霍斯特2013 年把这条线做细——库存（以basis 的水平与斜率度量）能解释商品横截面收益的大部分，且这种解释力在库存低时最强\cite{12}。
+
+这条线索的另一端是价格动态的理论刻画。迪顿与拉罗克1992 年证明，库存的非线性行为会让商品价格呈现“平时平缓、偶尔跳跃”的形态，价格钉住（price pinning）与跳跃是理性均衡的一部分而非市场失灵\cite{14}；平迪克1994 年给出了库存平滑短期价格波动的结构模型\cite{15}。卡什与麦克德莫特的长周期研究补了时间维度：商品价格的长期趋势很小而波动很大，用短样本外推长期回报会系统性高估\cite{16}。
+
+柯伊登等人的carry 研究把上述脉络统一到一个可交易的因子里：用期货曲线的斜率构造跨资产carry，商品是其中波动最大、与传统资产相关性最低的板块\cite{13}。\heiti{期限结构不是基本面的“影子”，它就是基本面进入价格的通道}——这是理解后文四类分析法的钥匙。
+
+\section{数据与信息源体系}
+
+\subsection{官方数据：平衡表、库存与仓单}
+
+期货基本面分析的信息源呈明显的层级结构。最底层是官方统计与交易所制度数据：美国农业部世界农业展望局与经济研究局的供需平衡表（产量、出口、期末库存）、美国能源信息署的原油与油品库存周报、国家统计局与海关总署的开工与进出口数据，以及三大商品交易所的注册仓单与交割预报。这类数据的共同特征是口径公开、发布日历固定、历史可回溯，构成基本面分析的“资产负债表”。施瓦格与特纳1995 年的分品种基本面手册至今仍是对这套数据最系统的操作性梳理，把天气、政府报告与库存解读整理成了可执行的阅读顺序\cite{40}。中国期货业协会的统编教材则给出了国内制度层面的完整图景\cite{47}。
+
+仓单数据值得单独强调，因为它介于“统计”与“制度”之间。仓单是可交割库存的法律凭证，其数量、所在地与持有者结构直接决定空头交割能力，因而是基差分析中信息含量最高的单一变量之一。世界银行对仓单作为抵押品与交割品的机制研究提供了跨国比较的基准\cite{21}，上期所关于标准仓单交易的理论与实践研究则从交易所视角解释了仓单流动性如何影响期现联动\cite{56}。国内实务中，注册仓单的周度变化、仓单集中度与虚实盘比是判断挤仓风险的标准工具箱，这一做法在公开研报中已被反复使用\cite{59, 61}。
+
+\subsection{机构研究与市场报告}
+
+第二层是机构研究：世界银行的《商品市场展望》按半年（每年4 月与10 月）给出分商品供需平衡与远期曲线判断\cite{55}，国际货币基金组织的工作论文系列提供方法论更扎实的分析，如期货价格能否预测现货的分结构检验\cite{50}、库存与期限结构对短缺冲击的反应\cite{51}，美联储的研究则处理地缘冲突下便利收益如何扭曲价格解读\cite{53}。这类报告的价值不在结论本身——它们通常不给交易信号——而在于口径：它们示范了专业机构如何定义“库存紧张”“供需缺口”这些模糊词汇。
+
+第三层是卖方研究，即券商与期货公司的金工与CTA 报告。国内这一层在2017 年之后成熟起来，华泰期货的期限结构因子系列第一次把便利收益、持有成本、展期收益的计算步骤完整公开\cite{57}，中信期货的商品四因子体系把动量与期限结构放进同一套打分框架\cite{59}，中信建投的风格因子跟踪以逐周多空收益的形式持续披露六因子表现\cite{58}，国泰君安期货的因子指数体系提供了更长的归因序列\cite{60}，国信证券的Carry 专题则把收益分解、持仓成本理论与对冲压力假说串成了完整的策略构造流程\cite{61}。这一层的弱点是方法披露不完整、样本期选择不透明，本文第十章的比较矩阵会把它们与学术证据分列呈现。
+
+\subsection{另类数据与文本信息}
+
+第三层之外的增量信息近年增长最快：卫星图像估计原油浮仓与农产品长势、港口与货运数据度量流量、天气预报模型驱动农产品单产预期、OPEC 与央行声明的文本情绪。中国期货业协会2019 年的卫星大数据研究报告给出了国内可落地的库存观测案例\cite{64}。文本方向上，美联储用结构主题模型分析OPEC 口径对油价的影响，是政策文本量化的范本\cite{54}。需要克制的是：另类数据的边际价值随其普及速度衰减，且多数供应商不披露历史修正规则，直接使用存在幸存者偏差与前视风险——本文第十二章会把这一点列为开放问题。
+
+一句话收束本章：\heiti{基本面数据的价值不在多寡，而在于是否进入了一个公开日历与公开口径的体系}——能被别人复算的数据才是分析，只能被自己看到的数据是故事。
+
+\section{方法一：供需平衡表与库存分析}
+
+\subsection{平衡表方法的逻辑与陷阱}
+
+供需平衡法是最古老也最直觉的期货基本面方法：估算产量、消费与库存的期末结余，用库存-消费比（stocks-to-use ratio）度量紧张程度，再把比值映射为价格方向。它的优点是因果链清楚——稀缺推高价格——并且每个输入都有官方来源可查；它的困难全部藏在“估算”两个字里。
+
+第一重困难是误差的不对称性。产量与消费数据在收获与核算之后会被多次修正，而平衡表在发布当时就必须使用预测值，预测误差本身会系统性地冲击价格。美国农业部经济研究局关于玉米期货如何反应产量预测的研究表明，逐月发布的预测更新会显著移动期货价格，历史预测误差还会调节市场对当期预测的反应\cite{62}。这意味着回测时用“最终修正值”重建历史平衡表会引入前视偏差——市场当时交易的是预测值，不是修正到位的终值——而多数初级分析恰恰这样做。第二重困难来自平衡表的内生性：价格高企会抑制消费、刺激未来种植，平衡表不是外生给定的环境，而是与价格互相决定。第三重困难是“库存-消费比到价格”的映射非线性：比值处于低位区间时，边际变化对价格的影响远大于高位区间，用线性回归拟合全样本会稀释尾部信息。
+
+迪顿与拉罗克的理论工作正好解释了第三点：库存低于某个阈值后，价格对流量冲击的敏感度陡增，跳跃成为均衡现象\cite{14}；平迪克的结构模型则把库存的平滑机制显式化\cite{15}。两者的共同含义是，平衡表分析真正的信息集中在低库存状态，而低库存状态恰恰是样本稀少、统计最难的区间——这是该方法“看起来简单、做起来难”的根本原因。
+
+\subsection{能源与农产品的两个范例}
+
+原油市场示范了平衡表方法的现代形态。分析者同时维护三张表——OPEC 与非OPEC 供给、全球需求（按季度）、商业与战略库存——并用基差与月差结构验证表格结论：当平衡表显示短缺而期限结构仍是深contango，要么表格错了，要么时间还不够。基琳2009 年的结构向量自回归给出了这类分析的方法论升级版：把油价冲击分解为供给冲击、需求冲击与投机冲击，证明同样幅度的价格上涨，供给驱动与需求驱动对经济的含义完全相反\cite{17}。国际货币基金组织关于OPEC 会议的研究提供了事件层面的补充，产量决策事件对价格水平与波动率都有可测影响\cite{52}。
+
+农产品的范例是天气—单产—库存链条。罗尔1984 年的橙汁研究是事件研究的原型：佛罗里达霜冻概率的变化在期货价格中即时且近乎完全地反映，说明“基本面信息”在流动性充足的期货市场上可以快到什么程度\cite{18}。天气风险的量化对冲已有完整的学术文献，以玉米为例连接天气变量、单产模型与衍生品定价的工作展示了从气象数据到交易合约的完整管线\cite{99}。
+
+\subsection{中国市场的实证补充}
+
+中国商品期货的平衡表分析多了一层制度背景：国储收储抛储、进口配额与保证金调整都会直接移动供需表，且政策变量的可预测性低于市场变量。冯玉林、汤珂与康文津在《金融研究》的工作为国内定价机制提供了基准——他们构建的市场、基差与基差动量三因子模型能解释中国商品期货的横截面收益，且存储理论在中国市场基本成立\cite{87}；钟腾与汤珂则从投资属性角度检验了中国商品期货的收益来源\cite{88}。李禾等人的研究给出一个重要的时效性警示：中国商品市场的共同因子（含期限结构与动量）在压力期会显著崩溃\cite{89}——平衡表给出的“安全边际”在极端行情中并不安全。
+
+\heiti{平衡表回答的是“有多少”，但它回答不了“多快”；前者的误差可以修正，后者的误差只能由}\
+\heiti{期限结构来定价}。这正是下一章方法的用武之地。
+
+\section{方法二：期限结构与基差分析}
+
+\subsection{从理论概念到可交易信号}
+
+期限结构分析法的主张是：与其计算“平衡表说价格应该多少”，不如直接读取市场已经投票出来的价格结构。近月对远月的升贴水、期货对现货的基差、逐月合约的斜率，这些量之所以携带基本面信息，是因为它们由真实持有现货的产业主体与套保者共同决定，作假成本极高。
+
+把理论变成信号的第一步是定义展期收益。持有近月合约的多头在到期时把头寸展期到远月，若近月贴水，展期过程按价差获利，反之亏损。法玛与弗伦奇1987 年的实证确立了斜率与收益的联系\cite{08}；费尔德曼与蒂尔2006 年专门检验backwardation 状态与商品期货业绩的关系，结论是贴水结构下的多头收益显著更优，但这一关系随样本期波动\cite{36}；蒂尔2015 年进一步论证期限结构是商品长期收益的首要驱动，其解释力超过时序动量\cite{35}。柯伊登等人把斜率推广成跨资产carry 因子\cite{13}，戈顿等人的工作则给出它与库存的联结机制\cite{12}——低库存抬高便利收益、压低近月，于是“贴水”本质上是市场对稀缺性的出价。
+
+\subsection{信号构造的主要变体}
+
+实务中至少存在三种构造方式，含义并不相同。第一种是斜率信号：取近月与远月的对数价差，横截面排序做多最贴水、做空最升水。华泰期货的公开教程详细给出了便利收益与展期收益的分解步骤\cite{57}，国信证券的Carry 专题则从收益分解一路推到组合构造\cite{61}。第二种是基差-动量复合：冯玉林等人的三因子结构（市场、基差、基差动量）表明，基差的水平与变化各自携带独立信息\cite{87}。第三种是曲线动量：不看斜率水平，而看曲线自身的形状变化，即近远月价差的动量。德格鲁特等人2014 年证明沿商品期货曲线做动量优于只用近月价格的动量\cite{33}，帕施克等人2020 年正式提出曲线动量因子并确认其横截面有效性\cite{34}，郑振龙等人的后续研究把曲线动量复制到中国市场并得到同向结论\cite{90}。
+
+横截面分解的基准来自施曼诺斯卡等人2014 年的《商品期货风险溢价解剖》：把商品横截面收益拆成动量、期限结构与库存三个交互维度后，期限结构的独立贡献最大，且动量与期限结构信号的相关性很低\cite{28}。这解释了为什么国内四因子体系几乎无一例外地把“动量+期限结构”当作双核\cite{59, 60}。
+
+\subsection{这个方法在哪里漏气}
+
+三处。其一，展期收益是历史实现量而非承诺收益：合约到期必须展期，而展期时点的价差是新的随机变量，回测中按到期日价差机械展期会高估可得性。其二，极端结构不可持续。2020 年4 月WTI 负油价、2022 年欧洲天然气挤仓都是期限结构信号的教科书式反例——贴水越深越做多，在结构翻转的时刻损失集中释放。学术上，李禾等人发现中国商品共同因子在压力期崩溃\cite{89}，与这一风险呼应。其三，容量与流动性集中在近月，远月合约的买卖价差可以吃掉斜率信号的大部分收益，尤其在国内商品远月普遍清淡的现实下。普里奥隆编的《商品金融市场》中古埃尔对库存理论与期限结构的系统章节给出了这些边界的理论表述\cite{48}。
+
+\heiti{期限结构是基本面的高频频谱：平衡表是季度数据，基差是日度数据，而市场只承认后者}\heiti{的即时清算价}。
+
+\section{方法三：成本曲线与产业链利润}
+
+\subsection{边际成本定价：成本曲线的逻辑}
+
+对工业品而言，长期价格的锚不是库存，而是边际产能的现金成本。逻辑朴素：价格显著高于边际成本曲线的高成本段，产能扩张与复产会压回价格；价格跌破现金成本，减产与检修会托住价格。霍特林1931 年的耗竭性资源理论是这条思路的学术源头，它证明可耗竭资源的价格路径由边际开采成本与贴现率共同决定\cite{19}。特鲁比与保卢斯2010 年对国际动力煤的研究是成本曲线假说的直接检验——观察到的煤价大体沿着边际成本排序定价\cite{20}。
+
+成本曲线方法的实操难点有三个：成本数据不公开（依赖调研与厂商口径，容易系统性偏差）、曲线随技术与汇率移动（同一品种三年换一条曲线）、以及“成本支撑”的心理位在恐慌期会被击穿（2015--2016 年国内黑色系、2020 年初原油都跌破过理论成本）。盖曼的商品专著把这套方法放在农产品、金属、能源三类资产的不同定价框架下对比，是该方法最完整的学术化表述\cite{39}。
+
+\subsection{产业链利润：比单一价格更稳的锚}
+
+单边价格难判断，产业链内部的相对价格常常更稳定——这是套利盘与产业套保共同维护的约束。压榨利润（大豆压榨）、裂解价差（原油炼化）、卷螺差（炼钢利润）这类加工价差，把上下游供需压缩成一个可直接交易的比值。西蒙1999 年对豆粕压榨价差的研究给出了最早的系统性策略检验：价差均值回归成立，但交易成本后收益集中在少数区间\cite{91}；Liu 与Sono 2016 年对中国大豆压榨价差的信息流与交易策略研究补充了新兴市场的证据——价差对上游信息的反应快于下游\cite{92}。
+
+中文实务文献对这套方法的沉淀已经比较厚。《期货多空逻辑》把“库存+基差+利润”整理成跨期与跨品种的操作框架\cite{49}，蒂尔与伊格尔伊合编的《智能商品投资》（Intelligent Commodity Investing，Risk Books）收录了机构级的策略设计文章\cite{41}，法博齐等人的《商品投资手册》与贝克等人的牛津商品研究集提供了学术侧的系统综述\cite{42, 43}。值得注意的共同提醒是：产业链利润策略的收益来源是加工环节的产能约束与开工周期，它在需求危机中会失效——需求塌陷时利润不是被压缩，而是全链条一起坍塌。
+
+\heiti{成本曲线告诉你价格“不该去哪”，产业链利润告诉你工厂“正在赚不赚钱”；前者是边界，}\heiti{后者是流量}——两者都比单点价格预测可靠，因为它们锚定的是物理约束而非心理。
+
+\section{方法四：事件与政策驱动}
+
+\subsection{事件法的逻辑：谁先读到，谁就定价}
+
+事件驱动分析不维护平衡表、不拟合成本曲线，它赌的是一件更简单的事：信息发布后的最初几小时里，价格没有走完全部调整。这条线索的学术原型是罗尔1984 年的橙汁研究——佛罗里达霜冻的概率信息在期货价格中的反映近乎即时，说明在流动性充足的市场里，“慢”的不是市场而是信息本身\cite{18}。真正的可交易空间出现在三个地方：信息难以量化（单产模型的分歧区间）、参与者结构受限（套保者被迫在事件前后调仓）、或者发布日历固定但解读复杂（平衡表的多空歧义）。
+
+天气是商品事件法的教科书场景。气象预报的更新频率以小时计，而作物单产的重估以周计，两者的时间差形成反复出现的定价缝隙；把天气变量、单产模型与衍生品对冲串成完整管线的研究已经出现\cite{99}。政策事件的难度更高：石油输出国组织的产量会议、主产国出口禁令、国内收储抛储公告，其信息含量集中在少数节点，且事后解读的选择空间大，容易产生事后归因偏差。美联储用结构主题模型分析该组织口径文本对油价波动与仓位的影响\cite{54}，国际货币基金组织的事件研究给出了产量决策对价格水平与波动率的双重影响\cite{52}——这两个工作的共同贡献是把“猜政策”变成了“量文本”。
+
+\subsection{高频日历：库存周报与宏观数据}
+
+机构化的事件交易围绕固定日历展开。原油市场每周三的库存报告、美国农业部每月的供需报告与每周出口检验、以及各国宏观数据发布，都构成可预演的事件窗口。关于美国能源信息署库存周报对原油期货影响的研究与美国农业部产量预测误差的研究，分别给出了能源与农产品两侧的基准反应模式\cite{63, 62}——共同规律是：反应幅度与数据偏离预期的幅度相关，而“预期”本身由专业机构的中值预测近似，这就把交易问题转化成了预期差问题。
+
+宏观数据对金融期货的冲击有自己的文献。米奥、拉姆钱德与祖姆瓦尔特用跳跃识别技术刻画了美国宏观新闻对标普500 期货价格跳跃的驱动结构\cite{79}；陈等人的中国市场研究则发现，百度指数度量的投资者注意力与宏观公告存在交互，且不同数据类别的冲击并不对称——只有少数几类公告对沪深300 期货的价格与流动性产生实质影响\cite{80}。两者的共同含义是：事件法在金融期货上同样成立，但可交易的部分集中在“预期差大且注意力被激活”的少数公告。
+
+事件法的边界也最清楚：持有窗口以小时到天计，容量有限，且对执行速度敏感——罗尔的橙汁研究其实是在提醒，最快的那部分调整根本不留给慢速交易者\cite{18}。
+
+\section{金融期货的基本面：一个需要单独交代的分支}
+
+\subsection{利率期货：期限溢价与政策预期}
+
+金融期货没有库存与仓单，但有自己的“基本面”：利率期货的价格由未来政策利率路径与期限溢价两部分组成，前者是预期，后者是持有长债所要求的补偿——两者在价格里不可直接观测，必须靠模型分离。这是利率期货基本面分析与商品平衡表最深刻的差异：商品分析者努力还原“实物有多少”，利率分析者努力还原“风险要多少”。
+
+方法论上有三条主线。第一条是无套利期限结构模型：安格与皮亚泽西把宏观变量嵌入仿射模型，让通胀与产出缺口进入利率定价\cite{68}；阿德里安、克朗克与蒙奇用回归框架直接估计各期限的期限溢价，纽约联储公开的期限溢价数据即源于此\cite{67}。第二条是可预测性：科克兰与皮亚泽西发现前端利率的帐篷形组合对国债超额收益有很强的样本内解释力\cite{66}，法玛与布莱斯则证明长期远期利率包含期限溢价信息而非纯预期\cite{69}——这条线的实际用途是判断期货曲线“贵不贵”，而非预测利率方向。第三条是政策事件定价：皮亚泽西与斯旺森证明联邦基金期货的超额收益与宏观周期指标强相关，期货价格等于政策预期加风险溢价\cite{70}。数据基础方面，古尔凯纳克等人构建的美国国债官方收益率曲线（1961 年至今）是这一切研究的标准起点\cite{65}。
+
+实务侧的对应物是基差与最便宜可交割券（CTD）。布尔哈特等人关于国债基差交易的专著把持有成本、交割期权与基差收敛讲得最透，中译本在国内被当作利率期货套利的案头书\cite{45}；伦德曼的研究指出教科书久期对冲法存在系统偏差，并比较了各类对冲比率构造\cite{77}，其后续工作对交割期权（含CTD 选择权）给出定价与对冲方法\cite{78}。这些内容共同回答一个基本面问题：期货价格与可交割券篮子之间的偏差，多少来自资金成本，多少来自交割期权的隐含价值。
+
+\subsection{股指期货：基差、套利边界与情绪}
+
+股指期货的定价有精确公式：现货价格加持有成本减分红。公式越精确，偏离就越有信息量。康奈尔与弗伦奇1983 年的两篇工作奠定了这一领域的基调——一篇给出持有成本定价的奠基性实证\cite{71}，另一篇证明税收因素（未实现资本利得的税负时机）会系统性压低期货价格，说明“偏离平价”有时是摩擦而非错误。莫德斯特与桑达瑞桑检验了现货-期货平价关系以及交易成本与卖空约束对基差的扭曲\cite{72}；菲莱夫斯基解释了股指期货早期持续折价的非均衡成因——卖空与保证金约束让套利者无法进场\cite{73}；布伦南与施瓦茨在连续时间框架下推导了含成本的套利边界与最优交易阈值\cite{74}。这套文献的实务结论是：基差= 套利成本的上界，超出上界的偏离才有交易价值。
+
+对冲侧，埃德灵顿1979 年确立了最小方差对冲比率与对冲有效性度量\cite{75}，菲莱夫斯基1985 年给出股指期货的贝塔对冲组合理论\cite{76}——这两篇是所有期货对冲比率研究的源头，商品与金融通用。基差的另一重含义是情绪与对冲成本：曹等人把投资者情绪引入持有成本模型，解释中国市场股指期货基差的异常波动\cite{84}；Ryu 等人的研究证实情绪驱动的错价在套利受限时被放大\cite{85}。国内曾出现的长期贴水（尤其中小盘指数期货）正是这一机制的现实版本：对冲需求集中，贴水是对稀缺保险的定价，而非对指数看空的表达。
+
+\subsection{外汇期货：利率平价的偏离}
+
+外汇期货的“基本面”压缩成一句话：两种货币的利率差。抛补利率平价给出理论基准，弗伦凯尔与利维奇的经典检验表明交易成本可以解释大部分平价偏离\cite{82}；法玛1984 年的远期贴水研究则揭示了著名的远期偏差之谜——远期升贴水同时包含风险溢价与预期，用它预测即期方向会得到符号稳定但幅度缩水的结论\cite{81}。韩、江与尹2019 年把利率平价偏离转化为可交易信号，直接检验外汇期货基差对即期收益的预测力\cite{83}。与商品的对照很有意思：商品的偏离靠库存与实物约束解释，外汇的偏离靠套利资金成本与风险溢价解释——同样是“平价失效”，一个物理，一个金融。
+
+\subsection{持仓结构：跨资产的共同语言}
+
+四类资产唯一完全共享的基本面语言是持仓结构。商品期货交易委员会的分类持仓报告、国内交易所的会员持仓排名，其理论基础都是对冲压力假说\cite{09, 10}：商业头寸代表被迫的套保需求，非商业头寸代表投机承接，两者的相对力量预测溢价方向。康、鲁文霍斯特与唐2020 年证明这一预测在商品与金融期货上都成立\cite{38}，赖与王2015 年在台湾股指期货上给出机构净持仓预测收益的直接证据\cite{86}。沃金1953 年的“套保即基差投机”在这里完成了跨资产的统一\cite{04}。
+
+\heiti{金融期货的基本面不看库存，看风险的供需：利率的风险叫期限溢价，股指的风险叫对冲}\heiti{需求，外汇的风险叫利差}——与商品的便利收益是同一个问题的两种问法。
+
+\section{从分析到策略：信号构造与实证证据}
+
+\subsection{分析与策略之间隔着什么}
+
+四类分析法给出的是判断，策略需要的是规则。从“看”到“做”至少要过四道手续：把判断量化成可排序的分值（如贴水分位、库存-消费比的z 值）、在横截面上决定多空两端（多数商品信号只能做多空对冲组合，单边方向的风险没有对冲）、把信号映射到仓位并计入成本、以及设定失效条件。大多数研报的失误发生在第一道与第二道：分值没有横截面基准（“贴水很深”相对谁？），或者把分析结论直接当方向判断（“供需偏紧”不等于现在做多，因为价格可能已经走完）。学术文献的优势恰恰在这一段——它们把四道手续全部写死在方法部分，代价是常常丢掉分析深度。
+
+\subsection{动量与趋势：商品上的证据全景}
+
+动量是商品期货研究最密集的方向，也是争议最大的方向。莫斯科维茨、欧与佩德森2012 年的时序动量在58 个市场上建立基准，商品是其中波动贡献最大的板块\cite{22}；皮尔朗从风险与套保行为角度给出了动量存在的机制解释\cite{26}；米弗与拉利斯系统检验了商品期货的动量策略变体，横截面动量的夏普高于时序动量\cite{23}；申骞的早期复核则把交易成本与稳健性讨论放进了正文\cite{24}。反方证据同样扎实：扎克玛丽、申与夏尔马2010 年的再检验表明，早期动量文献的部分显著性在成本调整与样本延长后缩水\cite{25}，查维斯与维斯瓦纳坦在现货与期货两个市场上同时刻画动量与均值回归，结论是两种力量在不同持有期上分治\cite{27}。
+
+这组文献给出的稳定结论有三条：动量在商品上存在但比股票弱，横截面构造优于时序构造，成本假设决定成败。达斯卡拉基等人对共同因子的系统检验给出第四条：把股票市场上成熟的因子模型整体搬到商品上，没有一个能成功定价商品横截面，结论是商品市场与股票市场彼此分割、商品内部又高度异质\cite{32}。这条否定性结果的建设性含义是：因子必须在商品自己的截面上找——施曼诺斯卡等人的解剖正是这样做的，其结论是动量与期限结构是两个相互独立的因子\cite{28}。
+
+\subsection{基本面信号的策略化证据}
+
+期限结构的策略证据在第五章已展开（斜率、基差动量、曲线动量\cite{35, 36, 33, 34, 90}），此处补充两点。第一是信号组合：富尔特斯等人直接检验了动量与期限结构信号的叠加，两者的低相关性让组合夏普显著优于任一单信号\cite{31}，这为国内四因子体系的双核结构提供了学术背书\cite{59, 60}。第二是配置视角：厄布与哈维关于商品期货战术与战略价值的分析提醒，商品的分散化价值依赖于“对通胀意外的暴露”而非单纯的高夏普\cite{29}，阿斯内斯等人的价值-动量普适性研究则把商品纳入跨资产框架，动量与价值在商品上同样互补\cite{30}。
+
+CTA 行业的复现研究给出了自上而下的校验。赫斯特、欧与佩德森的百年趋势证据说明，扣费后趋势在商品上长期为正但分布极度右偏\cite{37}；贝叶斯图模型对CTA 收益的最新分解则显示，行业收益的大部分仍可由短长趋势因子复现\cite{93}。开源侧，量化社区已经沉淀了三类可运行资产：可执行的策略笔记本（商品carry 信号的完整实现\cite{94}）、完整的算法代码库（商品期货动量的LEAN 实现\cite{95}）、以及论文-实现对照清单\cite{96}。这些不构成学术证据，但把“复现”的门槛从研究机构降到了个人。
+
+\subsection{中国市场的证据与它的保质期}
+
+国内公开证据的分布很不均衡：因子定义与逐周多空收益有持续披露（中信建投的六因子跟踪\cite{58}、国信证券的carry 专题\cite{61}），长周期归因有因子指数序列可查\cite{60}，年度层面有量化CTA 报告给出全貌\cite{100}，学术侧则有《金融研究》的定价机制检验\cite{87, 88}与国际期刊的中国曲线动量复制\cite{90}。多方交叉后相对稳健的结论是：期限结构与动量在中国商品横截面上显著，且与股票因子低相关。
+
+必须同时写下的反面证据是李禾等人的发现——共同因子在压力期会崩溃\cite{89}，以及国内研报普遍回避的三个问题：样本起点选择（2016 年黑色系大年 vs 2020 年后）、涨跌停与换月的处理细节、以及远月流动性约束下的容量假设。到这里可以给出本章的主句：\heiti{动量与期限结构是目前商品基本面策略中证据最厚的两条腿，但“证据厚”指的是多}\heiti{方独立验证过，不指的是收益稳定}。
+
+\section{统一比较矩阵与结论置信度}
+
+为了把四类方法放进同一把尺子，本章按六个维度做横向对比。表\ref{tab:matrix} 中“学术证据”指经同行评审的实证文献强度，“机构证据”指公开研报与官方研究的覆盖度，“置信度”按三方以上交叉验证为高、两方为中、单一来源为低的规则分级。
+
+\begin{longtable}{p{2.6cm}p{2.6cm}p{1.6cm}p{1.6cm}p{3.4cm}p{1.6cm}}
+\caption{四类分析法与金融期货分支的统一比较矩阵}\label{tab:matrix}\\
+\toprule
+方法 & 信息载体与频率 & 学术证据 & 机构证据 & 主要失效模式 & 置信度 \\
+\midrule
+\endhead
+供需平衡法 & 平衡表（月/季） & 强 & 强 & 修正偏差；低库存非线性；政策外生冲击 & 高 \\
+期限结构法 & 曲线与基差（日） & 强 & 强 & 结构翻转挤仓；展期可得性；远月流动性 & 高 \\
+成本曲线法 & 成本调研（季） & 中 & 中 & 成本口径漂移；恐慌击穿；数据不透明 & 中 \\
+事件驱动法 & 发布日历（事件） & 中 & 中 & 预期差构造；执行速度；事后归因偏差 & 中 \\
+持仓结构法 & 交易所持仓（周） & 中 & 强 & 头寸解读歧义；拥挤度未量化 & 中 \\
+利率期货（期限溢价） & 模型估计（日） & 强 & 中 & 模型风险；结构突变（量化宽松前后） & 中 \\
+股指期货（基差套利） & 持有成本（日） & 强 & 强 & 套利边界外的摩擦；分红估计误差 & 高 \\
+外汇期货（利率平价） & 利差（日） & 强 & 中 & 远期偏差之谜；资本管制摩擦 & 中 \\
+\bottomrule
+\end{longtable}
+
+表中值得解释的是两处不对称。其一，成本曲线法的学术证据明显弱于其他方法——直接检验“边际成本定价”的公开研究稀少（动力煤是少数案例\cite{20}），实务却大量依赖它，这种“实务先行、文献缺位”的格局意味着该方法的许多参数属于未经核验的行业惯例。其二，持仓结构法的机构证据强于学术证据：商业与非商业持仓的解读在国内研报中无处不在，但中文文献对它的系统检验很少，而英文文献的基准结论（对冲压力预测溢价\cite{10, 38}）在中文语境下未经充分复制。
+
+置信度分级的直接用法是决定研究与仓位的分配：高置信度的方法值得投入完整的数据工程，中置信度的方法先做小样本验证，单一来源的结论只作为先验、不作为信号。
+
+\section{可复现实验建议}
+
+综述的终点不该是“信我”，而应该是“你也能验”。本章把前九章的证据转写成一套分层实验协议，目标是让一位只有公开数据与普通算力的读者，独立完成对四类信号的复现与证伪。协议分四层推进，每层有自己的失败判据。
+
+\subsection{数据层：先把“看后视镜”堵死}
+
+复现失败最常见的原因不在策略，而在数据。第一，历史平衡表必须使用当时的发布版本（vintage），而不是事后修正值——第四章已说明，用最终修正值重建平衡表等于把未来的单产信息放进回测\cite{62}。国内商品还要额外固定三条规则：复权方式（等比或不复权）、合约切换规则（主力判定与移仓日）、以及涨跌停与停牌日的不可成交处理。这三条在研报中常被省略，却是收益差异的主要来源之一。第二，样本区间至少切分为三段独立复算（如2010--2016、2017--2020、2021--2024），任何只在某一段成立的信号按失败处理。第三，数据层的产出应当是一张“信号输入表”：每行一个合约日，列是原始价量、规则化后的可交易标记与信号值——先审这张表，再看任何净值曲线。
+
+\subsection{信号与组合层：把四道手续写死}
+
+第九章说过，从分析到策略隔着四道手续。可复现的最低要求是把它们全部写成显式参数：分值定义（如252 日分位、z 值窗口）、横截面基准（全市场还是板块内）、多空两端的配对方式（等权还是按波动率加权）、以及失效条件（信号翻转还是固定持有期）。成本层统一用两档口径：仅手续费加滑点的“乐观档”，再加冲击成本的“保守档”，两档结果同时报告；国内商品换月移仓按单边一次计费。所有参数在回测前锁定并记录，运行后不允许回头修改——这一步的纪律价值高于任何精巧的信号设计。
+
+\subsection{统计层：按怀疑者的标准惩罚自己}
+
+策略文献的样本外预测力平均缩水约四分之一，部分研究缩水过半\cite{101}；而2010 年之前的策略研究大多没有做多重检验校正，显著性阈值普遍偏松\cite{98}。落到操作上是三条硬要求。其一，维护试验台账：每跑一个参数组合、每换一个信号定义，都在台账里记一行，最终的显著性按全部试验次数校正，而不是按“最后一次跑通的那版”计算。其二，报告经多重检验调整后的夏普（如Deflated Sharpe）与试验数的关系曲线，而不是单一净值\cite{97}。其三，留出真正的样本外区间：参数在训练段锁定后，测试段只允许运行一次；测试段结果不佳就如实报告，不得回到训练段重新调参。三条合起来只有一个目的——让“偶然好看”在统计上无处藏身。
+
+\subsection{复现资产与验收标准}
+
+开源社区已经把复现的门槛降了不少：贝叶斯图模型对CTA 收益的分解可以作为行业层面的基准对照\cite{93}，商品carry 信号的可执行笔记本、商品期货动量的LEAN 实现、以及论文与代码的对照清单，分别覆盖了信号、引擎与核验三个环节\cite{94, 95, 96}。它们不构成学术证据，但给了自检的参照系。最终验收建议用五道门：数据版本可追溯、参数全锁定、成本双档报告、多重检验校正后的显著性达标、三段子样本方向一致。五道门有任何一道不过，结论就只能停留在“待验证”，不进入决策。
+
+\heiti{可复现不是一种美德，而是一种筛选机制：它把经得起重跑的结论和只经得起讲述的结论分开}——本章的协议就是这道筛子的孔径。
+
+\section{边界、失效模式与开放问题}
+
+\subsection{数据与制度的边界}
+
+四类方法共享同一个数据天花板。平衡表依赖官方发布日历，而官方数据存在修订与口径变更，任何依赖即时反应的策略都在与数据供应商的延迟赛跑；仓单与库存数据的可得性在国际市场差异极大，国内交易所披露口径也不统一。制度层面，涨跌停、停牌、移仓规则与保证金调整会截断信号的执行——理论上可交易的价差在跌停板上无处成交，这一事实在回测里常被一行“忽略不可成交日”的代码抹掉。更隐蔽的是远月流动性：斜率信号的信息集中在近远月价差上，而多数品种的远月合约报价稀疏，纸面收益与可实现收益之间隔着一条流动性鸿沟。
+
+\subsection{证据的边界}
+
+本文比较矩阵给出的置信度分级，本质上是对证据覆盖面的陈述，不是对收益的背书。学术条目虽然逐条核验了元数据，但核验的是“文献存在且结论如述”，不是“结论在你的样本期与成本假设下成立”；机构研报的方法披露普遍不完整，样本期选择不透明，本文只能如实标注其来源类型而无法复算其净值。另一条容易被忽略的边界是中文证据的保质期：国内商品因子的公开研究集中于2017 年之后，多数实证样本覆盖不到两个完整的库存周期，跨周期外推缺乏基础。此外，已有研究明确显示中国商品共同因子在压力期会崩溃\cite{89}——凡是以“危机时也成立”为前提的仓位方案，都应当先被这条证据否决。
+
+\subsection{失效模式清单}
+
+把前文分散讨论的失效模式集中列一遍，便于按图索骥。平衡表法的失效来自修正偏差、内生性与非线性映射；期限结构法的失效来自结构翻转挤仓、展期时点的价差重估与远月流动性；成本曲线法的失效来自成本口径漂移与恐慌期击穿；事件法的失效来自预期差构造与执行速度；持仓结构法的失效来自头寸解读的歧义与拥挤度未被量化；金融期货侧，利率模型的风险在结构突变（如货币政策框架转换），股指套利的风险在摩擦边界外推，外汇的风险在资本管制对平价的切断。矩阵中的每一格“中”或“低”，背后都对应上述一条或多条。
+
+\subsection{开放问题}
+
+四个问题目前没有可靠答案。第一，成本曲线的实证缺口：实务大量依赖“边际成本支撑”，但直接检验边际成本定价的公开研究稀少，这一方法的参数多数属于未经核验的行业惯例，值得优先补齐。第二，持仓结构的中文复制：对冲压力假说在英文文献中有跨资产证据，中文语境下的系统检验仍属空白。第三，金融与商品基本面的统一度量：便利收益、期限溢价与对冲压力在概念上可以互相翻译，但尚无被广泛接受的统一实证框架，本文的四分类是描述性的而非形式化的。第四，另类数据的价值衰减速度：卫星、货运与文本数据的边际收益随普及而递减，而其历史修正规则普遍不公开，如何在前视风险与信息增量之间划线，仍缺少公开研究。
+
+\subsection{收束}
+
+回到引言的那句话：期货市场里，基本面信息几乎从不直接进入价格，它先被翻译成期限结构和基差，再由交易者消化。本文的四类分析法，其实是四种不同的翻译方案——平衡表翻译“有多少”，期限结构翻译“市场现在信多少”，成本曲线翻译“最差能差到哪”，事件法翻译“下一颗钉子什么时候落”。翻译必然有损耗，所以每一类方法都带一份失效清单；翻译可以被检验，所以本文把复现协议放在结论之前。在期货市场里，基本面分析的成熟标志不是预测更准，而是更清楚地知道自己在哪里会错。
+
+\begin{thebibliography}{101}
+\bibitem{01} KEYNES J M. A Treatise on Money[M]. London: Macmillan, 1930.
+\bibitem{02} WORKING H. Theory of the Inverse Carrying Charge in Futures Markets[J]. Journal of Farm Economics, 1948, 30(1): 1-28.
+\bibitem{03} WORKING H. The Theory of the Price of Storage[J]. American Economic Review, 1949, 39(6): 1254-1262.
+\bibitem{04} WORKING H. Hedging Reconsidered[J]. Journal of Farm Economics, 1953, 35(4): 544-561.
+\bibitem{05} KALDOR N. Speculation and Economic Stability[J]. The Review of Economic Studies, 1939, 7(1): 1-27.
+\bibitem{06} BRENNAN M J. The Supply of Storage[J]. American Economic Review, 1958, 48(1): 50-72.
+\bibitem{07} TELSER L G. Futures Trading and the Storage of Cotton and Wheat[J]. Journal of Political Economy, 1958, 66(3): 233-255.
+\bibitem{08} FAMA E F, FRENCH K R. Commodity Futures Prices: Some Evidence on Forecast Power, Premiums, and the Theory of Storage[J]. The Journal of Business, 1987, 60(1): 55-73.
+\bibitem{09} HIRSHLEIFER D. Residual Risk, Trading Costs, and Commodity Futures Risk Premia[J]. The Review of Financial Studies, 1988, 1(2): 173-193.
+\bibitem{10} BESSEMBINDER H. An Empirical Analysis of Risk Premia in Futures Markets[J]. Journal of Futures Markets, 1993, 13(6): 611-630.
+\bibitem{11} GORTON G, ROUWENHORST K G. Facts and Fantasies about Commodity Futures[J]. Financial Analysts Journal, 2006, 62(2): 47-68.
+\bibitem{12} GORTON G, HAYASHI F, ROUWENHORST K G. The Fundamentals of Commodity Futures Returns[J]. Review of Finance, 2013, 17(1): 35-105.
+\bibitem{13} KOIJEN R S J, MOSKOWITZ T J, PEDERSEN L H, et al. Carry[J]. Journal of Financial Economics, 2018, 127(2): 197-225.
+\bibitem{14} DEATON A, LAROQUE G. On the Behaviour of Commodity Prices[J]. The Review of Economic Studies, 1992, 59(1): 1-23.
+\bibitem{15} PINDYCK R S. Inventories and the Short-Run Dynamics of Commodity Prices[J]. The RAND Journal of Economics, 1994, 25(1): 141-159.
+\bibitem{16} CASHIN P, MCDERMOTT C J. The Long-Run Behavior of Commodity Prices: Small Trends and Big Variability[J]. IMF Staff Papers, 2002, 49(2): 175-199.
+\bibitem{17} KILIAN L. Not All Oil Price Shocks Are Alike: Disentangling Demand and Supply Shocks in the Crude Oil Market[J]. American Economic Review, 2009, 99(3): 1053-1069.
+\bibitem{18} ROLL R. Orange Juice and Weather[J]. American Economic Review, 1984, 74(5): 861-880.
+\bibitem{19} HOTELLING H. The Economics of Exhaustible Resources[J]. Journal of Political Economy, 1931, 39(2): 137-175.
+\bibitem{20} TRÜBY J, PAULUS M. Have Prices of Internationally Traded Steam Coal been Marginal Cost Based?[R]. EWI Working Paper No. 10/05. Cologne: Institute of Energy Economics at the University of Cologne, 2010.
+\bibitem{21} GIOVANNUCCI D, LARSON D F, VARANGIS P. Warehouse Receipts: Facilitating Credit and Commodity Markets[R]. Washington, DC: World Bank, 2000.
+\bibitem{22} MOSKOWITZ T J, OOI Y H, PEDERSEN L H. Time Series Momentum[J]. Journal of Financial Economics, 2012, 104(2): 228-250.
+\bibitem{23} MIFFRE J, RALLIS G. Momentum Strategies in Commodity Futures Markets[J]. Journal of Banking \& Finance, 2007, 31(6): 1863-1886.
+\bibitem{24} SHEN Q, SZAKMARY A C, SHARMA S C. An Examination of Momentum Strategies in Commodity Futures Markets[J]. Journal of Futures Markets, 2007, 27(3): 227-256.
+\bibitem{25} SZAKMARY A C, SHEN Q, SHARMA S C. Trend-Following Trading Strategies in Commodity Futures: A Re-Examination[J]. Journal of Banking \& Finance, 2010, 34(2): 409-426.
+\bibitem{26} PIRRONG S C. Momentum in Futures Markets[EB/OL]. SSRN Working Paper No. 671841, 2005.
+\bibitem{27} CHAVES D B, VISWANATHAN V. Momentum and Mean-Reversion in Commodity Spot and Futures Markets[J]. Journal of Commodity Markets, 2016, 3(1): 39-53.
+\bibitem{28} SZYMANOWSKA M, DE ROON F A, NIJMAN T E, et al. An Anatomy of Commodity Futures Risk Premia[J]. The Journal of Finance, 2014, 69(1): 453-482.
+\bibitem{29} ERB C B, HARVEY C R. The Strategic and Tactical Value of Commodity Futures[J]. Financial Analysts Journal, 2006, 62(2): 69-97.
+\bibitem{30} ASNESS C S, MOSKOWITZ T J, PEDERSEN L H. Value and Momentum Everywhere[J]. The Journal of Finance, 2013, 68(3): 929-985.
+\bibitem{31} FUERTES A M, MIFFRE J, RALLIS G. Tactical Allocation in Commodity Futures Markets: Combining Momentum and Term Structure Signals[J]. Journal of Banking \& Finance, 2010, 34(10): 2530-2548.
+\bibitem{32} DASKALAKI C, KOSTAKIS A, SKIADOPOULOS G. Are There Common Factors in Individual Commodity Futures Returns?[J]. Journal of Banking \& Finance, 2014, 40: 346-363.
+\bibitem{33} DE GROOT W, KARSTANJE D, ZHOU W. Exploiting Commodity Momentum along the Futures Curves[J]. Journal of Banking \& Finance, 2014, 48: 79-93.
+\bibitem{34} PASCHKE R, PROKOPCZUK M, WESE SIMEN C. Curve Momentum[J]. Journal of Banking \& Finance, 2020, 113: 105718.
+\bibitem{35} TILL H. Term Structure as the Primary Driver of Long-Term Commodity Futures Returns[EB/OL]. SSRN Working Paper No. 2629283, 2015.
+\bibitem{36} FELDMAN B, TILL H. Backwardation and Commodity Futures Performance: Evidence from Evolving Agricultural Markets[J]. Journal of Alternative Investments, 2006, 9(3): 24-39.
+\bibitem{37} HURST B, OOI Y H, PEDERSEN L H. A Century of Evidence on Trend-Following Investing[J]. The Journal of Portfolio Management, 2017, 44(1): 15-29.
+\bibitem{38} KANG W, ROUWENHORST K G, TANG K. A Tale of Two Premiums: The Role of Hedgers and Speculators in Commodity Futures Markets[J]. The Journal of Finance, 2020, 75(1): 377-417.
+\bibitem{39} GEMAN H. Commodities and Commodity Derivatives: Modeling and Pricing for Agriculturals, Metals and Energy[M]. Chichester: John Wiley \& Sons, 2005.
+\bibitem{40} SCHWAGER J D, TURNER S C. Futures: Fundamental Analysis[M]. New York: John Wiley \& Sons, 1995.
+\bibitem{41} TILL H, EAGLEYE J, eds. Intelligent Commodity Investing: New Strategies and Practical Insights for Informed Decision Making[M]. London: Risk Books, 2007.
+\bibitem{42} FABOZZI F J, FÜSS R, KAISER D G, eds. The Handbook of Commodity Investing[M]. Hoboken: John Wiley \& Sons, 2008.
+\bibitem{43} BAKER H K, FILBECK G, HARRIS J H, eds. Commodities: Markets, Performance, and Strategies[M]. New York: Oxford University Press, 2018.
+\bibitem{44} 罗威. 四种商品期货的价格下限研究[M]. 成都: 西南财经大学出版社, 2017.
+\bibitem{45} BURGHARDT G, BELTON T, LANE M, et al. The Treasury Bond Basis: An In-Depth Analysis for Hedgers, Speculators, and Arbitrageurs[M]. 3rd ed. New York: McGraw-Hill, 2005.
+\bibitem{47} 中国期货业协会. 期货及衍生品基础（第三版）[M]. 北京: 中国财政经济出版社, 2022.
+\bibitem{48} PRIOLON J, ed. Financial Markets for Commodities[M]. Chichester: Wiley-ISTE, 2018: 55-72.
+\bibitem{49} MA J. 期货多空逻辑[M]. 北京: 清华大学出版社, 2020.
+\bibitem{50} REICHSFELD D A, ROACHE S K. Do Commodity Futures Help Forecast Spot Prices?[R]. IMF Working Paper WP/11/254. Washington, DC: International Monetary Fund, 2011.
+\bibitem{51} ROACHE S K, ERBIL N. How Commodity Price Curves and Inventories React to a Short-Run Scarcity Shock[R]. IMF Working Paper No. 10/222. Washington, DC: International Monetary Fund, 2010.
+\bibitem{52} PESCATORI A, NAZER Y F. OPEC and the Oil Market[R]. IMF Working Paper WP/22/183. Washington, DC: International Monetary Fund, 2022.
+\bibitem{53} HEITFIELD E, PARK Y H, DANESH E. Convenience Yields, Risk Premiums, and the Interpretation of Oil Futures Prices During Times of Geopolitical Conflict[EB/OL]. FEDS Notes. Washington, DC: Board of Governors of the Federal Reserve System, 2026.
+\bibitem{54} BRUNETTI C, JOËTS M, MIGNON V. Reasons Behind Words: OPEC Narratives and the Oil Market[R]. Finance and Economics Discussion Series 2024-003. Washington, DC: Board of Governors of the Federal Reserve System, 2024.
+\bibitem{55} WORLD BANK. Commodity Markets Outlook[R]. Washington, DC: World Bank.
+\bibitem{56} 上海期货交易所. 上期标准仓单交易的理论及其实践[R]. 上海: 上海期货交易所, 2018.
+\bibitem{57} 华泰期货. CTA量化策略因子系列（三）：期限结构因子[R]. 华泰期货量化策略专题, 2017.
+\bibitem{58} 中信建投期货. 量化CTA风格因子跟踪[R]. 系列周报.
+\bibitem{59} 中信期货金融工程. 如曦将至，似日方升——2024年度策略报告[R]. 中信期货, 2024.
+\bibitem{60} 国泰君安期货. 长周期CTA策略收益归因与风险展望[R]. 国泰君安期货专题报告.
+\bibitem{61} 张欣慰, 刘凯. CTA系列专题之三：基于Carry的商品期货交易策略[R]. 深圳: 国信证券, 2022.
+\bibitem{62} ARNADE C, HOFFMAN L, EFFLAND A. The Impact of Public Information on Commodity Market Performance: The Response of Corn Futures to USDA Corn Production Forecasts[R]. Economic Research Service ERR-293. Washington, DC: USDA, 2021.
+\bibitem{63} MIAO H, RAMCHANDER S, WANG T, et al. The Impact of Crude Oil Inventory Announcements on Prices: Evidence from Derivatives Markets[J]. Journal of Futures Markets, 2018, 38(1): 38-65.
+\bibitem{64} 中国期货业协会. 卫星大数据分析助力大宗商品基本面研究[R]. 中国期货业协会研究院, 2019.
+\bibitem{65} GÜRKAYNAK R S, SACK B P, WRIGHT J H. The U.S. Treasury Yield Curve: 1961 to the Present[J]. Journal of Monetary Economics, 2007, 54(8): 2291-2304.
+\bibitem{66} COCHRANE J H, PIAZZESI M. Bond Risk Premia[J]. American Economic Review, 2005, 95(1): 138-160.
+\bibitem{67} ADRIAN T, CRUMP R K, MOENCH E. Pricing the Term Structure with Linear Regressions[J]. Journal of Financial Economics, 2013, 110(1): 110-138.
+\bibitem{68} ANG A, PIAZZESI M. A No-Arbitrage Vector Autoregression of Term Structure Dynamics with Macroeconomic and Latent Variables[J]. Journal of Monetary Economics, 2003, 50(4): 745-787.
+\bibitem{69} FAMA E F, BLISS R R. The Information in Long-Maturity Forward Rates[J]. American Economic Review, 1987, 77(4): 680-692.
+\bibitem{70} PIAZZESI M, SWANSON E T. Futures Prices as Risk-Adjusted Forecasts of Monetary Policy[J]. Journal of Monetary Economics, 2008, 55(4): 677-691.
+\bibitem{71} CORNELL B, FRENCH K R. The Pricing of Stock Index Futures[J]. Journal of Futures Markets, 1983, 3(1): 1-14.
+\bibitem{72} MODEST D M, SUNDARESAN M. The Relationship between Spot and Futures Prices in Stock Index Futures Markets: Some Preliminary Evidence[J]. Journal of Futures Markets, 1983, 3(1): 15-41.
+\bibitem{73} FIGLEWSKI S. Explaining the Early Discounts on Stock Index Futures: The Case for Disequilibrium[J]. Financial Analysts Journal, 1984, 40(4): 43-47.
+\bibitem{74} BRENNAN M J, SCHWARTZ E S. Arbitrage in Stock Index Futures[J]. The Journal of Business, 1990, 63(S1): S7.
+\bibitem{75} EDERINGTON L H. The Hedging Performance of the New Futures Markets[J]. The Journal of Finance, 1979, 34(1): 157-170.
+\bibitem{76} FIGLEWSKI S. Hedging with Stock Index Futures: Theory and Application in a New Market[J]. Journal of Futures Markets, 1985, 5(2): 183-199.
+\bibitem{77} RENDLEMAN R J, Jr. Duration-Based Hedging with Treasury Bond Futures[J]. The Journal of Fixed Income, 1999, 9(1): 84-91.
+\bibitem{78} RENDLEMAN R J, Jr. Delivery Options in the Pricing and Hedging of Treasury Bond and Note Futures[J]. The Journal of Fixed Income, 2004, 14(2): 20-31.
+\bibitem{79} MIAO H, RAMCHANDER S, ZUMWALT J K. S\&P 500 Index-Futures Price Jumps and Macroeconomic News[J]. Journal of Futures Markets, 2014, 34(10): 980-1001.
+\bibitem{80} CHEN J, LIU Y J, LU L, et al. Investor Attention and Macroeconomic News Announcements: Evidence from Stock Index Futures[J]. Journal of Futures Markets, 2016, 36(3): 240-266.
+\bibitem{81} FAMA E F. Forward and Spot Exchange Rates[J]. Journal of Monetary Economics, 1984, 14(3): 319-338.
+\bibitem{82} FRENKEL J A, LEVICH R M. Transaction Costs and Interest Arbitrage: Tranquil versus Turbulent Periods[J]. Journal of Political Economy, 1977, 85(6): 1209-1226.
+\bibitem{83} HAN L, JIANG X, YIN L. The Predictive Performance of the Currency Futures Basis for Spot Returns[J]. Quantitative Finance, 2019, 19(3): 391-405.
+\bibitem{84} CAO S, LI Z, KOEDIJK K G, et al. The Emotional Cost-of-Carry: Chinese Investor Sentiment and Equity Index Futures Basis[J]. China Finance Review International, 2022, 12(3): 451-476.
+\bibitem{85} RYU D, RYU D, YANG H. Investor Sentiment, Mispricing, and Limited Arbitrage in the Futures Market[J]. Journal of Futures Markets, 2025, 45(8): 879-895.
+\bibitem{86} LAI H C, WANG K M. Trading Behavior of Institutional Investors and Stock Index Futures Returns in Taiwan[J]. Journal of Behavioral Finance, 2015, 16(4): 311-326.
+\bibitem{87} 冯玉林, 汤珂, 康文津. 中国大宗商品期货市场定价机制研究[J]. 金融研究, 2022, 510(12): 149-167.
+\bibitem{88} 钟腾, 汤珂. 中国商品期货投资属性研究[J]. 金融研究, 2016, (4): 128-143.
+\bibitem{89} LI H, LIU Z, ZHAO Y. The Fortune and Crash of Common Risk Factors in Chinese Commodity Markets[J]. Journal of Commodity Markets, 2023, 32: 100362.
+\bibitem{90} ZHENG Z, LIU Y, WU Y, et al. Curve Momentum in China[J]. Journal of Futures Markets, 2026, 46(6): 982-1021.
+\bibitem{91} SIMON D P. The Soybean Crush Spread: Empirical Evidence and Trading Strategies[J]. Journal of Futures Markets, 1999, 19(3): 271-289.
+\bibitem{92} LIU Q W, SONO H H. Empirical Properties, Information Flow, and Trading Strategies of China's Soybean Crush Spread[J]. Journal of Futures Markets, 2016, 36(11): 1057-1075.
+\bibitem{93} BENHAMOU E, OHANA J J, ETIENNE A, et al. Re-evaluating Short- and Long-Term Trend Factors in CTA Replication: A Bayesian Graphical Approach[EB/OL]. arXiv: 2507.15876, 2025.
+\bibitem{94} MACROSYNERGY. Commodity Carry as a Trading Signal[CP/OL]. Macrosynergy Academy Notebooks.
+\bibitem{95} QUANTCONNECT. Commodities Futures Trend Following[CP/OL]. QuantConnect Research.
+\bibitem{96} CBAILES. awesome-deep-trading[CP/OL]. GitHub.
+\bibitem{97} BAILEY D H, LÓPEZ DE PRADO M. The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality[J]. The Journal of Portfolio Management, 2014, 40(5): 94-107.
+\bibitem{98} HARVEY C R, LIU Y, ZHU H. … and the Cross-Section of Expected Returns[J]. The Review of Financial Studies, 2016, 29(1): 5-68.
+\bibitem{99} GYAMERAH S A, NGARE P, IKPE D. Hedging Crop Yields Against Weather Uncertainties: A Weather Derivative Perspective[EB/OL]. arXiv: 1905.07546, 2019.
+\bibitem{100} 中信建投期货. 量化CTA年报[R]. 系列年度报告.
+\bibitem{101} MCLEAN D, PONTIFF J. Does Academic Research Destroy Stock Return Predictability?[J]. The Journal of Finance, 2016, 71(1): 5-32.
+\end{thebibliography}
+
+% ==APPEND==
+\end{document}

@@ -1,0 +1,154 @@
+% !TEX program = xelatex
+% 从涡旋坍缩到形式化验证：OpenAI 纳维–斯托克斯方程有限时间爆破工作的数学思想与技术脉络
+% 作者：Trae-Work、DeepSeek-V4.1-Flash
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[UTF8,fontset=windows,heading=true]{ctex}
+\usepackage{geometry}
+\geometry{top=2.6cm,bottom=2.6cm,left=2.6cm,right=2.6cm}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{fontspec}
+\usepackage{xurl}
+\usepackage{hyperref}
+
+% ---------- 配色：藏青 + 天蓝 + 浅底 ----------
+\definecolor{navy}{HTML}{17324F}
+\definecolor{sky}{HTML}{2B7BB9}
+\definecolor{skysoft}{HTML}{6FA8CF}
+\definecolor{lightbg}{HTML}{F1F5F9}
+\definecolor{theader}{HTML}{DCE9F5}
+\definecolor{rulegray}{HTML}{B9C6D4}
+\definecolor{inkgray}{HTML}{55606C}
+
+% ---------- 中英文间距 ----------
+\xeCJKsetup{CJKecglue={\hskip 0.22em plus 0.08em minus 0.05em}}
+
+% ---------- 段落与换行 ----------
+\linespread{1.32}
+\setlength{\parskip}{0.45em}
+\setlength{\emergencystretch}{3em}
+\sloppy
+
+% ---------- hyperref ----------
+\hypersetup{
+  colorlinks=true,
+  linkcolor=navy,
+  citecolor=navy,
+  urlcolor=sky,
+  bookmarksnumbered=true,
+  pdfstartview=FitH,
+  pdftitle={从涡旋坍缩到形式化验证：OpenAI 纳维-斯托克斯方程有限时间爆破工作的数学思想与技术脉络},
+  pdfauthor={Trae-Work, DeepSeek-V4.1-Flash},
+  pdfsubject={Navier-Stokes, Millennium Prize Problem, Formal Verification}
+}
+
+% ---------- 标题样式 ----------
+\titleformat{\section}{\normalfont\Large\bfseries\color{navy}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries\color{navy}}{\thesubsection}{0.7em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries\color{sky}}{\thesubsubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{2.1ex plus 0.6ex minus 0.2ex}{1.1ex}
+\titlespacing*{\subsection}{0pt}{1.6ex plus 0.5ex minus 0.2ex}{0.8ex}
+\titlespacing*{\subsubsection}{0pt}{1.3ex plus 0.4ex minus 0.2ex}{0.6ex}
+
+% ---------- 目录 ----------
+\renewcommand{\contentsname}{目\hspace{0.5em}录}
+\renewcommand{\refname}{参考文献}
+\setcounter{tocdepth}{2}
+\usepackage{tocloft}
+\renewcommand{\cftsecfont}{\bfseries\color{navy}}
+\renewcommand{\cftsecpagefont}{\bfseries\color{navy}}
+\renewcommand{\cftsubsecfont}{\color{sky}}
+\renewcommand{\cftsubsecpagefont}{\color{sky}}
+\renewcommand{\cftsecleader}{\color{rulegray}\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforesecskip}{2pt}
+\setlength{\cftbeforesubsecskip}{1pt}
+
+% ---------- 定理类环境 ----------
+\theoremstyle{plain}
+\newtheorem{theorem}{定理}
+\newtheorem{lemma}{引理}
+\newtheorem{proposition}{命题}
+\newtheorem{corollary}{推论}
+\theoremstyle{definition}
+\newtheorem{definition}{定义}
+\theoremstyle{remark}
+\newtheorem{remark}{注}
+\renewcommand{\proofname}{\bfseries 证明}
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+% ---------- 卡片样式 ----------
+\newtcolorbox{keybox}[1][]{
+  colback=lightbg, colframe=navy, boxrule=0pt, leftrule=3pt,
+  arc=1pt, left=9pt, right=9pt, top=7pt, bottom=7pt, breakable,
+  fontupper=\small, #1}
+\newtcolorbox{principlebox}[1][]{
+  colback=white, colframe=sky, boxrule=0pt, leftrule=3pt,
+  arc=1pt, left=9pt, right=9pt, top=7pt, bottom=7pt, breakable,
+  fontupper=\small, #1}
+\newtcolorbox{quotebox}[1][]{
+  colback=lightbg, colframe=skysoft, boxrule=0pt, leftrule=3pt,
+  arc=1pt, left=9pt, right=9pt, top=7pt, bottom=7pt, breakable,
+  fontupper=\small\itshape, #1}
+
+% ---------- 表格 ----------
+\renewcommand{\arraystretch}{1.35}
+\newcommand{\hdrow}{\rowcolor{theader}}
+\captionsetup{font=small,labelfont={bf,color=navy},labelsep=quad}
+\captionsetup[table]{skip=6pt}
+
+% ---------- 页眉页脚 ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{inkgray}OpenAI 纳维--斯托克斯工作综述}
+\fancyhead[R]{\small\color{inkgray}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{rulegray}\leaders\hrule height \headrulewidth\hfill}}
+
+% ---------- 引用命令 ----------
+\newcommand{\arxiv}[1]{\href{https://arxiv.org/abs/#1}{arXiv:#1}}
+\newcommand{\NS}{Navier--Stokes}
+
+\title{\vspace{-1.2cm}\color{navy}\bfseries 从涡旋坍缩到形式化验证\\[0.3em]
+\Large OpenAI 纳维--斯托克斯方程有限时间爆破工作的\\[0.2em]数学思想与技术脉络}
+\author{Trae-Work、DeepSeek-V4.1-Flash}
+\date{2026 年 10 月 13 日}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+\noindent 2026 年 9 月 8 日，OpenAI 公布了一份由内部模型与约一万个并发智能体在 88 小时内产出的手稿，声称在光滑外力下构造出三维不可压缩 \NS{} 方程从静止出发、动能始终有界的有限时间爆破解，并给出 Lean 形式化。本文系统梳理这一工作的数学思想脉络：其技术血脉来自 Córdoba 与 Martínez-Zoroa 的“残差博弈”纲领，经 Alpöge--Buckmaster 在光滑外力与 Euler 方程上的推进而收束于 \NS{}。文章依次考察四层核心数学内容——各向异性自相似坍缩涡旋的标度、以零角平均振荡脉冲的平均动量通量补足外力、逐阶修正以保持外力 $C^{\infty}$ 光滑、以及在环面 $\mathbb{T}^{2}$ 上反演方向导数算子的 Fourier 乘子估计——并对每一步给出可直接核验的推导。随后转入数学界的验证与约束：Terence Tao 的方法溯源、Constantin--Ignatova--Vicol 关于“各向异性 Type II 界加轴对称核心加解析外力即正则”的刚性定理（它约束了构造的外力形态而非否证结论），以及 Bastounis--Circelli--Hansen 指出的自然语言证明与 Lean 形式化之间的落差，其中引理 8.6 的 $m+4$ 与 $m+5$ 差异被作为形式化翻译非语义忠实的样本。本文对该争议、署名与训练数据问题坚持严格中立并陈，最后给出经边界修正后的判断：该工作首先是一条技术路线的收敛证据，其次才是对形式化验证认识论的一次压力测试，而非千禧年问题的终局裁判。
+
+\vspace{0.5em}
+\noindent\textbf{关键词}\quad 纳维--斯托克斯方程；千禧年问题；有限时间爆破；自相似坍缩；Reynolds 应力；形式化验证；Lean；自动形式化
+\end{abstract}
+
+\vspace{0.6em}
+\begin{keybox}
+\textbf{阅读约定}\quad 本文所有关于手稿技术内容的陈述，均以 OpenAI 公开手稿、Lean 仓库与已公开的独立文献为依据，并尽量标注来源编号；凡属对证明正确性的独立复核，本文均未进行，相关判断一律引用公开文献并注明其作者立场。涉及争议事实的段落，均逐项标明来源、以归属语气分别叙述，不代任何一方作结论。
+\end{keybox}
+
+\vspace{0.5em}
+{\small
+\setlength{\parskip}{2pt}
+\tableofcontents}
+
+\clearpage
+
+\input{sections/part1}
+\input{sections/part2}
+\input{sections/part3}
+
+\end{document}

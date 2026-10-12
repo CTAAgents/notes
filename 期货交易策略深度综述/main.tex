@@ -1,0 +1,621 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\emergencystretch=3em
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.4em}
+\pagestyle{headings}
+\title{\heiti 期货交易策略深度综述\\[4pt]\Large 从趋势到截面：按利润来源的四分法重构}
+\author{叨客宁宁}
+\date{}
+\begin{document}
+\maketitle
+\begin{center}\vspace{-7.2pt}{\small\bfseries 摘要}\vspace{-11.7pt}\end{center}
+\begin{quotation}\small
+期货交易策略的既有文献分散在资产定价、微观结构、衍生品与量化投资四个传统之中，学术论文与机构研报各说各话，缺少一份以利润来源为纲、同时核验两类文献真实性的综述。本文提出”\hspace{0.3em}利润来源四分法”——赚反应不足的钱（趋势）、赚反应过度的钱（回归）、赚结构收益的钱（Carry）、赚相对定价的钱（截面）——并以此为主轴深写四条轨道，其余轨道（套利价差、事件驱动、高频微观结构、机器学习与另类数据、仓位风控）作中等深度覆盖。全文纳入90 条核心文献，其中学术文献经OpenAlex、Crossref、arXiv 逐条核验，机构研报标注公开来源与核验状态；在此基础上给出统一比较矩阵、分层结论置信度，以及一套防止数据窥探的可复现实验建议。本文不作任何投资推荐，所有实证结论均标注样本期与边界条件。
+\end{quotation}
+\vspace{-6.2pt}\noindent 关键词：期货交易；趋势跟踪；均值回归；期限结构；截面动量；文献综述；策略复现
+\vspace{-1.7pt}
+\section{引言}
+
+管理期货（Managed Futures）是唯一一类在学术界与实务界都有长期、连续、可检验记录的另类策略。从Working 的仓储理论到Moskowitz 等人的时序动量，再到如今国内期货市场数十只量化CTA 产品，七十余年积累的文献足以支撑一份深度综述；但真正动手整理时会发现三个麻烦。
+
+
+第一，证据散落。趋势的百年证据发表在投资组合管理期刊上，配对交易的奠基作在资产定价期刊里，期限结构的理论源头在1940–1950 年代的《美国经济评论》，而过去十年最有信息量的中文实践——期限结构因子、跨期套利、产业链比值——几乎全部躺在券商与期货公司的内部研报里，两者互不引用。第二，结论互相打架。同一个”\hspace{0.3em}动量”，在58 个市场上被证明显著\cite{03}，在短周期上又被最新研究宣告坍缩\cite{11}；配对交易2006 年的年化超额约11\% \cite{28}，到2009 年前后衰减到不足三分之一\cite{35}。不交代样本期与口径的引用，比不引用更危险。第三，发表偏差与数据窥探。2010 年以前的策略研究大多没有做多重检验校正\cite{45, 46}，公开发表的预测力平均会缩水一半以上\cite{36}，这让”\hspace{0.3em}文献说有效”\hspace{0.3em}本身就需要打折。
+
+
+本文的目标是把这三层麻烦一次处理掉：以利润来源为分类主轴重建叙事，把学术证据与机构实践放进同一张比较矩阵，对每条核心文献标注来源类型与核验状态，并在最后一章给出可复现的实验设计，让读者能够自己检验而不是被动接受结论。
+
+
+范围上，本文覆盖期货与衍生品交易的主要策略谱系，以商品期货与金融期货为主战场，期权类波动率交易仅在相关处简述、不作展开。方法上，文献经由四条通道并行搜集：深度研究代理检索、arXiv 定向接口、机构研报公开页面、以及OpenAlex/Crossref 元数据接口的逐条核验；无法核验到公开可访问来源的条目一律标注”\hspace{0.3em}仅网页确认”\hspace{0.3em}或剔除，不凑数。正文按四条深写轨道组织：第三章趋势跟踪，第四章均值回归与统计套利，第五章Carry 与期限结构，第六章截面动量与轮动；第七章简述其余轨道，第八章给出比较矩阵与置信度分级，第九章是复现建议，第十章交代边界与开放问题。
+
+
+一句话预告全文的判断：\heiti{策略分类的底层标准不是信号形态，而是利润来自谁的错}\heiti{误——趋势赚反应不足的钱，回归赚反应过度的钱，Carry 赚结构持有者让渡的钱，截}\heiti{面赚品种间相对误定价的钱。}按这个标准重新读文献，许多表面上矛盾的结论其实只是在说不同口袋里的钱。
+
+
+\section{分类框架：为什么按利润来源划分}
+
+\subsection{四分法的逻辑}
+
+给策略分类的常见做法是按信号形态：突破类、均线类、价差类、回归类。这种分法方便写代码，却不利于理解收益从哪里来——因为同一段收益曲线可能由完全不同的经济机制支撑，而机制决定了它什么时候会失效。本文改用利润来源作为主轴，理由是一个朴素的约束：在扣除成本的零和近似下，一笔策略收益必须对应某个对手方的让渡，让渡方要么是犯了错（情绪化交易、反应不足、被迫交易），要么是付出了服务对价（对冲需求、便利收益、流动性供给报酬）。
+
+
+按这个约束，期货策略的利润可以归入四个口袋：
+
+
+\heiti{（一）赚反应不足的钱——趋势类。}价格对新信息的反应是渐进的：资金分批入场、止损盘被连锁触发、风险预算模型被动追涨杀跌，这些摩擦让趋势在形成后延续一段时间。趋势跟踪的所有变体——时序动量、通道突破、均线跟随——本质都是同一个赌注：已实现的方向性移动在短期内有惯性。
+
+
+\heiti{（二）赚反应过度的钱——回归类。}与趋势相反，交易者对噪声赋予了过多信号含义，价格偏离了某个可论证的锚（历史均值、协整关系、持有成本区间），随后向锚收敛。配对交易、价差回归、日内反转都属于这一口袋。
+
+
+\heiti{（三）赚结构的钱——Carry 类。}这一口袋里没有人犯错：商品的便利收益、股指期货的分红与对冲供需、债券的期限溢价，都让持有某个方向本身产生现金流。Carry 策略赚的是期限结构对持有者的补偿，其风险在于结构翻转的时刻（如2022 年能源挤仓）。
+
+
+\heiti{（四）赚相对定价的钱——截面类。}不判断绝对方向，只判断谁比谁强。跨品种动量、产业链利润轮动、仓单信号做多空，赚的是品种之间的相对误定价；它与前三个口袋正交，因为一个截面组合可以同时对冲掉宏观方向暴露。
+
+
+\subsection{与传统分类的对应关系}
+
+这四分法不是新发明，而是对既有文献的重新编目。管理期货的经典综述早已指出，CTA 行业的收益可以用跨资产时序动量基本解释\cite{01}，用风险因子原型复现CTA 基准与趋势暴露的研究也得到同向结论\cite{21}；统计套利的系统综述则把价差类策略按估计方法分为五族\cite{37}；商品资产定价研究把商品截面收益归结为平均收益、carry、动量三个维度\cite{65}。换言之，实务界熟悉的”\hspace{0.3em}趋势+ 套利”\hspace{0.3em}二分法，在学术文献里对应的是更细的四支。四分法的价值在于显式化了口袋之间的相关结构：趋势与截面动量共享动量内核但暴露不同（前者吃时序、后者吃截面），回归与Carry 共享”\hspace{0.3em}价差”\hspace{0.3em}语言但赌注相反（回归赌收敛、Carry 赌结构延续）。
+
+
+\subsection{不属于四口袋的其余轨道}
+
+还有三类策略无法干净地放进上述框架，本文在第七章中等深度覆盖。其一是事件驱动：利润来自信息发布的瞬时定价不足，持有窗口以小时到天计，本质上是把”\hspace{0.3em}反应不足”\hspace{0.3em}压缩到事件窗口内。其二是高频与做市：利润来自流动性提供的报酬与微观结构摩擦，与方向判断基本无关。其三是机器学习与另类数据：这不是一个独立的利润口袋，而是一种信号构造方法，可以服务于四个口袋中的任何一个——正因为如此，对ML 策略的检验标准应当比传统策略更严格，第九章会专门处理。
+
+
+\section{趋势跟踪：正偏度的代价与证据}
+
+\subsection{奠基证据：从58 个市场到137 年}
+
+趋势跟踪的现代学术起点是Moskowitz、Ooi 与Pedersen 在2012 年发表的时序动量研究\cite{03}。他们检验了58 个期货与现货市场、覆盖商品、股指、债券、外汇，发现过去12 个月的收益方向对下一期收益有稳定的正向预测力，且这一现象在资产类别内部与跨类别都存在。Babu 等人随后在82 种样本外新证券上重复了这一检验，趋势的显著性没有因品种从未进入过回测而消失\cite{14}。更重要的是策略构造的简洁性：只用过去收益的符号，不估计参数、不拟合曲线，这让它成为最难被”\hspace{0.3em}过拟合”\hspace{0.3em}指责的经典信号之一。
+
+
+更长的证据来自AQR 的百年研究\cite{04}：把趋势规则回溯到1880 年代，跨股票、债券、商品、外汇，趋势策略在此后137 年间几乎每个十年都是正收益，并且在股票市场危机年份表现突出。CFM 团队把样本进一步拉长到1800 年\cite{05}，得到约$t = 10$ 的显著性，并给出两个对实务很重要的补充观察：长周期趋势收益在两个世纪里没有明显衰减，短周期则已经萎缩；CTA 行业管理规模占全球资产比例仍只有几个百分点，”\hspace{0.3em}拥挤导致失效”\hspace{0.3em}的论断在总量层面缺乏直接证据。
+
+
+这两项研究与后续争议共同构成趋势文献的骨架，值得先把结论摆清楚：\heiti{长周期趋}\heiti{势的百年稳健性证据较强，短周期趋势的近期衰减证据同样较强，二者并不矛盾}——第三小节会说明为什么。
+
+
+\subsection{机制：趋势为什么存在}
+
+对趋势成因的解释大致三派，各有可检验的推论。
+
+
+风险预算派认为趋势是被动风险转移的结果。目标波动率模型、风险平价组合、CTA 的仓位调整都要求投资者在波动上升时减仓、在波动下降时加仓，这在客观上形成”\hspace{0.3em}追涨杀跌”\hspace{0.3em}的机械流。这一派的推论是：趋势溢价与波动率环境内生相关，用波动率管理可以显著改善其风险调整收益——Moreira 与Muir 证明按已实现波动率反比缩放仓位能普遍提升因子夏普\cite{08}，但后续研究提醒这种改善依赖资产与样本期，不是免费午餐\cite{09}。
+
+
+行为派把趋势归因于反应不足与处置效应的组合：投资者对新信息过度谨慎、过早了结盈利头寸，让价格只走完了部分调整\cite{02}。这一派难以直接检验，但它与”\hspace{0.3em}趋势在信息扩散慢的市场更明显”\hspace{0.3em}的横截面证据一致。
+
+
+摩擦派关注微观结构。CFM 与牛津团队2026 年的论文给出了这一派最有冲击力的结果\cite{11}：2009 年之后短周期趋势策略的夏普坍缩到接近零，而区分衰减与存活的关键变量是波动率标准化后的最小报价变动单位（tick size）——电子化与报价精度提高压缩了短周期趋势的可捕捉空间。这篇预印本的政策含义很直接：短周期趋势的恶化未必是拥挤的错，而是市场基础设施变化的代价。
+
+
+三派解释并不互斥。一个务实的综合是：趋势溢价长期存在，因为风险转移需求与行为偏差不会消失；但它的\kaishu{分布}在迁移——短周期、高换手的那部分被微观结构进步吃掉，留下来的主要是中长周期与危机时段的补偿。
+
+
+\subsection{设计维度：同一信号的三种做法}
+
+趋势策略看似简单，实际实现中有三个自由度，Baltas 与Kosowski 把它们称为波动率估计、交易规则与相关性处理\cite{06}。三者的组合差异足以让同一批数据跑出截然不同的换手率与收益路径。
+
+
+波动率估计决定仓位刻度。用历史波动率、Parkinson 高低价波动率还是EWMA，直接影响ATR 类止损的距离与加仓节奏。交易规则决定进出场：离散突破（唐奇安通道，中文研报有系统的回测基准\cite{27}）、均线穿越、或连续型的动量打分，三者在趋势市里殊途同归，在震荡市里差别巨大——Marshall 等人系统比较了均线规则与TSMOM，发现两者盈利相当且相互补充\cite{12}，这为”\hspace{0.3em}多规则集成”\hspace{0.3em}提供了直接依据。相关性处理决定组合层面的分散效果：逐品种独立信号后加总，还是先估计协方差再做组合优化，在品种数增多时会分道扬镳。
+
+
+设计选择的另一面是换手与成本。Man Institute 的研究把”\hspace{0.3em}速度”\hspace{0.3em}作为趋势策略的核心权衡：信号越快，对拐点响应越灵敏，但假突破与换手成本也越重\cite{17}。Winton 用交易上限（trade cap）直接量化了执行成本对趋势收益的侵蚀路径\cite{20}，结论是容量约束首先出现在高换手段而非策略整体。
+
+
+\subsection{衰减之争：趋势还有效吗}
+
+2023 年前后趋势策略的超长回撤把”\hspace{0.3em}趋势是否失效”\hspace{0.3em}推成行业议题，文献与研报形成了相对清晰的三派。
+
+
+悲观派的证据是统计性的。Goulding、Harvey 与Mazzoleni 发现，2008 年之后”\hspace{0.3em}趋势断裂”（trend break，即价格先动、随后快速回吐的模式）频率显著上升，这是月度级趋势策略走弱的主要归因；他们同时给出一个补救思路——用快慢信号的分歧度动态混合来对冲断裂风险\cite{10}。短周期的证据更严峻，如前所述已接近失效\cite{11}。Man Group 2025 年的复盘承认本轮回撤在长度上超出历史常态，并指出回撤集中发生在低波动震荡段\cite{19}。
+
+
+乐观派的证据是结构性的。Man AHL 系列研究反复强调趋势收益的正偏与危机alpha：1960–2015 年间趋势策略在股债双熊中均有正贡献\cite{15}，SG Trend 指数与股指收益分布的对比显示长期正偏是风格事实而非样本偶然\cite{18}，2023 年的专题直接回应”\hspace{0.3em}有什么不好”——回撤是这个正偏保费的定价\cite{16}。百年证据\cite{04, 05} 则提供了”\hspace{0.3em}每次宣布失效之后它都回来了”\hspace{0.3em}的历史归纳。
+
+
+务实派试图调和。CFM 的凸性研究给出了漂亮的机制解释：趋势收益近似等于长短期实现波动之差，因此天生带有凸性——这正是它在崩盘中赚钱的原因，也是它在缓涨阴跌中亏钱的原因\cite{13}。Research Aﬀiliates 则从信号叠加角度提出，趋势顺carry 方向交易可改善长期表现，但在2022 年那样的结构剧变年份，纯趋势反而反超，过滤规则的收益不稳定\cite{22}。
+
+
+容量问题上还有一条反方基准不可忽略：Baltas 与Kosowski 用业绩–资金流检验没有发现CTA 时序动量存在显著容量约束\cite{07}，与”\hspace{0.3em}拥挤毁掉趋势”\hspace{0.3em}的直觉相反。综合各方，一个诚实的表述是：\heiti{趋势没有死，但趋势的钱变挑了——短周期与震荡市的钱在变}\heiti{薄，中长周期与危机补偿仍然在场，而这一切需要扣掉成本并按样本期如实汇报之后才}\heiti{能下结论}。
+
+
+\subsection{中文市场的实践画像}
+
+国内研报提供了与学术文献互补的工程细节。华泰金工的时序CTA 方法论综述把实现拆成市场状态识别、开仓信号、退出机制三层，退出环节普遍采用ATR 移动止损而非固定止盈\cite{23}。国泰君安期货对长周期CTA 做了分市场环境的收益归因，覆盖商品长/中/截面动量、期限基差与CTA 多因子\cite{24}。中信期货与中信建投期货的年度报告记录了行业周期本身：2024 年国内量化CTA 指数约+6.5\%，海外NilssonHedge/Barclay CTA 指数约+3.2\%，归因指向两年沉淀后的复苏\cite{25, 26}。这些研报的共同取向值得注意——国内实践者很少只跑单一趋势信号，而是把趋势、期限结构、截面强弱做多因子组合，这与学术界”\hspace{0.3em}单一信号衰减、组合存活”\hspace{0.3em}的隐含结论方向一致。
+
+
+\subsection{小结}
+
+趋势跟踪是四个口袋中证据最长、边界最清楚的一支：百年尺度的正收益\cite{04, 05}、明确的正偏收益结构\cite{13, 18}、可检验的机制假设\cite{08, 11}，以及一场仍在进行的衰减争论\cite{10, 11, 16}。它的可复现性也最好——规则透明、参数少、数据公开，第九章的复现实验将以它作为基准策略。
+
+
+\section{均值回归与统计套利：与时间赛跑的利润}
+
+\subsection{奠基证据与机制分叉}
+
+均值回归的现代起点是Gatev、Goetzmann 与Rouwenhorst 的配对交易研究\cite{28}。规则朴素到近乎简陋：找出过去共动、此后价差偏离的两只股票，做多低估、做空高估，价差回归到历史区间后平仓。他们在1962–2002 年的美股上得到年化约11\% 的超额收益，且在危机年份表现更强。这篇论文的真正贡献不是那个11\%，而是把”\hspace{0.3em}相对价值”从直觉变成了可回测的两步程序——先定配对，再定交易规则。
+
+
+但利润的来源从一开始就有分歧。Lo 与MacKinlay 1990 年的检验指出，反向组合的收益不能全部由”\hspace{0.3em}过度反应”\hspace{0.3em}解释，共同因子与非同步交易也会制造出看似反转的收益\cite{29}；Jegadeesh 的短期反转证据\cite{30} 同样面临”\hspace{0.3em}是行为偏差还是流动性补偿”\hspace{0.3em}的拷问。这个机制分叉至今没有闭合，实务后果却很具体：如果反转收益主要来自流动性补偿，那么它会随市场结构变化而变化；如果来自行为偏差，它应当在散户参与度高的市场更明显。两种解释预言了不同的衰减路径。
+
+
+\subsection{方法演进：从距离法到端到端学习}
+
+配对交易的方法论经历了一条清晰的升级路线，Krauss 的系统综述把它整理为五族\cite{37}。
+
+
+距离法是原始方案\cite{28}：标准化价格路径的累积距离最小者为配对，优点是无参数、稳健，缺点是对冲比率固定、不处理协整。协整框架\cite{31} 补上了这一课——先检验长期均衡关系，再交易价差，两步法成为教科书标准。Huck 与Afawubo 的比较给出了冷静的结论：协整优于距离法，但优势依赖样本期与交易成本设定\cite{32}，也就是说这是一场没有免费升级的军备竞赛。
+
+
+第二条线是动态估计。de Moura 等人用状态空间模型加卡尔曼滤波估计时变对冲比率\cite{33}，直接回应了静态协整在结构突变下的失灵；中信期货的中文专题把同一技术搬到金融期货价差上，给出三类进出场规则的回测\cite{47}；国内学术端还有小波去噪与GARCH 结合的改进\cite{44}。第三条线是端到端学习：Han 等人用分层强化学习把”\hspace{0.3em}选对”与”\hspace{0.3em}交易”\hspace{0.3em}统一优化\cite{34}，避免两阶段流水线的次优性——这类方法在文献中开始出现，但样本外证据仍然很薄，第九章会对ML 类策略提出更高的检验门槛。
+
+
+\subsection{衰减：公开发表的代价}
+
+均值回归文献最诚实的一章是关于衰减。Do 与Faf f的复核显示，配对交易月均超额从1962–1988 年的0.86\% 降到2003–2009 年的0.24\% \cite{35}——趋势的、统计上显著的、方向明确的衰减。McLean 与Pontif f把这个现象一般化：策略公开发表后平均衰减约56\%，且套利成本高的样本衰减反而更少（因为成本挡住了套利资本的涌入）\cite{36}。
+
+
+这两条证据叠加，给从业者一个可操作的推论：\heiti{回测里看到的均值回归收益，应当}\heiti{先打对折再讨论}。更进一步，2010 年以前的多数策略研究没有做多重检验校正\cite{45, 46}，意味着文献中报告的显著性本身系统性偏高。不处理这两个问题的复现，只是在重复别人的幸运。
+
+
+\subsection{商品期货上的证据}
+
+商品为均值回归提供了比股票更”\hspace{0.3em}物理”\hspace{0.3em}的锚，因此这一口袋在商品上的证据形态与股票截然不同。
+
+
+第一个锚是库存与持有成本。跨期价差受仓储理论约束（详见第五章\cite{70, 71}），偏离无套利区间后收敛，这是跨期套利的理论底座。中文实证给出具体形态：棉花期现与跨期两类套利的驱动不同，期现靠基差修复、跨期靠期限结构相对价值，协整模型在期现一侧更强\cite{72}。
+
+
+第二个锚是产业链利润。压榨价差是教科书案例——Simon 早在1999 年就证明大豆压榨价差可检验均值回归并据此设计交易规则\cite{40}；Liu 与He Sono 把它移到中国市场，发现中国豆粕压榨价差具均值回归性，协整与五日均线规则均可获利\cite{41}。国内研报沿着这条线做了大量工程化：做空螺纹–铁矿石比值的配比与波动率中性化方法\cite{68}、卷螺差高位收缩的产业链判断\cite{69}、以及分位数/升贴水/动量三类跨期策略的分化比较\cite{49}。
+
+
+第三个锚是日内行为。Borgards 等人发现商品期货日内存在显著过度反应，疫情期次数与幅度上升、能源最突出\cite{38}；中国市场的证据更细——2017–2022 年商品期货与期权存在显著日内反转，隔夜开盘因子最强\cite{42}，大商所六品种存在日内与隔夜收益的”争夺”\hspace{0.3em}现象\cite{43}。但这里必须泼一盆冷水：Yang 等人发现中国商品期货的日内策略收益不足以覆盖交易成本，低频长期的动量/反转才显著\cite{77}。日内反转在学术上存在、在扣费后不一定能带走，两句话都对，缺一不可。
+
+
+还有一条把趋势与回归缝合起来的证据：Bianchi、Drew 与Fan 发现商品动量在12–30 个月后反转，动量加反转的双排序年化20.24\%，优于单动量\cite{39}。这提示商品收益存在一个完整的生命周期——短期过度反应、中期惯性、长期再反转——四分法的前两个口袋在同一资产上接力。
+
+
+\subsection{成本：这一口袋的生死线}
+
+均值回归是四个口袋中换手最高、持有期最短的一类，因此成本敏感度最高。中信期货2017 年的跨品种统计套利报告给出多品种配对年化52.2\%、回撤4.7\% 的数字，同时明确标注”\hspace{0.3em}未计滑点”\hspace{0.3em}\cite{48}——这类报告在中文研报里很有代表性，读的时候必须把成本口径一并读进去。回测的成本口径（手续费、仅对换手部分收费、涨跌停不能成交、冲击成本按参与率模型）在不同研报间差异极大，这正是统一比较矩阵（第八章）要显式列出的列。
+
+
+\subsection{小结}
+
+均值回归的证据画像与趋势恰好互补：机制上有锚（库存、利润、行为），因而短期可信；但发表偏差与拥挤让长期收益系统性缩水\cite{35, 36}，高换手又让成本口径决定生死\cite{48}。用一句话概括这一口袋的正确姿势：\heiti{找到物理的锚，扣掉真实的成本，再对公}\heiti{开发表的收益打个折扣}。
+
+
+\section{Carry 与期限结构：没有人犯错的钱}
+
+\subsection{理论源头：仓储理论与基差之谜}
+
+Carry 的理论根基比多数量化策略都老。Working 的仓储理论\cite{70} 把期货价格拆成持有成本与便利收益两部分：仓储供给与需求决定基差的无套利区间，偏离区间就触发套利。Brennan 补上了供给端\cite{71}——便利收益随库存下降而上升，这解释了为什么紧库存品种会呈现backwardation（近高远低）结构。这两篇1940–1950 年代的论文至今仍是跨期价差交易的理论底座：套利者赌的不是价格方向，而是价差回到持有成本区间。
+
+
+实证端，Fama 与French 发现基差对现货价格具有预测力，支持库存理论的信息含量\cite{51}。Gorton 与Rouwenhorst 的著名检验则回答了另一个问题：1959–2004 年等权商品期货指数的风险收益与股票接近，而其中相当部分来自期限结构\cite{50}。Erb 与Harvey 进一步把这件事说穿：商品期货的长期收益主要来自展期收益（roll return）而非现货上涨\cite{52}。三篇文献连起来给出一个反直觉的结论——\heiti{很多”\hspace{0.3em}商品配置”\hspace{0.3em}赚的其实是}\heiti{carry，只是以前没人这么命名}。
+
+
+\subsection{Carry 作为普适因子}
+
+Koijen 等人的研究把carry 从商品推广到股票、债券、外汇四大资产\cite{53}：carry 可以事前度量（远期/现货或近月/远月的相对定价），并且预测各资产的截面与序列收益。这一工作的意义在于把carry 从”\hspace{0.3em}商品的特殊性质”\hspace{0.3em}提升为”\hspace{0.3em}风险补偿的一般形式”——持有高carry 的资产本质上是在收取保险费，而2022 年能源与利率市场的剧烈重定价提醒这类保费是尾部风险的对价\cite{22}。
+
+
+商品carry 的一个经典细分是backwardation 与绩效的关系：Feldman 与Till 发现谷物的长期收益由backwardation 驱动，贴水结构本身就是对冲者支付的溢价\cite{54}。对配置者这是顺风，对逆向的空头则是持续的成本。
+
+
+\subsection{曲线信号：从水平到斜率再到斜率的变化}
+
+把期限结构做成可交易信号有三个层次。第一层是水平：carry 因子直接多空贴水方向\cite{53, 58}。第二层是斜率动量——de Groot 等人发现沿曲线的信号显著增强传统商品动量\cite{55}，Paschke 等人把”\hspace{0.3em}曲线动量”（curve slope 的变化方向）独立成因子，获得显著超额收益\cite{56}；Zheng 把曲线动量带到中国市场，发现其夏普可比传统因子，且羊群行为是重要驱动\cite{57}。第三层是工程化：中信期货的期限结构因子报告给出多品种展期收益截面多空的做法\cite{58}，华泰金工的三策略跟踪记录了carry 组合创2010 年以来新高与三策略等权融合的配置思路\cite{59}。
+
+
+中国市场的特殊性在于金融期货：股指期货长期贴水，尤其IC/IM 深度贴水让年化对冲成本高企。东吴证券的研报用分红调整后的年化基差跟踪这一结构，并给出”IM 最低贴水对冲优于连续对冲”\hspace{0.3em}的执行结论\cite{60}——在贴水常态化的环境里，\heiti{择时对冲本身}\heiti{就是一类carry 策略}：同样的空头保护，不同月份合约的成本差可以相差数个百分点。
+
+
+\subsection{风险：结构翻转的时刻}
+
+Carry 的收益曲线是”\hspace{0.3em}捡硬币+ 偶尔踩雷”：平时稳定收租，结构翻转时一次性回吐。2022 年是教科书式的反例——能源backwardation 快速翻转，顺势carry 头寸遭受重创\cite{22}。文献给出的缓释手段有三种：跨品种分散（各品种结构翻转不同步）、carry 与趋势的叠加（趋势在结构剧变时提供反向信号\cite{22}）、以及对极端基差的仓位折扣\cite{58}。没有一种能消除风险，只能把单点踩雷变成分散的磨损。
+
+
+\subsection{小结}
+
+Carry 是四个口袋中理论最扎实、逻辑最”\hspace{0.3em}非零和”\hspace{0.3em}的一支：它赚的是对冲者与产业客户为转移风险支付的对价，理论上可以长期存在，不依赖任何对手方犯错。代价是尾部——它在结构稳定的年份贡献平滑收益，在结构剧变年份集中偿付。理论底座\cite{70, 71} 已有七十年，因子化证据\cite{53, 55, 56} 有十年，中国市场证据\cite{57, 60} 才刚起步，这也是四支中中外文献密度差异最大的一支。
+
+
+\section{截面动量与轮动：不赌方向，赌强弱}
+
+\subsection{从时序到截面}
+
+时序动量问”\hspace{0.3em}这个品种会涨吗”，截面动量问”\hspace{0.3em}哪个品种涨得更强”\hspace{0.3em}\cite{03}。后者的吸引力是结构性的：多空对冲掉宏观方向暴露后，组合对商品整体涨跌不敏感，收益来自排序的准确性。这一差异决定了两者的风险画像——同为动量家族，截面组合的回撤模式更接近选股组合而非CTA。
+
+
+商品截面动量的证据始于Miffre 与Rallis \cite{61}：非线性风格排序（对信号做条件分组而非单调排序）在商品期货中显著获利，说明商品的截面关系不是简单的线性排序。Kang 与Kwon 证明国际商品期货动量稳健存在且可跨市场组合增强\cite{62}。Iwanaga 与Sakemoto 把商品动量分解为共同成分与特异成分\cite{63}——这个分解对理解截面与趋势的关系很关键：时序动量吃共同成分（beta 味），截面动量吃特异成分（alpha 味），两者在2022 年式的普涨普跌行情中会同时失效，因为那时几乎没有”\hspace{0.3em}特异”\hspace{0.3em}可言。
+
+
+\subsection{截面收益的驱动：库存与三因子}
+
+截面排序的依据不止价格。Gorton、Hayashi 与Rouwenhorst 的基本面研究发现低库存品种的截面收益更高——库存是商品截面的核心驱动\cite{64}；Bakshi、Gao 与Rossi 则证明平均收益、carry、动量三个维度即可刻画商品截面\cite{65}。这两篇合起来实际上给出了商品版的”\hspace{0.3em}三因子模型”，也说明本文的四分法在截面维度上是自洽的：截面组合本来就是把趋势与carry 的横截面暴露打包，再对冲掉共同成分。
+
+
+\subsection{中文实践：轮动、比值与仓单}
+
+国内研报在截面一侧的产出明显多于学术侧，因为中国市场的品种结构（板块分明、产业链清晰）天然适合轮动叙事。方正中期的双动量专题给出一个重要的诚实结论：时序动量在商品中普遍有效，截面动量效果一般，原因归结为品种数不足\cite{66}——截面策略需要足够的横截面宽度来分散单点错误，A 股几千只股票的截面逻辑不能直接平移到几十个商品品种上。华泰金工的截面仓单组合按板块强弱做多空配置、输出到品种级持仓\cite{67}，中信期货的四因子体系（动量、期限结构、持仓、波动率）把截面与carry 整合进统一框架\cite{25}。产业链轮动则走比值路线：螺纹–铁矿石比值的波动率中性化\cite{68} 与卷螺差的利润收缩判断\cite{69} 是两个可直接交易的截面例子。
+
+
+\subsection{截面的边界}
+
+截面策略的失效模式与趋势不同。它不怕震荡（震荡市里强弱排序仍有意义），怕的是\kaishu{同涨同跌}——板块内高度联动时，多空腿的价差波动被压缩，而换手照常发生。中国商品市场的另一个约束是做空端：部分品种融券式的空头可得性、保证金上浮、涨跌停板都会让”\hspace{0.3em}空最弱”\hspace{0.3em}比”\hspace{0.3em}多最强”\hspace{0.3em}更难执行，研报中的截面多空绩效因此常常隐含了理想化的空头假设。评估任何截面结果前，先确认它的空头腿是否真的可交易。
+
+
+\subsection{小结}
+
+截面类是四支中”\hspace{0.3em}容量逻辑”\hspace{0.3em}最健康的一支：它对冲方向暴露、依赖横截面宽度、与趋势和carry 天然可组合\cite{63, 65}。它的软肋是国内品种数与空头执行约束\cite{66}。一句话定位：\heiti{截面是把三个口袋的钱在品种维度上重新分配，自己不生产利润，但能放大其他}\heiti{口袋的效率}。
+
+
+\section{其余轨道：交叉地带与新前沿}
+
+\subsection{套利价差：四分法的交叉地带}
+
+严格地说，套利不是第五个口袋，而是前四个口袋的交叉。跨期套利赌价差回归（回归口袋）但以持有成本为锚（Carry 口袋）\cite{70, 71}；期现套利赌基差修复，是回归与Carry 的重叠区\cite{72}；跨品种产业链比值（压榨价差、螺矿比、卷螺差）则同时承载回归与截面逻辑\cite{40, 41, 68}。理解这一点有实用价值：当文献报告”\hspace{0.3em}套利策略”\hspace{0.3em}绩效时，应先问它归哪个口袋——回归型的衰减快\cite{35}，Carry 型的尾部重\cite{22}，两者的资本承诺方式完全不同。
+
+
+\subsection{事件驱动：把反应不足压缩到窗口内}
+
+事件策略在信息发布的窗口内下注，持有期以小时到天计。公开证据集中在三类事件。农业报告：USDA 的产量预测显著驱动玉米期货，8–9 月的报告影响强于早期报告\cite{73}——报告日历公开、效应可检验，是事件研究的干净模板。能源库存：EIA 原油库存公告对期货有显著价格效应，控制宏观新闻后依然稳健\cite{74}。政策与天气：保证金上调对期货收益有显著负效应、过度调整助长投机波动\cite{75}；厄尔尼诺对美豆期货波动的影响可以用GARCH 加事件研究框架检验\cite{76}。
+
+
+事件轨道的共同软肋是容量与执行：利润集中在公告后的最初几分钟，参与者都知道日历，因此真实的超额取决于速度与预期差的解读，而不是事件本身。公开文献能证明”\hspace{0.3em}效应存在”，很难证明”\hspace{0.3em}散户可捕获”。
+
+
+\subsection{高频与市场微观结构}
+
+这一子领域的学术重心在做市与订单流。Barzykin、Bergault 与Guéant 用嵌套OU 过程刻画现货贵金属的价差，通过HJB 近似求解现货–期货联合做市与库存风险控制\cite{79}——这是做市策略”\hspace{0.3em}理论最深、复现最难”\hspace{0.3em}的典型。对非做市者更相关的是中国期货的频率证据：Yang 等人发现低频动量/反转显著而日内策略扣费后不足\cite{77}；Zheng 用订单流、订单簿与技术指标训练TabNet，对上期所白银期货方向预测准确率约0.601 \cite{78}。0.60 的准确率听起来可观，但方向预测准确率与策略夏普之间隔着成本、仓位与风险控制三道墙，这正是第九章要求”\hspace{0.3em}端到端回测而非单点指标”\hspace{0.3em}的原因。
+
+
+\subsection{机器学习与另类数据：方法不是口袋}
+
+机器学习在期货上的应用可以按四个口袋归类：预测价格方向的归趋势口袋\cite{81}，预测价差的归回归口袋\cite{34}，预测结构的归Carry 口袋，做截面排序的归截面口袋。Gupta 的稀疏隐因子预测器在铜、WTI、黄金上做多期预测并执行防泄漏协议\cite{82}，是预印本中协议意识较强的一例。另类数据则提供了传统价格之外的信息源：CFTC 持仓报告显示投机者买入的期货随后短期反转、对冲者买入者随后跑赢，持仓数据含可交易信息\cite{80}；卫星库存观测对WTI 当周方向的预测概率约59.46\% \cite{83}。
+
+
+对这一轨道的判断必须克制。文献中报告的单点指标（准确率、IC）与可交易收益之间系统性地隔着多重检验与过拟合：ML 模型的自由度远超传统信号，同样的样本内表现在样本外缩水更狠\cite{36}。因此本文对ML 策略采用比四支主干更高的证据门槛，只在第九章给出检验框架，不给出”\hspace{0.3em}有效”\hspace{0.3em}的结论。
+
+
+\subsection{仓位与组合：同一个信号的另一半}
+
+最后一个子领域不产生信号，但决定信号的存活。等风险贡献组合（ERC）给出多策略风险均衡的数学形式\cite{84}；波动率目标化把任意信号的收益流缩放到统一风险刻度\cite{08}；分数Kelly 及其波动率惩罚变体在中国商品期货上优于全Kelly \cite{85}。实务共识可以压缩成一句：\heiti{同一组信号，仓位方案不同，十年后的存活状态完全不同}——这也是复现建议中把仓位规则与信号规则同等对待的原因。
+
+
+\section{统一比较矩阵与结论置信度}
+
+\subsection{四支主干的比较矩阵}
+
+表1 按利润来源对四支主干做统一比较。成本敏感度与证据强度为本文基于文献的定性编码（高/中/低），不是测量值，编码依据见各章小结。
+
+
+{\small\setlength{\tabcolsep}{4pt}\begin{longtable}{p{54.06pt}p{79.67pt}p{42.68pt}p{56.91pt}p{85.36pt}p{36.99pt}p{36.99pt}}
+\caption{比较矩阵：四支主干按利润来源的统一刻画（编码为本文定性判断）}\label{tab:matrix}\\
+\toprule
+类别 & 利润来源 & 典型持有期 & 收益形态 & 主要失效模式 & 成本敏感 & 证据强度 \\
+\midrule
+\endfirsthead
+\toprule
+类别 & 利润来源 & 典型持有期 & 收益形态 & 主要失效模式 & 成本敏感 & 证据强度 \\
+\midrule
+\endhead
+趋势跟踪 & 对新信息反应不足的惯性 & 日–月 & 正偏、小亏多、大赚少 & 长期震荡、趋势断裂增多 & 中 & 高（百年证据） \\
+\midrule
+均值回归/统计套利 & 过度反应的修复、流动性补偿 & 分钟–周 & 左偏或近对称、胜率高 & 结构性断裂、锚失效、成本吞噬 & 高 & 中高（衰减证据充分） \\
+\midrule
+Carry/期限结构 & 对冲者让渡的结构对价 & 周–月 & 高胜率、尾部回撤 & 结构翻转、挤仓 & 中 & 高（理论）、中（中国实证） \\
+\midrule
+截面动量/轮动 & 品种间相对误定价 & 日–月 & 接近对称、依赖分散 & 同涨同跌、空头约束 & 中高 & 中（品种数约束） \\
+\bottomrule
+\end{longtable}}
+
+\subsection{结论置信度分级}
+
+置信度按四个标准综合评定：样本期长度与是否跨越多个市场周期、独立复现的数量（学术与机构是否各自报告过）、核验状态（元数据是否经OpenAlex/Crossref/arXiv 确认）、以及是否处理了多重检验与成本。分级结果如下。
+
+
+\heiti{高置信}：（1）长周期趋势在多资产、跨世纪尺度上正收益\cite{04, 05}；（2）趋势收益呈正偏、危机年份有正贡献\cite{13, 15, 18}；（3）配对交易利润随发表与时间显著衰减\cite{35, 36}；（4）商品长期收益中展期收益占有重要份额\cite{50, 52}；（5）仓储理论对跨期价差的约束\cite{70, 71}。
+
+
+\heiti{中置信}：（1）短周期趋势2009 年后显著衰减（单篇预印本+ 机制解释，待更多独立复现）\cite{11}；（2）波动率目标化改善风险调整收益但依赖样本\cite{08, 09}；（3）截面动量在商品上有效但受品种数限制\cite{61, 66}；（4）曲线动量因子\cite{55, 56}（两篇独立期刊，但样本集中于特定时期）；（5）中国商品日内反转存在\cite{42, 43}（学术一致，扣费后可交易性存疑\cite{77}）。
+
+
+\heiti{低置信}：（1）ML 与另类数据策略的可交易性\cite{78, 81, 82, 83}——单点指标多、端到端复现少、多重检验处理几乎缺位；（2）事件驱动的散户可捕获性\cite{73, 74}；（3）regime 择时的增量价值\cite{88, 89, 90}（方法论文献丰富，但策略层面的样本外证据薄弱）。
+
+
+需要说明的是，”\hspace{0.3em}低置信”\hspace{0.3em}不等于”\hspace{0.3em}无效”，而是指公开证据尚不足以支撑强结论。反过来，”\hspace{0.3em}高置信”\hspace{0.3em}的结论也都带着限定词——长周期趋势的高置信建立在扣除成本与容量的假设之上，谁也无法保证下一个十年复制上一个十年。
+
+
+\section{复现建议：把文献结论变成可检验的实验}
+
+综述的价值不止于转述，更在于让读者能自己检验。本章给出一套端到端的复现协议：数据口径、四个基准信号、评估方法与五道验证门。设计原则只有一条——\heiti{先固定}\heiti{协议，再看结果}，所有参数在触碰测试集之前锁定。
+
+
+\subsection{数据与口径基线}
+
+复现的第一敌人不是模型，是口径不一致。建议锁定如下基线：行情用本地可持续获取的日线数据（如通达信vipdoc 主力连续序列，含持仓量），全样本不少于十年、覆盖至少一轮完整牛熊；价格用复权口径并在文档中声明复权方法；对涨跌停、停牌、退市设置不可成交掩码，信号指向不可成交时顺延而非作废。成本按三档报告：零成本（与文献对照用）、中成本（手续费加滑点）、高成本（中成本再加冲击），冲击采用绝对参与率模型、参与率上限设为10\%，超限头寸标记并单独披露。收费口径必须是只对换入换出部分收取、持有仓位零成本——这是均值回归类策略（高换手）与Carry 类策略（低换手）能否同表比较的关键。任何回测报告如果缺失成本口径，直接判为不可比较。
+
+
+\subsection{四支各一个基准信号}
+
+复现的目标是验证文献，不是优化业绩，因此每个口袋只取一个参数最少的基准：
+
+
+（1）\heiti{趋势}：过去12 个月收益符号定方向\cite{03}，波动率目标化仓位（目标年化波动10\%–15\%）\cite{08}，不做参数搜索。（2）\heiti{均值回归}：对一篮子品种的标准化价差做z-score 交易（$|z| > 2$ 进场、$|z| < 0.5$ 出场），配对按协整或相关性预选\cite{28, 31}，进场规则一旦写定不得回调。（3）\textbf{Carry}：按12 个月展期收益（近远月价差除以价差波动）截面排序、多空前后四分位\cite{53, 58}。（4）\heiti{截面动量}：按12 个月收益截面排序、多空前后四分位\cite{03, 61}，与Carry 做相关性检查后决定等权或风险平价\cite{84}。
+
+
+这四个信号覆盖了四分法的全部口袋，且每一个都有直接对应的文献出处；复现结果与文献的偏差本身就是信息——偏差出现在哪支，哪支的结论就需要重新审视。
+
+
+\subsection{评估协议}
+
+评估分五层，逐层收紧：
+
+
+\heiti{第一层，样本内描述统计}：年化收益、年化波动、夏普、最大回撤、月胜率、偏度峰度、年化换手，多空与仅多头分开报告（A 股与部分商品的融券式空头约束会显著改变结论）\cite{77}。
+
+
+\heiti{第二层，成本阶梯}：三档成本各出一组夏普，重点看零成本到高成本的衰减比例——均值回归类衰减超过一半即视为成本敏感、标记为不可交易候选。
+
+
+\heiti{第三层，样本外走查}：滚动walk-forward，训练窗与测试窗严格分离、无未来函数，逐期报告截面IC 与多头组合收益；所有超参数搜索记入试验账本（trial log），作为下一步的输入。
+
+
+\heiti{第四层，多重检验校正}：以试验次数对夏普做Deflated Sharpe 修正\cite{86}，报告PBO （样本内最优策略样本外跑输中位数的概率）\cite{87}；对”\hspace{0.3em}从N 个变体里挑出来的最好那个”，显著性门槛按$t > 3$ 而非$t > 2$ 执行\cite{46}，或直接用Reality Check 做数据窥探校正\cite{45}。这一步是2010 年前文献系统性缺失的\cite{36}，也是复现最容易偷懒的环节。
+
+
+\heiti{第五层，容量与执行}：按参与率模型递增资金规模，找出策略收益对规模的拐点，报告”\hspace{0.3em}夏普减半”\hspace{0.3em}对应的资金额度；换手高的策略（均值回归、截面）在这一层最容易现原形\cite{20}。
+
+
+\subsection{五道验证门}
+
+把上述协议压缩成五道串行的门，任何一道不过就停止投入：
+
+
+\heiti{G1 数据完整性}：样本、掩码、复权、成本参数全部有文档与断言可查，重跑结果\\哈希一致。\heiti{G2 成本后收益}：高成本口径下年化夏普$> 0.5$ 且最大回撤可承受，否则只\\作为学术结果记录。\heiti{G3 统计显著}：DSR 修正后仍达标、PBO $< 0.5$（理想$< 0.2$）、试\\验账本完整\cite{86, 87}。\heiti{G4 样本外稳定}：walk-forward 的分段收益同号率$> 60$\%，最近一\\段（近五年）不显著劣于全样本。\heiti{G5 容量可接受}：目标资金规模下参与率不触顶、冲\\击后收益仍过G2。
+
+
+五道门的设计意图是把失败提前：G1 拦口径错误，G2 拦成本幻觉，G3 拦数据窥探，G4 拦结构变化，G5 拦规模幻想。多数复现失败发生在G2 与G3，而这两道恰恰是免费的——不需要更多数据，只需要诚实。
+
+
+\subsection{对ML 策略的附加要求}
+
+任何机器学习信号在通过上述五门之外，还需满足三条：其一，泄漏检测——特征\\构造的时间戳必须能通过”\kern-9pt\hspace{0.3em}切片重算”\kern-9pt\hspace{0.3em}测试\kern-7pt（任一交易日的特征只使用该日之前的数据）\kern-6pt\\\cite{82}；其二，嵌套验证——超参数搜索在外层训练窗内部完成，外层测试窗只碰一次；其\\三，基线对照——ML 模型必须与同特征的线性模型及前述四支基准同表对比，若增量\\夏普不能覆盖模型复杂度带来的过拟合风险，按简单模型收录\cite{36, 82}。文献目前能同\\时满足这三条的期货ML 研究很少\cite{78, 81}，这正是本文把该轨道列为低置信的原因。
+
+
+\section{边界条件与开放问题}
+
+本文的结论有明确边界。文献层面，四条检索通道无法覆盖付费数据库的全部内容，机构研报以公开可访问者为准，部分条目仅能到”\hspace{0.3em}网页确认”\hspace{0.3em}级别（附录A 逐一标注）；趋势与均值回归的中文深度研报大量托管于付费平台，未取得直链者一律不收录，因此中文证据密度被系统性低估。方法层面，本文的置信度分级是基于文献数量与核验状态的定性编码，不是元分析式的效应量合并；比较矩阵中的”\hspace{0.3em}成本敏感””\hspace{0.3em}证据强度”\hspace{0.3em}两列是本文判断而非测量值。范围层面，期权波动率交易、场外衍生品、以及中国市场的程序化交易监管变化只做了点状提及。
+
+
+在此基础上，值得点名的开放问题有五个。第一，短周期趋势衰减的机制之争——微观结构解释\cite{11} 与趋势断裂解释\cite{10} 尚未被独立数据分离开，两者对不同市场（商品vs 金融期货）的适用性未知。第二，均值回归利润来源的机制分叉（行为偏差还是流动性补偿\cite{29}）在商品上没有被正面检验，而这个答案直接决定其衰减速度。第三，中国截面策略的品种数阈值——方正中期的”\hspace{0.3em}品种数不足”\hspace{0.3em}判断\cite{66} 是经验之谈，横截面宽度与截面夏普的定量关系仍是空白。第四，regime 择时的增量价值：方法论文献丰富\cite{88, 89, 90}，但扣除成本与搜索偏差后能留下多少，缺乏统一协议下的公开对照。第五，事件驱动的可捕获性：文献证明了效应存在\cite{73, 74}，没有人系统报告过扣费、按散户可实现速度执行后的净收益。
+
+
+\section{结论}
+
+本文以利润来源四分法重新编目了期货交易策略文献：赚反应不足的钱（趋势）、赚反应过度的钱（回归）、赚结构的钱（Carry）、赚相对定价的钱（截面），其余轨道作为交叉地带与新前沿处理。四条主干的证据画像各不相同——趋势有百年级的正收益与正偏结构，但短周期正在被微观结构进步重新定价；均值回归有最扎实的机制锚，却在发表偏差与成本的双重折扣下不断缩水；Carry 理论最老、逻辑最非零和，代价是结构翻转时的尾部；截面的容量逻辑最健康，但受制于品种宽度与空头执行。
+
+
+三层结论按置信度递减排列：高置信层是可以直接引用的（长周期趋势、配对衰减、展期收益的重要性、仓储理论约束）；中置信层需要带着限定词使用（短周期衰减、曲线动量、中国日内反转）；低置信层只宜作为研究方向而非决策依据（ML 可交易性、事件可捕获性、regime 择时）。全文90 条文献的来源类型与核验状态在附录中逐一标注，读者可以据此自行调整权重。
+
+
+最后回到开篇那句话：策略分类的底层标准不是信号形态，而是利润来自谁的错误。趋势赚反应不足的钱，回归赚反应过度的钱，Carry 赚结构持有者让渡的钱，截面赚相对误定价的钱——按这个标准，四个口袋各自的风险、衰减路径与组合角色几乎是被利润来源决定的。理解了口袋，剩下的只是工程。
+
+
+\newpage
+\appendix
+
+\section{证据表}
+
+表2 列出全文纳入的90 条核心文献及其证据属性。E 编号与正文引用编号一一对应（E$_n$ 即正文\cite{01} 的$n$）；”\hspace{0.3em}核验”\hspace{0.3em}列中，”\hspace{0.3em}某库通过”\hspace{0.3em}表示元数据经OpenAlex、Crossref 或arXiv 接口逐条确认，”\hspace{0.3em}网页确认”\hspace{0.3em}表示仅能确认公开页面或多方书目一致、未能通过接口核验。来源类型分为期刊、预印本、机构研报、专著、工作论文、会议、学位论文七类。
+
+
+{\small\setlength{\tabcolsep}{4pt}\begin{longtable}{p{28.45pt}p{244.69pt}p{48.37pt}p{85.36pt}}
+\caption{证据表：90 条核心文献的来源类型与核验状态}\label{tab:evidence}\\
+\toprule
+E编号 & 一句话核心结论 & 来源类型 & 核验状态 \\
+\midrule
+\endfirsthead
+\toprule
+E编号 & 一句话核心结论 & 来源类型 & 核验状态 \\
+\midrule
+\endhead
+1 & CTA收益可由跨资产时序动量基本解释 & 期刊 & 网页确认 \\
+2 & 管理期货/趋势跟踪体系的代表性专著 & 专著 & 网页确认 \\
+3 & 58个市场过去12个月动量普遍成立 & 期刊 & OpenAlex通过 \\
+4 & 1880年以来趋势策略每十年均为正收益 & 期刊 & Crossref通过 \\
+5 & 1800年以来趋势显著（$t \approx 10$）、长周期未衰减 & 预印本 & arXiv通过 \\
+6 & 波动率估计、交易规则、相关性处理显著影响TSMOM & 期刊/专著 & Crossref通过 \\
+7 & 未发现CTA时序动量存在显著容量约束 & 预印本 & OpenAlex通过 \\
+8 & 按波动率反比缩放仓位可提升因子夏普 & 期刊 & OpenAlex通过 \\
+9 & 波动率目标化普遍改善风险调整收益但依赖样本 & 期刊 & Crossref通过 \\
+10 & 趋势断裂频率上升是月度趋势走弱主因 & 期刊 & Crossref通过 \\
+11 & 短周期趋势2009年后夏普坍缩、关键变量为标准化ticksize & 预印本 & arXiv通过 \\
+12 & 均线规则与TSMOM盈利相当且相互补充 & 期刊 & OpenAlex通过 \\
+13 & 趋势收益约等于长短波动之差、具正凸性 & 预印本 & arXiv通过 \\
+14 & 82种新证券上样本外验证趋势普适 & 期刊 & 网页确认 \\
+15 & 1960–2015趋势在股债双熊均有正贡献 & 机构研报 & 网页确认 \\
+16 & 系统回应趋势回撤质疑、正偏价值仍成立 & 机构研报 & 网页确认 \\
+17 & 信号速度是趋势盈亏与换手的核心权衡 & 机构研报 & 网页确认 \\
+18 & 趋势长期正偏、股指负偏是风格事实 & 机构研报 & 网页确认 \\
+19 & 本轮超长回撤集中于低波动震荡段 & 机构研报 & 网页确认 \\
+20 & 交易上限量化执行成本对趋势收益的侵蚀 & 机构研报 & 网页确认 \\
+21 & 用风险因子原型复制CTA基准与趋势暴露 & 机构研报 & 网页确认（镜像） \\
+22 & 趋势顺carry交易可改善长期表现但2022年失效 & 机构研报 & 网页确认 \\
+23 & 时序CTA实现拆为市场状态、开仓信号、退出机制三层 & 机构研报 & 网页确认 \\
+24 & 长周期CTA分市场环境的收益归因框架 & 机构研报 & 网页确认 \\
+25 & 动量与期限结构为商品收益主干的四因子体系 & 机构研报 & 网页确认 \\
+26 & 2024国内量化CTA指数约+6.52\%、海外约+3.2\% & 机构研报 & 网页确认 \\
+27 & 系统回测唐奇安通道突破规则的中文基准 & 机构研报 & 网页确认 \\
+28 & 配对交易1962–2002年化超额约11\%、危机期更强 & 期刊 & OpenAlex通过 \\
+29 & 反向收益不能全由过度反应解释 & 期刊 & Crossref通过 \\
+30 & 短期（1周–1月）反转效应的权威证据 & 期刊 & Crossref通过 \\
+31 & 首次系统给出协整配对的两步法框架 & 专著 & 网页确认 \\
+32 & 协整优于距离法但依赖样本期与成本设定 & 期刊 & Crossref通过 \\
+33 & 卡尔曼滤波估计时变对冲比率改进静态协整 & 期刊 & Crossref通过 \\
+34 & 分层强化学习统一配对选择与交易、优于两阶段 & 预印本 & arXiv通过 \\
+35 & 配对月均超额由0.86\%降至0.24\% & 期刊 & 网页确认 \\
+36 & 策略公开发表后平均衰减约56\% & 期刊 & Crossref通过 \\
+37 & 五族配对方法及盈利衰减证据的系统综述 & 期刊 & 网页确认 \\
+38 & 商品期货日内存在显著过度反应、疫情期上升 & 期刊 & 网页确认 \\
+39 & 商品动量12–30个月后反转、双排序优于单动量 & 期刊 & Crossref通过 \\
+40 & 大豆压榨价差可检验均值回归并设计交易规则 & 期刊 & Crossref通过 \\
+41 & 中国豆粕压榨价差均值回归、协整与均线规则均可获利 & 期刊 & Crossref通过 \\
+42 & 中国商品期货与期权存在显著日内反转、隔夜最强 & 期刊 & Crossref通过 \\
+43 & 大商所六品种存在日内与隔夜收益的争夺现象 & 期刊 & 网页确认 \\
+44 & 小波去噪GARCH优化协整信号提升夏普 & 期刊 & 网页确认 \\
+45 & 自助法RealityCheck校正策略多重比较 & 期刊 & Crossref通过 \\
+46 & 资产定价检验应取$t > 3$门槛 & 期刊 & Crossref通过 \\
+47 & 卡尔曼滤波价差套利的三类进出场规则回测 & 机构研报 & 网页确认 \\
+48 & 多品种配对不计滑点年化52.2\%、回撤4.7\% & 机构研报 & 网页确认 \\
+49 & 分位数/升贴水/动量三类跨期策略表现分化 & 机构研报 & 网页确认 \\
+50 & 等权商品指数风险收益近似股票、期限结构决定展期 & 期刊 & OpenAlex通过 \\
+51 & 基差对现货具预测力、支持库存理论 & 期刊 & Crossref通过 \\
+52 & 商品长期收益主要来自展期收益而非现货上涨 & 工作论文 & Crossref通过 \\
+53 & carry可事前测度并预测四大资产的截面与序列收益 & 期刊 & Crossref通过 \\
+54 & 谷物长期收益由backwardation驱动 & 期刊 & Crossref通过 \\
+55 & 沿期限结构的曲线信号显著增强商品动量 & 期刊 & Crossref通过 \\
+56 & 曲线斜率动量产生显著超额收益 & 期刊 & Crossref通过 \\
+57 & 中国曲线动量夏普可比传统因子、羊群行为驱动 & 期刊 & OpenAlex通过 \\
+58 & 多品种展期收益截面多空、对冲现货$\beta$获取carry & 机构研报 & 网页确认 \\
+59 & carry组合创2010年以来新高、三策略等权融合 & 机构研报 & 网页确认 \\
+60 & 分红调整年化基差跟踪、IM最低贴水对冲更优 & 机构研报 & 网页确认 \\
+61 & 非线性风格排序在商品期货中显著获利 & 期刊 & OpenAlex通过 \\
+62 & 国际商品期货动量稳健并可跨市场增强 & 期刊 & Crossref通过 \\
+63 & 商品动量可分解为共同成分与特异成分 & 期刊 & Crossref通过 \\
+64 & 低库存品种截面收益更高、库存是核心驱动 & 期刊 & Crossref通过 \\
+65 & 平均收益、carry、动量三因子刻画商品截面 & 期刊 & Crossref通过 \\
+66 & 时序动量普遍、截面动量因品种数不足效果一般 & 机构研报 & 网页确认 \\
+67 & 截面仓单组合按板块强弱做多空配置 & 机构研报 & 网页确认 \\
+68 & 螺矿比值套利的配比与波动率中性化方法 & 行业报纸 & 网页确认 \\
+69 & 卷螺差高位收缩的产业链轮动判断 & 机构研报 & 网页确认 \\
+70 & 仓储供给需求决定持有成本与期现价差 & 期刊 & 网页确认 \\
+71 & 便利收益与仓储供给曲线解释期限结构 & 期刊 & OpenAlex通过 \\
+72 & 棉花期现靠基差修复、跨期靠期限结构相对价值 & 期刊 & 网页确认 \\
+73 & USDA玉米产量预测显著驱动期货、8–9月最强 & 机构研报 & 网页确认 \\
+74 & EIA库存公告对原油期货有显著价格效应 & 机构研报 & 网页确认 \\
+75 & 保证金上调对期货收益有显著负效应 & 期刊 & 网页确认 \\
+76 & GARCH加事件研究检验厄尔尼诺对美豆期货影响 & 会议 & 网页确认 \\
+77 & 中国商品低频动量反转显著、日内不足以覆盖成本 & 期刊 & Crossref通过 \\
+78 & 订单流加订单簿训练TabNet、白银方向准确率约0.601 & 预印本 & arXiv通过 \\
+79 & 嵌套OU加HJB求解现货期货联合做市与库存控制 & 预印本 & arXiv通过 \\
+80 & 投机者买入随后反转、对冲者买入随后跑赢 & 期刊 & Crossref通过 \\
+81 & 机器学习预测中国原油期货的实证基准 & 期刊 & Crossref通过 \\
+82 & 稀疏隐因子多期预测优于神经基线并做防泄漏协议 & 预印本 & arXiv通过 \\
+83 & 卫星库存对WTI当周方向预测概率约59.46\% & 机构研报 & 网页确认 \\
+84 & 等风险贡献组合的性质、分散度与优化 & 期刊 & Crossref通过 \\
+85 & 波动率惩罚Kelly在中国商品上优于全Kelly & 学位论文 & 网页确认 \\
+86 & 按试验次数、偏度峰度修正的去水夏普 & 期刊 & Crossref通过 \\
+87 & CSCV估计回测过拟合概率PBO & 期刊 & Crossref通过 \\
+88 & 马尔可夫区制切换在资产收益与策略中的证据综述 & 期刊 & Crossref通过 \\
+89 & HMM区制加正则回归用于CTA策略配置切换 & 期刊 & Crossref通过 \\
+90 & 区制事前预测在股票、商品、外汇优于HMM & 预印本 & arXiv通过 \\
+\bottomrule
+\end{longtable}}
+
+
+\newpage
+\newpage
+\section{参考文献}
+\begin{thebibliography}{90}
+\bibitem{01} HURST B L, OOI Y H, PEDERSEN L H. Demystifying managed futures[J]. Journal of Investment Management, 2013, 11(3).
+\bibitem{02} COVEL M. 趋势跟踪（Trend Following）[M]. 2021.
+\bibitem{03} MOSKOWITZ T J, OOI Y H, PEDERSEN L H. Time series momentum[J]. Journal of Financial Economics, 2012, 104(2): 228-250.
+\bibitem{04} HURST B L, OOI Y H, PEDERSEN L H. A century of evidence on trend-following investing[J]. Journal of Portfolio Management, 2017, 44(1): 15-29.
+\bibitem{05} LEMPÉRIÈRE Y, DEREMBLE C, SEAGER P, et al. Two centuries of trend following[EB/OL]. arXiv: 1404.3274, 2014.
+\bibitem{06} BALTAS N, KOSOWSKI A. Demystifying time-series momentum strategies: volatility estimators, trading rules and pairwise correlations[R]. Working Paper, 2012.
+\bibitem{07} BALTAS N, KOSOWSKI A. Momentum strategies in futures markets and trend-following funds[EB/OL]. SSRN Working Paper No. 1968996, 2011.
+\bibitem{08} MOREIRA A, MUIR T. Volatility-managed portfolios[J]. Journal of Finance, 2017, 72(4): 1611-1644.
+\bibitem{09} HARVEY C R, HOYLE E, KORGONKAR R, et al. The impact of volatility targeting[J]. Journal of Portfolio Management, 2018, 45(1): 14-33.
+\bibitem{10} GOULDING C L, HARVEY C R, MAZZOLENI M. Breaking bad trends[J]. Financial Analysts Journal, 2024, 80(1): 84-98.
+\bibitem{11} KURTH J G, EISLER Z, REJ A, et al. Is trend still your friend? A microstructural account of the demise of short-term trend-following[EB/OL]. arXiv: 2607.01550, 2026.
+\bibitem{12} MARSHALL B R, NGUYEN N H, VISALTANACHOTI N. Time series momentum and moving average trading rules[J]. Quantitative Finance, 2017, 17(3): 405-421.
+\bibitem{13} DAO T L, NGUYEN T T, DEREMBLE C, et al. Tail protection for long investors: trend convexity at work[EB/OL]. arXiv: 1607.02410, 2016.
+\bibitem{14} BABU A, LEVINE A, LIN Y, et al. Trends everywhere[EB/OL]. SSRN, 2018.
+\bibitem{15} HAMILL P, RATTRAY S, VAN HEMERT O. Trend following: equity and bond crisis alpha[R]. London: Man AHL, 2016.
+\bibitem{16} ROBERTSON J. 趋势回撤质疑的系统回应与正偏价值[R]. Man Institute, 2023.
+\bibitem{17} MACKIC A. 趋势信号的速度权衡：灵敏度、换手与假突破[R]. Man Institute, 2023.
+\bibitem{18} ROBERTSON J, GOODALL S. 趋势的长期正偏与股指负偏：风格事实的证据[R]. Man Institute, 2023.
+\bibitem{19} MAN GROUP. 趋势策略超长回撤复盘：集中于低波动震荡段[R]. 2025.
+\bibitem{20} WINTON CAPITAL MANAGEMENT. 交易上限（trade cap）：执行成本对趋势收益的侵蚀路径[R]. 2015.
+\bibitem{21} J P MORGAN. 用风险因子原型复制CTA 基准与趋势暴露[R]. Quantitative and Derivatives Strategies, 2015.
+\bibitem{22} RESEARCH AFFILIATES. 趋势与carry 的信号叠加：长期表现与2022 年的例外[R]. 2025.
+\bibitem{23} 华泰证券. 时序CTA 的三层实现：市场状态、开仓信号与退出机制[R]. 华泰金工, 2026.
+\bibitem{24} 国泰君安期货. 长周期CTA 分市场环境的收益归因框架[R]. 2026.
+\bibitem{25} 中信期货. 商品期货四因子体系：动量与期限结构[R]. 2024.
+\bibitem{26} 中信建投期货. 2024 年国内外量化CTA 表现与归因[R]. 2024.
+\bibitem{27} 银河期货. 唐奇安通道突破规则的系统回测[R]. 2024.
+\bibitem{28} GATEV E, GOETZMANN W N, ROUWENHORST K G. Pairs trading: performance of a relative value arbitrage rule[J]. Review of Financial Studies, 2006, 19(2): 541-581.
+\bibitem{29} LO A W, MACKINLAY A C. When are contrarian profits due to stock market overreaction?[J]. Review of Financial Studies, 1990, 3(2): 175-205.
+\bibitem{30} JEGADEESH N. Evidence of predictable behavior of security returns[J]. Journal of Finance, 1990, 45(3): 881-898.
+\bibitem{31} VIDYAMURTHY G. Pairs trading: quantitative methods and analysis[M]. Hoboken: Wiley, 2004.
+\bibitem{32} HUCK N, AFAWUBO K. Pairs trading and selection methods: is cointegration superior?[J]. Applied Economics, 2015, 47(6): 599-613.
+\bibitem{33} DE MOURA C E, PIZZINGA A, ZUBELLI J. A pairs trading strategy based on linear state space models and the Kalman filter[J]. Quantitative Finance, 2016, 16(10): 1559-1573.
+\bibitem{34} HAN W, ZHANG B, XIE Q, et al. Select and trade: towards unified pair trading with hierarchical reinforcement learning[EB/OL]. arXiv: 2301.10724, 2023.
+\bibitem{35} DO B, FAFF R. Does simple pairs trading still work?[J]. Financial Analysts Journal, 2010, 66(4): 83-95.
+\bibitem{36} MCLEAN R D, PONTIFF J. Does academic research destroy stock return predictability?[J]. Journal of Finance, 2016, 71(1): 5-32.
+\bibitem{37} KRAUSS C. Statistical arbitrage pairs trading strategies: review and outlook[J]. Journal of Economic Surveys, 2017, 31(2): 513-545.
+\bibitem{38} BORGARDS O, CZUDAJ R L, HOANG T H V. Price overreactions in the commodity futures market: an intraday analysis of the Covid-19 pandemic impact[J]. Resources Policy, 2021, 71: 101966.
+\bibitem{39} BIANCHI R J, DREW M E, FAN J. Combining momentum with reversal in commodity futures[J]. Journal of Banking \& Finance, 2015, 59: 423-444.
+\bibitem{40} SIMON D P. The soybean crush spread: empirical evidence and trading strategies[J]. Journal of Futures Markets, 1999, 19(3): 271-289.
+\bibitem{41} LIU Q W, SONO H H. Empirical properties, information flow, and trading strategies of China’s soybean crush spread[J]. Journal of Futures Markets, 2016, 36(11): 10571075.
+\bibitem{42} ZHENG L, LUO X. Is there an intraday reversal effect in commodity futures and options? Evidence from the Chinese market[J]. Pacific-Basin Finance Journal, 2024, 88: 102534.
+\bibitem{43} 商品期货日内与隔夜收益的争夺：大连商品交易所六个品种的证据[J]. 中文期刊（维普收录）.
+\bibitem{44} 基于小波去噪与GARCH 协整的商品期货价差交易策略[J]. 中国管理科学, 2023.
+\bibitem{45} WHITE H. A reality check for data snooping[J]. Econometrica, 2000, 68(5): 10971126.
+\bibitem{46} HARVEY C R, LIU Y, ZHU H. …and the cross-section of expected returns[J]. Review of Financial Studies, 2016, 29(1): 5-68.
+\bibitem{47} 中信期货. 基于卡尔曼滤波的价差套利：三类进出场规则回测[R]. 2024.
+\bibitem{48} 中信期货. 跨品种统计套利策略专题[R]. 2017.
+\bibitem{49} 华泰期货. 白银跨期策略：分位数、升贴水与动量三类比较[R]. 2026.
+\bibitem{50} GORTON G, ROUWENHORST K G. Facts and fantasies about commodity futures[J]. Financial Analysts Journal, 2006, 62(2): 47-68.
+\bibitem{51} FAMA E F, FRENCH K R. Commodity futures prices: some evidence on forecast power, premiums, and the theory of storage[J]. Journal of Business, 1987, 60(1): 55.
+\bibitem{52} ERB C B, HARVEY C R. The tactical and strategic value of commodity futures[R]. NBER Working Paper No. 11222, 2005.
+\bibitem{53} KOIJEN R S J, MOSKOWITZ T J, PEDERSEN L H, et al. Carry[J]. Journal of Financial Economics, 2018, 127(2): 197-225.
+\bibitem{54} FELDMAN T, TILL H. Backwardation and commodity futures performance[J]. Journal of Alternative Investments, 2006, 9(3): 24-39.
+\bibitem{55} DE GROOT W, KARSTANJE D, ZHOU W. Exploiting commodity momentum along the futures curves[J]. Journal of Banking \& Finance, 2014, 48: 79-93.
+\bibitem{56} PASCHKE R, PROKOPCZUK M, WESE S C. Curve momentum[J]. Journal of Banking \& Finance, 2020, 113: 105718.
+\bibitem{57} ZHENG Z, LIU Y, WU Y, et al. Curve momentum in China[J]. Journal of Futures Markets, 2026, 46(6): 982-1021.
+\bibitem{58} 中信期货. 期限结构（展期收益）因子研究[R].
+\bibitem{59} 华泰金工. 商品carry 三策略跟踪：组合创2010 年以来新高与等权融合[R]. 2025.
+\bibitem{60} 东吴证券. 分红调整年化基差与IM 贴水对冲策略[R]. 2026.
+\bibitem{61} MIFFRE J, RALLIS G. Momentum strategies in commodity futures markets[J]. Journal of Banking \& Finance, 2007, 31(6): 1863-1886.
+\bibitem{62} KANG J, KWON K Y. Momentum in international commodity futures markets[J]. Journal of Futures Markets, 2017, 37(8): 803-835.
+\bibitem{63} IWANAGA Y, SAKEMOTO R. Commodity momentum decomposition[J]. Journal of Futures Markets, 2022, 43(2): 198-216.
+\bibitem{64} GORTON G, HAYASHI F, ROUWENHORST K G. The fundamentals of commodity futures returns[J]. Review of Finance, 2013, 17(1): 35-105.
+\bibitem{65} BAKSHI G S, GAO X, ROSSI A G. Understanding the sources of risk underlying the cross-section of commodity returns[J]. Management Science, 2019, 65(2): 619-641.
+\bibitem{66} 方正中期. 双动量专题：时序动量与截面动量的品种数约束[R]. 2020.
+\bibitem{67} 华泰金工. 截面仓单组合：按板块强弱的多空配置[R]. 2026.
+\bibitem{68} 螺纹–铁矿石比值套利的配比与波动率中性化方法[N]. 期货日报, 2016.
+\bibitem{69} 银河期货. 卷螺差高位收缩的产业链轮动判断[R]. 2026.
+\bibitem{70} WORKING H. The theory of price of storage[J]. American Economic Review, 1949, 39: 1254-1262.
+\bibitem{71} BRENNAN M J. The supply of storage[J]. American Economic Review, 1958, 48(1): 50-72.
+\bibitem{72} 棉花期现与跨期套利的驱动差异：基差修复与期限结构相对价值[J]. 石河子大学学报（自然科学版）, 2025.
+\bibitem{73} U.S. DEPARTMENT OF AGRICULTURE, ECONOMIC RESEARCH SERVICE. Crop production forecast errors and commodity futures market response[R]. Economic Research Report No. 293, 2003.
+\bibitem{74} EIA. 库存公告对原油期货价格的影响[R]. U.S. Energy Information Administration, 2017.
+\bibitem{75} 期货保证金调整对市场收益的影响：过度调整与投机波动[J]. 中文期刊, 2025.
+\bibitem{76} 厄尔尼诺事件对美国大豆期货波动的影响：基于GARCH 与事件研究的检验[C]//SHS Web of Conferences, 2023.
+\bibitem{77} YANG Y, GÖNCÜ A, PANTELOUS A A. Momentum and reversal strategies in Chinese commodity futures markets[J]. International Review of Financial Analysis, 2018, 60: 177-196.
+\bibitem{78} ZHENG Y. Neural network and order flow, technical analysis: predicting short-term direction of futures contract[EB/OL]. arXiv: 2203.12457, 2022.
+\bibitem{79} BARZYKIN A, BERGAULT P, GUÉANT O. Market making in spot precious metals[EB/OL]. arXiv: 2404.15478, 2024.
+\bibitem{80} KANG W, ROUWENHORST K G, TANG C. A tale of two premiums: the role of hedgers and speculators in commodity futures markets[J]. Journal of Finance, 2020, 75(1): 377-417.
+\bibitem{81} GUO L, HUANG X, LI Y, et al. Forecasting crude oil futures price using machine learning methods: evidence from China[J]. Energy Economics, 2023, 127: 107089.
+\bibitem{82} GUPTA A. Sparse latent factor forecaster (SLFF) with iterative inference for transparent multi-horizon commodity futures prediction[EB/OL]. arXiv:2505.06795, 2025.
+\bibitem{83} 中国期货业协会. 卫星数据与大宗商品库存量化研究报告[R]. 2022.
+\bibitem{84} MAILLARD S, RONCALLI T, TEÏLETCHE J. The properties of equally weighted risk contribution portfolios[J]. Journal of Portfolio Management, 2010, 36(4): 60-70.
+\bibitem{85} 波动率惩罚Kelly 及其在中国商品期货中的应用[D]. Birmingham: University of Birmingham, 2018.
+\bibitem{86} BAILEY D H, LÓPEZ DE PRADO M. The deflated Sharpe ratio: correcting for selection bias, backtest overfitting and non-normality[J]. Journal of Portfolio Management, 2014, 40(5): 94-107.
+\bibitem{87} BAILEY D H, BORWEIN J M, LÓPEZ DE PRADO M, et al. The probability of backtest overfitting[J]. Journal of Computational Finance, 2016.
+\bibitem{88} ANG A, TIMMERMANN A F. Regime changes and financial markets[J]. Annual Review of Financial Economics, 2012, 4(1): 313-337.
+\bibitem{89} EWALD J, FRANSSON D. Predictive modeling and statistical inference for commodity trading advisors[J]. Cogent Economics \& Finance, 2025, 14(1).
+\bibitem{90} POMORSKI P, GORSE D. Improving portfolio performance using a novel method for predicting financial regimes[EB/OL]. arXiv: 2310.04536, 2023.
+\end{thebibliography}
+
+\end{document}

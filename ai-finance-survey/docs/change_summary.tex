@@ -1,0 +1,227 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+\setlist{topsep=0.3em,itemsep=0.2em,parsep=0.15em}
+
+\title{\bfseries 复权因子修正与交易制度掩码收紧\\\large 变更摘要（面向交接与复核）}
+\author{\large 叨客宁宁}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{这份摘要解决什么问题}
+
+综述第 21 章的真实数据实证此前用两处简化口径：价格不复权、涨跌停按固定阈值近似判定。这两处都会污染结果——除权跳空会混入收益与特征，近似阈值会把并未封板的交易日误判为不可成交（或相反）。本次变更把两处口径补齐，重跑 P0--P2 全流程，并同步论文、评审报告与说明文档。
+
+变更只动真实数据那一支：合成面板（\texttt{code/data.py}）与评测层（\texttt{code/eval.py}）、成本层（\texttt{code/costs.py}）未改。合成路径已回归验证，结果与变更前逐位一致（PBO $0.567$、区间 $[0.400,0.584]$）。
+
+\section{口径变更对照}
+
+\begin{table}[htbp]
+\centering
+\caption{两处口径的变更前后对照}
+\label{tab:caliber}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{5.4cm}>{\raggedright\arraybackslash}p{6.2cm}@{}}
+\toprule
+维度 & 变更前 & 变更后 \\
+\midrule
+价格口径 & 通达信原始日线，不复权；极端跳空（$|r|>45\%$）按事件剔除 & 原始价乘后复权因子，先于一切特征与收益计算；跳空由复权自然消除，不再需要事件剔除 \\
+\addlinespace
+复权因子来源 & 无（未做复权） & AKShare 后复权因子，缓存至 \texttt{outputs/hfq\_factors.json}；首次联网、之后离线复用 \\
+\addlinespace
+涨跌停判定 & 按板块固定阈值 $|r| \ge 10\%$ 或 $20\%$ 近似，含 $0.5\%$ 容差 & 封板价精确判定：四档幅度分别算 $\text{round}(\text{前收}\times(1\pm\text{lim}),0.01)$，收盘与最高（涨停）/最低（跌停）同时等于该价才判封板 \\
+\addlinespace
+ST 特殊处理 & 未处理 & 由 $\pm5\%$ 档位直接识别，不依赖名称表、无前视 \\
+\addlinespace
+北交所 & 未纳入 & 纳入（$\pm30\%$ 档位），样本含 15 只 \\
+\addlinespace
+一字板 & 未单独处理 & 开$=$高$=$低$=$收且封板者记为不可成交 \\
+\addlinespace
+新股 & 未处理 & 上市后前 20 个交易日剔除 \\
+\addlinespace
+流动性 & 未筛除 & 日成交额中位数低于 2000 万元者剔除 \\
+\addlinespace
+覆盖率计算 & 按整个窗口计算，新股因历史不足被整体排除 & 按上市后活动窗口计算，新股保留至上市日之后（样本含窗口内上市 153 只） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+封板判定之所以逐日对四档幅度都试一遍，是为了不依赖任何名称表：ST（$\pm5\%$）、主板（$\pm10\%$）、创业板与科创板（$\pm20\%$）、北交所（$\pm30\%$）在判定式里自动区分，且只用当日及以前信息，不引入前视。
+
+\section{一处阻塞及其处置（须如实说明）}
+
+通达信本地权息文件 \texttt{gbbq} 是复权的标准本地方案，但本机三个安装中的该文件\textbf{均为加密存储}：文件头为记录数（$193245$ 条、每条 $29$ 字节，算术自洽），记录区首字节恒为密文前缀，无明文日期与代码。逐一验证并排除了明文、单字节异或、自密钥异或等假设后，判定逆向解密不可靠—解出错误因子的后果比不复权更严重，故放弃该路径。
+
+改走第三方兜底：复权因子取 AKShare，缓存落盘。这条拼装链（通达信原始价 $\times$ AKShare 因子）与 AKShare 独立后复权价做了交叉核验，结果见表 \ref{tab:verify}。
+
+\begin{table}[htbp]
+\centering
+\caption{复权拼装链交叉核验（抽样 8 只）}
+\label{tab:verify}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{5.4cm}@{}}
+\toprule
+代码 & 对照日数 & 最大相对偏差 & 备注 \\
+\midrule
+sh600519 & 1881 & $1.1\times10^{-6}$ & 因子末值 8.8825 \\
+sz000001 & 1881 & $4.1\times10^{-6}$ & 因子末值 154.0324 \\
+sz300750 & 1881 & $7.1\times10^{-5}$ & — \\
+sh600000 & 1881 & $4.8\times10^{-5}$ & — \\
+sh601318 & 1881 & $4.9\times10^{-5}$ & — \\
+sz002594 & 1881 & $1.1\times10^{-4}$ & — \\
+bj920002 & 571 & $6.6\times10^{-5}$ & 北交所 \\
+bj920000 & 1385 & $7.8\times10^{-4}$ & 北交所，全部样本中最大 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+核验脚本 \texttt{scripts/verify\_adjust.py}。结论：8 只中 7 只偏差不超过 $1.2\times10^{-4}$，最大偏差出现在一只北交所个股、量级 $7.8\times10^{-4}$，对日频价量特征可忽略。因子缓存现含 605 只、抓取失败 0 只。
+
+\section{变更清单}
+
+\begin{table}[htbp]
+\centering
+\caption{文件级变更清单}
+\label{tab:files}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{8.3cm}@{}}
+\toprule
+文件 & 类型 & 内容 \\
+\midrule
+\texttt{code/real\_data.py} & 重写 & 后复权、封板价精确判定、一字板、新股剔除、流动性筛除、北交所、因子抓取与增量落盘、快照返回 \texttt{fac}/\texttt{adj}/\texttt{raw} 便于审计 \\
+\texttt{code/run.py} & 修改 & \texttt{{-}{-}real} 分支打印数据统计、统计写入试验账本、输出 \texttt{trial\_ledger\_real.json} \\
+\texttt{code/diag\_ls\_lo.py} & 新增 & 单特征多空与仅多头（可实施）对照，为论文第 21 章表提供数字 \\
+\texttt{code/diag\_adjust\_effect.py} & 新增 & 复权与否对截面 IC 的影响对照 \\
+\texttt{scripts/verify\_adjust.py} & 新增 & 复权拼装链交叉核验 \\
+\texttt{outputs/hfq\_factors.json} & 新增 & 复权因子缓存（605 只） \\
+\texttt{sections/checklist.tex} & 修改 & §21 真实数据最小实证按新口径重写，数字与边界全部更新 \\
+\texttt{sections/repro\_protocol.tex} & 修改 & 协议对照表中“时点快照”“交易制度掩码”两行 \\
+\texttt{docs/peer\_review.tex} & 修改 & M13 状态与页数 \\
+\texttt{README.md} & 修改 & 目录结构、运行命令、数据说明、外部依赖标注 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+实现中有个中途修掉的缺陷值得记录：新股剔除最初取的是“窗口内序列的首个交易日”，这会把窗口开始前就已上市的股票误剔除 20 天。已改为按真实上市日判定—只有窗口内上市者才剔除，且覆盖率也按上市后活动窗口计算。
+
+\section{实测结果对照}
+
+样本为沪深与北交所 A 股，窗口 2019-01-02 至 2026-10-08，$T=1881$、$N=400$、$K=8$，候选池 61 个。变更后快照校验和 \texttt{781cadd68dfbd170}（变更前为 \texttt{a08b6e4eca17d7c4}）。
+
+\begin{table}[htbp]
+\centering
+\caption{实跑结果：变更前（\texttt{real\_run.txt}）与变更后（\texttt{real\_run\_v2.txt}）}
+\label{tab:results}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{5.0cm}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{4.6cm}@{}}
+\toprule
+项目 & 变更前 & 变更后 \\
+\midrule
+样本内最优候选 & rand26，样本内夏普 3.404 & rand10，样本内夏普 3.649 \\
+滚动前向 OOS 夏普 & 3.109 & 2.671 \\
+单次切分 OOS 夏普 & 3.129 & 3.595 \\
+OOS 高于它的候选数 & 2 & 1 \\
+IC 均值 / IR & 0.0299 / 0.208 & 0.0129 / 0.088 \\
+成本三档夏普 & 3.176 / 2.394 / 1.876 & 3.057 / 2.043 / 1.164 \\
+DSR（标准误 / 离散口径） & 1.0000 / 0.0000 & 0.9991 / 0.0022 \\
+PBO（切分区间） & 0.000（$[0.000,0.002]$） & 0.000（$[0.000,0.000]$） \\
+量比多空 OOS 夏普 & 3.839 & 3.056 \\
+最优仅多头 OOS 夏普 & 1.721 & 1.271 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+结论方向没有变：信息层确有稳定信号（DSR 标准误口径 $0.9991$、PBO $0.000$），但换成可实施的仅多头口径后夏普从 3.056 落到 1.271，成本再把多空从 3.057 压到 1.164。也就是说，缝隙判据里“可预测不等于可交易”这一条，在收紧口径后依然成立。
+
+有一处\textbf{数字不可直接对比}需要点明：“不可成交单元占比”从 0.0563 升到 0.2134，并非可交易性恶化。变更后 universe 纳入了 153 只窗口内上市的新股（覆盖率改按活动窗口计算），这些股票上市前的单元格天然无数据、计入不可成交，从而抬高了总量。真正可比的是有效样本内的封板占比—变更后为 1.97\%（涨停 1.19\%、跌停 0.38\%），一字板 0.16\%。
+
+\section{复权到底改变了什么：一项独立对照}
+
+最初起草时写过一句“复权后 IC 从 0.0299 降到 0.0129，因除权跳空被消除”——这是错的。两轮实跑的 IC 来自\textbf{不同的候选}（rand26 与 rand10），且 universe 与掩码口径同时变了，不能归因于复权。
+
+为把这件事做实，另做了一项单变量对照：保持特征与权重不变，只把标签换成原始收盘价的相邻比，两列 IC 之差便只可能来自除权跳空。结果见表 \ref{tab:adjustic}。
+
+\begin{table}[htbp]
+\centering
+\caption{复权口径对截面 IC 的影响（同特征、同掩码，仅标签不同）}
+\label{tab:adjustic}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{5.0cm}@{}}
+\toprule
+特征 & 后复权 IC & 不复权 IC & 差 \\
+\midrule
+1 日反转 & 0.0240 & 0.0241 & $-0.0001$ \\
+5 日动量 & $-0.0051$ & $-0.0061$ & $+0.0011$ \\
+20 日动量 & $-0.0098$ & $-0.0101$ & $+0.0004$ \\
+60 日动量 & $-0.0094$ & $-0.0101$ & $+0.0006$ \\
+波动率 & $-0.0072$ & $-0.0067$ & $-0.0005$ \\
+量比 & $-0.0303$ & $-0.0304$ & $+0.0000$ \\
+距均线偏离 & $-0.0077$ & $-0.0087$ & $+0.0009$ \\
+非流动性 & $0.0108$ & $0.0114$ & $-0.0005$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+八项差异的绝对值全不超过 $0.0011$。也就是说，在日频价量特征上，除权跳空\textbf{不是}截面相关的显著来源——这与“不复权就会污染信号”的直觉预期相反。复权仍然应该做（收益口径正确、极端跳空不必再靠人为规则剔除），但它带来的收益是口径干净，而非信号结构改变。两轮 IC 的差别应主要归于 universe 与掩码收紧以及候选不同。
+
+这条对照的价值不在于复权，而在于它示范了一件事：把“看起来合理的因果解释”拿去单变量验证，结论可能相反。文档与代码中因此保留该脚本（\texttt{code/diag\_adjust\_effect.py}），供后续复核。
+
+\section{复现与核验}
+
+\begin{table}[htbp]
+\centering
+\caption{复现步骤与核验证据}
+\label{tab:repro}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{9.2cm}@{}}
+\toprule
+步骤 & 命令与产出 \\
+\midrule
+复权核验 & \texttt{python scripts/verify\_adjust.py} $\rightarrow$ 表 \ref{tab:verify} \\
+全流程实跑 & \texttt{cd code; python run.py {-}{-}real} $\rightarrow$ \texttt{trial\_ledger\_real.json} \\
+多空/仅多头对照 & \texttt{python diag\_ls\_lo.py} $\rightarrow$ 论文第 21 章表 \\
+复权影响对照 & \texttt{python diag\_adjust\_effect.py} $\rightarrow$ 表 \ref{tab:adjustic} \\
+合成路径回归 & \texttt{python run.py} $\rightarrow$ PBO $0.567$、区间 $[0.400,0.584]$，与变更前一致 \\
+论文编译 & \texttt{xelatex main.tex} 连续三次 \\
+质量门 & 编译错误 0、Overfull 0、正文引用键 90 $=$ 参考文献 90 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+试验账本中的关键字段已逐项与论文表格核对（快照校验和、选中候选、OOS 夏普、IC/IR、成本三档、DSR 两口径、PBO 及切分区间、不可成交占比）全部一致。
+
+\section{未收敛的边界}
+
+\begin{enumerate}
+  \item \textbf{复权因子依赖第三方}。本地权息文件加密不可解析，因子来自 AKShare；若该因子在某处滞后于真实除权日，会残留局部跳空。这是本次变更引入的唯一新增外部依赖，已在论文与 README 中标注。
+  \item \textbf{幸存者偏差仍在}。universe 只保留窗口末仍在市且成交额达标的股票，退市股不在本地库中。
+  \item \textbf{仅多头未做 beta 中性}。“最优仅多头 OOS 1.271”中含市场 beta，未剥离。
+  \item \textbf{涨跌停判定的例外情形}。按四档固定幅度尝试，未处理上市首日、重大资产重组复牌等无涨跌幅限制或特殊安排。
+  \item \textbf{停牌频率未进一步筛除}。仅用成交额中位数做了一道流动性门槛。
+\end{enumerate}
+
+以上都会影响具体数值，方向上倾向于高估可交易性，故“仅多头更弱”这一对照应读作上界性质的结果，而非收益预测。
+
+\section{后续变更（第二轮评审之后）}
+
+本摘要表 \ref{tab:results} 中“成本三档”一列反映的是本摘要所述变更刚完成时的状态。此后第二轮评审指出：冲击模型的 ADV 取常数 $10^9$ 元，而样本个股成交额中位数只有 $7.46\times10^7$ 元，相差 13.4 倍，使参与率与冲击成本被系统性低估。该问题已修正：\textbf{“含冲击”一档由年化 $0.104$、夏普 $1.164$ 变为年化 $-0.134$、夏普 $-1.492$}（即由正转负），费率也改为按 A 股构成计入并按日期分段印花税。
+
+该轮同时补齐了单特征多重检验校正、DSR 两口径的取舍说明、universe 清单冻结与 beta/alpha 分解。完整的口径对照、实测数据与残留边界见\textbf{另一份文档}：\texttt{docs/change\_summary\_round2.tex}（成本口径修正与统计披露补齐：变更摘要）。本文不再重复其表格，以免同一组数字出现两个版本。
+
+这一变化不改变本摘要所述变更的任何结论，反而使“可预测不等于可交易”的证据更强；论文第 21 章、第 11 章与第 16 章协议表均已同步。
+
+\medskip
+
+\noindent 此后第三轮评审又指出一处更细的问题：第 21 章用样本内最优候选演示成本吞噬收益，而该候选恰好是换手最高的一类（年化 182 倍），用它代表全体会得出过宽的结论。实测表明换手在候选间跨度达 26 倍，低换手的候选（非流动性，年化 14--18 倍）在含冲击后夏普仍为 1.01／0.89，是 16 种构建方式中仅有的两种存活者。因此论文把结论由“可预测但不可交易”改写为条件式：\textbf{成本后能否存活取决于换手}。该轮的八条意见与逐条证据见 \texttt{docs/peer\_review\_round3.tex}。
+
+值得记一笔的是：本文面向非技术读者的摘要（\texttt{docs/investor\_brief.tex}）早就用“同一个信号，仅仅因为交易频率不同，就从亏钱变成赚钱”表述过同一件事——这一轮实际是把正文的结论收回到摘要一直以来的口径上。
+\end{document}

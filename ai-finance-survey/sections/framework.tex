@@ -1,0 +1,71 @@
+% 第3章 综述框架：方法族 × 交易环节
+\section{综述框架：方法族与交易环节的双轴}\label{sec:framework}
+
+第 \ref{sec:foundations} 章把 AI 的作用拆成了表示、预测、决策三个位置。这一章把它落成一张可以逐格检查的表格，好让后面每一章都有明确的位置感，不至于写成“某方法的介绍”。
+
+\subsection{两条轴}
+
+\textbf{纵轴是方法族}，按技术谱系分六类：
+
+\begin{enumerate}
+  \item \textbf{监督学习与 alpha 挖掘}：线性/正则化回归、树模型、集成学习，把横截面收益预测形式化为一个回归/排序问题。
+  \item \textbf{深度学习与序列建模}：RNN/LSTM、TCN、Transformer、以及 2024 年后的时序基础模型，处理序列依赖与长上下文。
+  \item \textbf{强化学习}：把交易当作序贯决策，直接优化执行成本、组合效用或交易收益。
+  \item \textbf{自然语言处理与大模型}：从词典法情绪、FinBERT 类编码器，到 LLM 抽取信号与 LLM 智能体。
+  \item \textbf{生成式模型}：GAN/VAE/扩散模型，用于合成数据、场景生成与市场仿真。
+  \item \textbf{图神经网络}：把公司、资产、产业链、跨资产的关系建成图，做关系感知的预测。
+\end{enumerate}
+
+\textbf{横轴是交易环节}，按一条完整的策略生命周期分五段：
+
+\begin{enumerate}
+  \item \textbf{信号生成（alpha）}：从数据出发产生对未来的预测。
+  \item \textbf{组合构建}：把预测翻译成权重，处理风险预算、约束与交易成本。
+  \item \textbf{交易执行}：决定下单路径、择时与做市报价，核心是摩擦管理。
+  \item \textbf{风险管理}：控制回撤、尾部风险与暴露，动态化风险预算。
+  \item \textbf{另类数据与微观结构}：订单簿、逐笔成交、非传统数据源，是信号与执行的共同上游。
+\end{enumerate}
+
+\subsection{双轴映射矩阵}
+
+下表是本文的组织地图。每一格后面的方括号给出对应章节。空白处不作为：它表示该“方法族 $\times$ 环节”组合在文献中确有实质工作，只是本文将其并入相邻章节讨论，以避免重复。
+
+\begin{table}[htbp]
+\centering
+\caption{方法族 $\times$ 交易环节 映射矩阵}
+\label{tab:framework}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{2.2cm}@{}}
+\toprule
+方法族 & 信号生成 & 组合构建 & 交易执行 & 风险管理 & 另类数据/微结构 \\
+\midrule
+监督学习 & 核心 [\ref{sec:supervised}] & 辅助 [\ref{sec:integration}] & --- & 辅助 [\ref{sec:integration}] & 消费端 [\ref{sec:altdata}] \\
+深度学习/序列 & 核心 [\ref{sec:deep}] & 辅助 [\ref{sec:deep}] & 辅助 [\ref{sec:deep}] & 辅助 [\ref{sec:integration}] & 核心 [\ref{sec:deep}] \\
+强化学习 & 辅助 [\ref{sec:rl}] & 核心 [\ref{sec:rl}] & 核心 [\ref{sec:rl}] & 辅助 [\ref{sec:rl}] & 执行侧 [\ref{sec:rl}] \\
+NLP/大模型 & 核心 [\ref{sec:nlp}] & 辅助 [\ref{sec:nlp}] & 辅助 [\ref{sec:nlp}] & 辅助 [\ref{sec:nlp}] & 新闻/文本 [\ref{sec:nlp}] \\
+生成式模型 & 辅助 [\ref{sec:gen}] & 辅助 [\ref{sec:gen}] & 仿真 [\ref{sec:gen}] & 压力测试 [\ref{sec:gen}] & 合成数据 [\ref{sec:gen}] \\
+图神经网络 & 核心 [\ref{sec:gnn}] & 辅助 [\ref{sec:gnn}] & --- & 传染风险 [\ref{sec:gnn}] & 关系结构 [\ref{sec:gnn}] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+这张表要传递的信息是：\textbf{方法族与交易环节不是一对一的关系}。同一个方法族可以在多个环节发力，同一个环节也可以被多个方法族改进。因此“某方法好不好”这个问题没有意义，必须问“在哪个环节、相对什么基线、扣掉什么成本之后”。这也是本文后面统一比较矩阵的出发点。
+
+\subsection{每一族的统一审查口径}
+
+为避免六章写成六套不同标准，本文对每一族都用同一套五个问题去审：
+
+\begin{enumerate}
+  \item \textbf{问题设定}：它到底在预测/优化什么目标？目标与“赚钱”之间差了几层？
+  \item \textbf{原理}：方法的机制是什么，为什么它可能有效（而不只是“跑了一遍”）？
+  \item \textbf{落地要素}：需要什么数据（频率、覆盖、许可）、什么特征、什么训练/推断成本？
+  \item \textbf{复现状态}：有没有公开代码、公开基准、独立复现？复现结论是否与原文一致（详见第 \ref{sec:repro_audit} 章）？
+  \item \textbf{失效边界}：在什么条件下它会失效？是信息耗尽、非平稳、成本吞噬，还是数据泄漏？
+\end{enumerate}
+
+这五个问题里，\textbf{第四和第五个是最容易被论文和报告略过的，也是本文花笔墨最多的地方}。因为对想落地的人而言，方法好不好用，取决于这两项，而不是取决于原文的样本内指标。
+
+\subsection{一条贯穿的判据}
+
+把第 \ref{sec:foundations} 章的可交易缝隙定义带到每一族，就得到本文反复使用的判据：一族方法的真实增量，等于它在统一口径下相对最强基线的 $G(\pi)$ 之差（见式 2.3），而不是它的样本内指标之差。凡是原文未报告成本、样本外与多重检验的，本文一律在证据表与比较矩阵里标注为“增量不可判定”。这不是苛刻，而是这份综述存在的意义——把“看起来有效”和“确实可交易”分开。
+
+本章要记住的一句话是：\textbf{方法族的名字不重要，重要的是它在交易链条的哪一环、替谁省下了信息成本或摩擦成本，以及这个节省有没有被独立复现过。}

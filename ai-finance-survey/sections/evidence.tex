@@ -1,0 +1,214 @@
+% 第12章 证据表
+\section{证据表（核心来源清单）}\label{sec:evidence}
+
+证据表由两张以 \textbf{E 编号}为主键的子表构成：证据表 A 记元数据，证据表 B 记评测属性；两张表用同一套 E 编号互指，比较矩阵（第 \ref{sec:matrix} 章）的每一行也标注对应的 E 编号。这样拆表是为了让“来源是什么”与“评测是否严谨”两条信息都能在同一宽度内读清，而不必把两者挤进一张宽表。
+
+\textbf{核验等级约定}（两级）：\textsc{已核验}=DOI/arXiv/官方链接与元数据互证；\textsc{部分核验}=元数据确认、样本区间或参数细节待全文复核。\textbf{\textsc{已核验}仅指元数据层，不代表结论可靠}——结论是否可靠请对照证据表 B 的“复现状态”列。来源类型标注该条目是期刊、会议、预印本还是专著，便于读者自行判断同行评审状态。
+
+\textbf{链接说明}：链接指向 DOI、arXiv 或官方来源；对无 DOI 的经典条目（专著、会议、杂志）标注“无 DOI”，不附替代链接；少数经典条目的链接为开放获取副本，已在“来源”列注明“OA 副本”。
+
+{\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.7cm}>{\raggedright\arraybackslash}p{1.0cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}p{0.9cm}@{}}
+\caption{证据表 A：元数据}\\
+\toprule
+ID & 族 & 标题（作者，年） & 来源 & 年 & 类型 & 核验 \\
+\midrule
+\endhead
+E1 & 原理 & Portfolio Selection（Markowitz, 1952） & \href{https://doi.org/10.1111/j.1540-6261.1952.tb01525.x}{DOI} & 1952 & 期刊 & 已核验 \\
+E2 & 原理 & Efficient Capital Markets: A Review of Theory and Empirical Work（Fama, 1970） & \href{https://doi.org/10.1111/j.1540-6261.1970.tb00518.x}{DOI} & 1970 & 期刊 & 已核验 \\
+E3 & 原理 & On the Impossibility of Informationally Efficient Markets（Grossman \\& Stiglitz, 1980） & \href{https://doi.org/10.7916/d8765r99}{OA 副本} & 1980 & 期刊 & 已核验 \\
+E4 & 原理 & Continuous Auctions and Insider Trading（Kyle, 1985） & \href{https://doi.org/10.2307/1913210}{DOI} & 1985 & 期刊 & 已核验 \\
+E5 & 原理 & The Limits of Arbitrage（Shleifer \\& Vishny, 1997） & \href{https://doi.org/10.1111/j.1540-6261.1997.tb03807.x}{DOI} & 1997 & 期刊 & 已核验 \\
+E6 & 原理 & Mean Reversion Pays, but Costs（Martin \\& Sch\"oneborn, 2011） & \href{https://arxiv.org/abs/1103.4934}{arXiv} & 2011 & 预印本 & 已核验 \\
+E7 & 监督 & Empirical Asset Pricing via Machine Learning（Gu 等, 2020） & \href{https://doi.org/10.1093/rfs/hhaa009}{DOI} & 2020 & 期刊 & 已核验 \\
+E8 & 监督 & Autoencoder Asset Pricing Models（Gu 等, 2021） & \href{https://doi.org/10.1016/j.jeconom.2020.07.009}{DOI} & 2021 & 期刊 & 已核验 \\
+E9 & 监督 & Deep Learning in Asset Pricing（Chen 等, 2024） & \href{https://doi.org/10.1287/mnsc.2023.4695}{DOI} & 2024 & 期刊 & 已核验 \\
+E10 & 监督 & The Virtue of Complexity in Return Prediction（Kelly 等, 2024） & \href{https://doi.org/10.1111/jofi.13298}{DOI} & 2024 & 期刊 & 已核验 \\
+E11 & 监督 & Taming the Factor Zoo: A Test of New Factors（Feng 等, 2020） & \href{https://doi.org/10.1111/jofi.12883}{DOI} & 2020 & 期刊 & 已核验 \\
+E12 & 监督 & Deep Neural Networks, Gradient-Boosted Trees, Random Forests: Statistical Arbitrage on the S\&P 500（Krauss 等, 2017） & \href{https://doi.org/10.1016/j.ejor.2016.10.031}{DOI} & 2017 & 期刊 & 已核验 \\
+E13 & 深度 & Deep Learning with Long Short-Term Memory Networks for Financial Market Predictions（Fischer \\& Krauss, 2018） & \href{https://doi.org/10.1016/j.ejor.2017.11.054}{DOI} & 2018 & 期刊 & 已核验 \\
+E14 & 深度 & DeepLOB: Deep Convolutional Neural Networks for Limit Order Books（Zhang 等, 2019） & \href{https://doi.org/10.1109/tsp.2019.2907260}{DOI} & 2019 & 期刊 & 已核验 \\
+E15 & 深度 & Forecasting Stock Prices from the Limit Order Book Using Convolutional Neural Networks（Tsantekidis 等, 2017） & \href{https://doi.org/10.1109/cbi.2017.23}{DOI} & 2017 & 会议 & 已核验 \\
+E16 & 深度 & Benchmark Dataset for Mid-Price Forecasting of Limit Order Book Data with Machine Learning Methods（Ntakaris 等, 2018） & \href{https://doi.org/10.1002/for.2543}{DOI} & 2018 & 期刊 & 已核验 \\
+E17 & 深度 & Deep Learning for Limit Order Books（Sirignano, 2019） & \href{https://doi.org/10.1080/14697688.2018.1546053}{DOI} & 2019 & 期刊 & 已核验 \\
+E18 & 深度 & Attention Is All You Need（Vaswani, 2017） & \href{https://arxiv.org/abs/1706.03762}{arXiv} & 2017 & 会议 & 已核验 \\
+E19 & 深度 & Temporal Fusion Transformers for Interpretable Multi-Horizon Time Series Forecasting（Lim 等, 2021） & \href{https://arxiv.org/abs/1912.09363}{arXiv} & 2021 & 期刊 & 已核验 \\
+E20 & 深度 & Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting（Zhou, 2021） & \href{https://arxiv.org/abs/2012.07436}{arXiv} & 2021 & 会议 & 已核验 \\
+E21 & 深度 & Autoformer: Decomposition Transformers with Auto-Correlation for Long-Term Series Forecasting（Wu 等, 2021） & \href{https://arxiv.org/abs/2106.13008}{arXiv} & 2021 & 会议 & 已核验 \\
+E22 & 深度 & Are Transformers Effective for Time Series Forecasting?（Zeng 等, 2023） & \href{https://arxiv.org/abs/2205.13504}{arXiv} & 2023 & 会议 & 已核验 \\
+E23 & 深度 & Chronos: Learning the Language of Time Series（Ansari, 2024） & \href{https://arxiv.org/abs/2403.07815}{arXiv} & 2024 & 期刊 & 已核验 \\
+E24 & 深度 & A Decoder-Only Foundation Model for Time-Series Forecasting（Das 等, 2024） & \href{https://arxiv.org/abs/2310.10688}{arXiv} & 2024 & 会议 & 已核验 \\
+E25 & 深度 & Lag-Llama: Towards Foundation Models for Probabilistic Time Series Forecasting（Rasul, 2023） & \href{https://arxiv.org/abs/2310.08278}{arXiv} & 2023 & 预印本 & 已核验 \\
+E26 & 强化 & Deep Direct Reinforcement Learning for Financial Signal Representation and Trading（Deng 等, 2017） & \href{https://doi.org/10.1109/tnnls.2016.2522401}{DOI} & 2017 & 期刊 & 已核验 \\
+E27 & 强化 & A Deep Reinforcement Learning Framework for the Financial Portfolio Management Problem（Jiang 等, 2017） & \href{https://arxiv.org/abs/1706.10059}{arXiv} & 2017 & 预印本 & 已核验 \\
+E28 & 强化 & FinRL: A Deep Reinforcement Learning Library for Automated Stock Trading in Quantitative Finance（Liu, 2020） & \href{https://arxiv.org/abs/2011.09607}{arXiv} & 2020 & 预印本 & 已核验 \\
+E29 & 强化 & Reinforcement Learning for Optimized Trade Execution（Nevmyvaka 等, 2006） & \href{https://doi.org/10.1145/1143844.1143929}{DOI} & 2006 & 会议 & 已核验 \\
+E30 & 强化 & Market Making via Reinforcement Learning（Spooner 等, 2018） & \href{https://arxiv.org/abs/1804.04216}{arXiv} & 2018 & 会议 & 已核验 \\
+E31 & 强化 & Deep Reinforcement Learning for Market Making in Corporate Bonds（Gu\'eant \\& Manziuk, 2019） & \href{https://arxiv.org/abs/1910.13205}{arXiv} & 2019 & 期刊 & 已核验 \\
+E32 & NLP & Giving Content to Investor Sentiment: The Role of Media in the Stock Market（Tetlock, 2007） & \href{https://doi.org/10.1111/j.1540-6261.2007.01232.x}{DOI} & 2007 & 期刊 & 已核验 \\
+E33 & NLP & Investor Sentiment and the Cross-Section of Stock Returns（Baker \\& Wurgler, 2006） & \href{https://doi.org/10.1111/j.1540-6261.2006.00885.x}{DOI} & 2006 & 期刊 & 已核验 \\
+E34 & NLP & When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10-Ks（Loughran \\& McDonald, 2011） & \href{https://doi.org/10.1111/j.1540-6261.2010.01625.x}{DOI} & 2011 & 期刊 & 已核验 \\
+E35 & NLP & FinBERT: Financial Sentiment Analysis with Pre-Trained Language Models（Araci, 2019） & \href{https://arxiv.org/abs/1908.10063}{arXiv} & 2019 & 预印本 & 已核验 \\
+E36 & NLP & FinBERT: A Pretrained Language Model for Financial Communications（Yang 等, 2020） & \href{https://arxiv.org/abs/2006.08097}{arXiv} & 2020 & 预印本 & 已核验 \\
+E37 & NLP & FinBERT: A Large Language Model for Extracting Information from Financial Text（Huang 等, 2023） & \href{https://doi.org/10.1111/1911-3846.12832}{DOI} & 2023 & 期刊 & 已核验 \\
+E38 & NLP & BloombergGPT: A Large Language Model for Finance（Wu, 2023） & \href{https://arxiv.org/abs/2303.17564}{arXiv} & 2023 & 预印本 & 已核验 \\
+E39 & NLP & FinGPT: Open-Source Financial Large Language Models（Yang 等, 2023） & \href{https://arxiv.org/abs/2306.06031}{arXiv} & 2023 & 预印本 & 已核验 \\
+E40 & NLP & Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models（Lopez-Lira \\& Tang, 2023） & \href{https://doi.org/10.2139/ssrn.4412788}{DOI} & 2023 & 期刊 & 已核验 \\
+E41 & NLP & Predicting Returns with Text Data（Ke 等, 2019） & \href{https://doi.org/10.3386/w26186}{DOI} & 2019 & 期刊 & 已核验 \\
+E42 & NLP & FinMem: A Performance-Enhanced LLM Trading Agent with Layered Memory and Character Design（Yu 等, 2023） & \href{https://arxiv.org/abs/2311.13743}{arXiv} & 2023 & 预印本 & 已核验 \\
+E43 & NLP & Large Language Model Agent in Financial Trading: A Survey（Ding, 2024） & \href{https://arxiv.org/abs/2408.06361}{arXiv} & 2024 & 预印本 & 已核验 \\
+E44 & NLP & Assessing Look-Ahead Bias in Stock Return Predictions Generated by GPT Sentiment Analysis（Glasserman \\& Lin, 2023） & \href{https://doi.org/10.3905/jfds.2023.1.143}{DOI} & 2023 & 期刊 & 已核验 \\
+E45 & NLP & Can LLM-Based Financial Investing Strategies Outperform the Market in the Long Run?（Li, 2025） & \href{https://arxiv.org/abs/2505.07078}{arXiv} & 2025 & 预印本 & 部分核验 \\
+E46 & NLP & StockBench: Can LLM Agents Trade Stocks Profitably in Real-World Markets?（Wang, 2025） & \href{https://arxiv.org/abs/2510.02209}{arXiv} & 2025 & 预印本 & 部分核验 \\
+E47 & NLP & INVESTORBENCH: A Benchmark for Financial Decision-Making Tasks with LLM-Based Agent（Li, 2025） & \href{https://doi.org/10.18653/v1/2025.acl-long.126}{DOI} & 2025 & 会议 & 已核验 \\
+E48 & 生成 & Quant GANs: Deep Generation of Financial Time Series（Wiese 等, 2020） & \href{https://doi.org/10.1080/14697688.2020.1730426}{DOI} & 2020 & 期刊 & 已核验 \\
+E49 & 生成 & Modeling Financial Time-Series with Generative Adversarial Networks（Takahashi 等, 2019） & \href{https://doi.org/10.1016/j.physa.2019.121261}{DOI} & 2019 & 期刊 & 已核验 \\
+E50 & 生成 & Time-Series Generative Adversarial Networks（Yoon 等, 2019） & 无 DOI & 2019 & 会议 & 已核验 \\
+E51 & 生成 & Deep Hedging（Buehler 等, 2019） & \href{https://arxiv.org/abs/1802.03042}{arXiv} & 2019 & 期刊 & 已核验 \\
+E52 & 生成 & ABIDES: Towards High-Fidelity Market Simulation for AI Research（Byrd 等, 2020） & \href{https://arxiv.org/abs/1904.12066}{arXiv} & 2020 & 预印本 & 已核验 \\
+E53 & 生成 & Generative Agents: Interactive Simulacra of Human Behavior（Park, 2023） & \href{https://arxiv.org/abs/2304.03442}{arXiv} & 2023 & 会议 & 已核验 \\
+E54 & 图网络 & Economic Links and Predictable Returns（Cohen \\& Frazzini, 2008） & \href{https://doi.org/10.1111/j.1540-6261.2008.01379.x}{DOI} & 2008 & 期刊 & 已核验 \\
+E55 & 图网络 & Graph Attention Networks（Veli\v{c}kovi\'c 等, 2018） & \href{https://arxiv.org/abs/1710.10903}{arXiv} & 2018 & 会议 & 已核验 \\
+E56 & 图网络 & Exploring Graph Neural Networks for Stock Market Predictions with Rolling Window Analysis（Matsunaga 等, 2019） & \href{https://arxiv.org/abs/1909.10660}{arXiv} & 2019 & 预印本 & 已核验 \\
+E57 & 图网络 & Temporal Relational Ranking for Stock Prediction（Feng 等, 2019） & \href{https://doi.org/10.1145/3309547}{DOI} & 2019 & 期刊 & 已核验 \\
+E58 & 图网络 & Incorporating Corporation Relationship via Graph Convolutional Neural Networks for Stock Price Prediction（Chen 等, 2018） & \href{https://doi.org/10.1145/3269206.3269269}{DOI} & 2018 & 会议 & 已核验 \\
+E59 & 图网络 & HATS: A Hierarchical Graph Attention Network for Stock Movement Prediction（Xu, 2019） & \href{https://arxiv.org/abs/1908.07999}{arXiv} & 2019 & 预印本 & 已核验 \\
+E60 & 图网络 & Temporal and Heterogeneous Graph Neural Network for Financial Time Series Prediction（Wang, 2021） & \href{https://arxiv.org/abs/2305.08740}{arXiv} & 2021 & 预印本 & 已核验 \\
+E61 & 图网络 & Deep Attentive Learning for Stock Movement Prediction from Social Media Text and Company Correlations（Sawhney 等, 2020） & \href{https://doi.org/10.18653/v1/2020.emnlp-main.676}{DOI} & 2020 & 会议 & 已核验 \\
+E62 & 另类 & Big Data as a Governance Mechanism（Zhu, 2019） & \href{https://doi.org/10.1093/rfs/hhy081}{DOI} & 2019 & 期刊 & 已核验 \\
+E63 & 另类 & The Value of Crowdsourced Earnings Forecasts（Jame 等, 2016） & \href{https://doi.org/10.1111/1475-679x.12121}{DOI} & 2016 & 期刊 & 已核验 \\
+E64 & 另类 & On the Capital Market Consequences of Big Data: Evidence from Outer Space（Katona 等, 2018） & \href{https://doi.org/10.2139/ssrn.3222741}{DOI} & 2018 & 期刊 & 已核验 \\
+E65 & 组合执行 & Generalized Autoregressive Conditional Heteroskedasticity（Bollerslev, 1986） & \href{https://doi.org/10.1016/0304-4076(86)90063-1}{DOI} & 1986 & 期刊 & 已核验 \\
+E66 & 组合执行 & A New Approach to the Economic Analysis of Nonstationary Time Series and the Business Cycle（Hamilton, 1989） & \href{https://doi.org/10.2307/1912559}{DOI} & 1989 & 期刊 & 已核验 \\
+E67 & 组合执行 & Optimal Execution of Portfolio Transactions（Almgren \\& Chriss, 2000） & \href{https://doi.org/10.21314/jor.2001.041}{DOI} & 2000 & 期刊 & 已核验 \\
+E68 & 组合执行 & Direct Estimation of Equity Market Impact（Almgren 等, 2005） & 无 DOI & 2005 & 期刊 & 已核验 \\
+E69 & 组合执行 & Optimization of Conditional Value-at-Risk（Rockafellar \\& Uryasev, 2000） & \href{https://doi.org/10.21314/jor.2000.038}{DOI} & 2000 & 期刊 & 已核验 \\
+E70 & 组合执行 & Estimation of Tail-Related Risk Measures for Heteroscedastic Financial Time Series（McNeil \\& Frey, 2000） & \href{https://doi.org/10.1016/s0927-5398(00)00012-8}{DOI} & 2000 & 期刊 & 已核验 \\
+E71 & 组合执行 & A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices（Ledoit \\& Wolf, 2004） & \href{https://doi.org/10.1016/s0047-259x(03)00096-4}{DOI} & 2004 & 期刊 & 已核验 \\
+E72 & 组合执行 & Drawdown Measure in Portfolio Optimization（Chekhlov 等, 2005） & \href{https://doi.org/10.1142/s0219024905002767}{DOI} & 2005 & 期刊 & 已核验 \\
+E73 & 组合执行 & The Impact of Volatility Targeting（Harvey 等, 2018） & \href{https://doi.org/10.3905/jpm.2018.45.1.014}{DOI} & 2018 & 期刊 & 已核验 \\
+E74 & 组合执行 & Algorithmic and High-Frequency Trading（Cartea 等, 2015） & 无 DOI & 2015 & 专著 & 已核验 \\
+E75 & 组合执行 & End-to-End Risk Budgeting Portfolio Optimization with Neural Networks（Costa \\& Iyengar, 2022） & \href{https://doi.org/10.1007/s10479-023-05539-4}{DOI} & 2022 & 期刊 & 已核验 \\
+E76 & 组合执行 & Deep Learning for Portfolio Optimization（Zhang 等, 2020） & \href{https://arxiv.org/abs/2005.13665}{arXiv} & 2020 & 期刊 & 已核验 \\
+E77 & 评测 & A Reality Check for Data Snooping（White, 2000） & \href{https://doi.org/10.1111/1468-0262.00152}{DOI} & 2000 & 期刊 & 已核验 \\
+E78 & 评测 & Data-Snooping, Technical Trading Rule Performance, and the Bootstrap（Sullivan 等, 1999） & \href{https://doi.org/10.1111/0022-1082.00163}{DOI} & 1999 & 期刊 & 已核验 \\
+E79 & 评测 & ... and the Cross-Section of Expected Returns（Harvey 等, 2016） & \href{https://doi.org/10.1093/rfs/hhv059}{DOI} & 2016 & 期刊 & 已核验 \\
+E80 & 评测 & Does Academic Research Destroy Stock Return Predictability?（McLean \\& Pontiff, 2016） & \href{https://doi.org/10.1111/jofi.12365}{DOI} & 2016 & 期刊 & 已核验 \\
+E81 & 评测 & Is There a Replication Crisis in Finance?（Jensen 等, 2023） & \href{https://doi.org/10.1111/jofi.13249}{DOI} & 2023 & 期刊 & 已核验 \\
+E82 & 评测 & Pseudo-Mathematics and Financial Charlatanism: The Effects of Backtest Overfitting on Out-of-Sample Performance（Bailey 等, 2014） & \href{https://doi.org/10.1090/noti1105}{DOI} & 2014 & 期刊 & 已核验 \\
+E83 & 评测 & The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality（Bailey \\& Prado, 2014） & \href{https://doi.org/10.3905/jpm.2014.40.5.094}{DOI} & 2014 & 期刊 & 已核验 \\
+E84 & 评测 & The Probability of Backtest Overfitting（Bailey 等, 2016） & \href{https://doi.org/10.21314/jcf.2016.322}{DOI} & 2016 & 期刊 & 已核验 \\
+E85 & 评测 & Advances in Financial Machine Learning（Prado, 2018） & 无 DOI & 2018 & 专著 & 已核验 \\
+E86 & 评测 & What Survives Honest Evaluation? Leakage-safe, Search-aware Assessment of LLM-Driven Trading（Ratnaike, 2026） & \href{https://arxiv.org/abs/2608.27734}{arXiv} & 2026 & 预印本 & 部分核验 \\
+E87 & 评测 & The Corporate Bond Factor Replication Crisis（Dickerson, 2026） & \href{https://arxiv.org/abs/2604.07880}{arXiv} & 2026 & 预印本 & 部分核验 \\
+E88 & 工具 & Qlib: An AI-Oriented Quantitative Investment Platform（Yang, 2020） & \href{https://arxiv.org/abs/2009.11189}{arXiv} & 2020 & 预印本 & 已核验 \\
+E89 & 工具 & Deep Learning for Financial Applications: A Survey（Sezer 等, 2020） & \href{https://doi.org/10.1016/j.asoc.2020.106384}{DOI} & 2020 & 期刊 & 已核验 \\
+E90 & 工具 & Machine Learning in Finance: A Topic Modeling Approach（Aziz 等, 2021） & \href{https://doi.org/10.1111/eufm.12326}{DOI} & 2021 & 期刊 & 已核验 \\
+\bottomrule
+\end{xltabular}
+}
+
+\noindent 表 A 中“关键定位”列（见表 B）的填写规范：限定为该条目在\emph{本文论证中承担的角色}（如“机制来源”“基准”“失效边界例证”），不作质量评价，以免把主观判断混入事实栏。
+
+{\small
+\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.7cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{1.8cm}@{}}
+\caption{证据表 B：纳入理由与评测属性}\\
+\toprule
+ID & 关键定位（纳入理由） & 样本外检验 & 成本口径 & 复现状态 \\
+\midrule
+\endhead
+E1 & 现代组合理论起点 & 不适用 & 不适用 & 不适用（理论） \\
+E2 & 有效市场三档定义 & 不适用 & 不适用 & 不适用（理论） \\
+E3 & 信息效率悖论（OA 版本链接） & 不适用 & 不适用 & 不适用（理论） \\
+E4 & 价格冲击系数 λ 与信息租金耗散 & 不适用 & 不适用 & 不适用（理论） \\
+E5 & 套利限制 & 不适用 & 不适用 & 不适用（理论） \\
+E6 & 均值回归成本敏感性 & 不适用 & 解析式 & 可复现（理论） \\
+E7 & 机器学习资产定价基准 & 滚动前向 & 未报告 & 部分复现 \\
+E8 & 自编码条件因子模型 & 时间切分 & 未报告 & 部分复现 \\
+E9 & 无套利结构注入网络 & 时间切分 & 未报告 & 部分复现 \\
+E10 & 复杂性红利（争议） & 时间切分 & 未报告 & 未核实 \\
+E11 & 双重选择 Lasso & 不适用（方法论） & 不适用 & 可复现 \\
+E12 & 三类模型统计套利对照 & 时间切分 & 未报告 & 部分复现 \\
+E13 & LSTM 方向预测与回测 & 时间切分 & 报告成本敏感性 & 部分复现 \\
+E14 & 订单簿 CNN-LSTM & 时间切分 & 未报告 & 部分复现 \\
+E15 & 订单簿 CNN & 时间切分 & 未报告 & 部分复现 \\
+E16 & FI-2010 公开订单簿基准 & 标准划分 & 不适用 & 可复现 \\
+E17 & 空间-订单簿深度网络 & 时间切分 & 未报告 & 部分复现 \\
+E18 & 注意力机制 & 标准划分 & 不适用 & 可复现 \\
+E19 & 可解释多步时序预测 & 标准划分 & 不适用 & 可复现 \\
+E20 & 长序列 Transformer & 标准划分 & 不适用 & 可复现 \\
+E21 & 分解式长序列预测 & 标准划分 & 不适用 & 可复现 \\
+E22 & 线性基线反证 & 标准划分 & 不适用 & 可复现 \\
+E23 & 时序基础模型（零样本） & 标准划分 & 不适用 & 可复现 \\
+E24 & 时序基础模型 TimesFM & 标准划分 & 不适用 & 可复现 \\
+E25 & 概率时序基础模型 & 标准划分 & 不适用 & 可复现 \\
+E26 & 直接 RL 信号与交易 & 时间切分 & 未报告 & 部分复现 \\
+E27 & 端到端组合管理 RL & 时间切分 & 报告费率 & 部分复现 \\
+E28 & RL 交易开源框架 & 时间切分 & 可配置 & 部分复现 \\
+E29 & 执行 RL 开山 & 时间切分 & 内生化 & 部分复现 \\
+E30 & RL 做市 & 时间切分 & 内生化 & 部分复现 \\
+E31 & 深度 RL 做市 & 时间切分 & 内生化 & 部分复现 \\
+E32 & 媒体情绪与价格 & 时间切分 & 不适用 & 部分复现 \\
+E33 & 情绪指数 & 时间切分 & 不适用 & 部分复现 \\
+E34 & 金融情感词典 & 标准划分 & 不适用 & 可复现 \\
+E35 & 金融情感 BERT & 标准划分 & 不适用 & 可复现 \\
+E36 & 金融语料继续预训练 & 标准划分 & 不适用 & 可复现 \\
+E37 & FinBERT 信息抽取 & 标准划分 & 不适用 & 可复现 \\
+E38 & 金融领域大模型 & 标准划分 & 不适用 & 部分复现 \\
+E39 & 开源金融大模型 & 标准划分 & 不适用 & 部分复现 \\
+E40 & LLM 新闻信号回测 & 时间切分 & 未报告 & 不可复现 \\
+E41 & 文本预测收益 & 时间切分 & 未报告 & 部分复现 \\
+E42 & LLM 交易智能体 & 时间切分 & 未报告 & 不可复现 \\
+E43 & LLM 交易智能体综述 & 不适用（综述） & 不适用 & 不适用 \\
+E44 & LLM 前视偏差实测 & 时间切分 & 不适用 & 可复现 \\
+E45 & LLM 投资策略长周期评测 & 前向留出 & 未报告 & 未核实 \\
+E46 & LLM 交易智能体基准 & 前向留出 & 未报告 & 未核实 \\
+E47 & 金融决策 LLM 基准 & 标准划分 & 不适用 & 部分复现 \\
+E48 & 金融时序 GAN 生成 & 风格化事实检验 & 不适用 & 部分复现 \\
+E49 & GAN 建模金融时序 & 时间切分 & 不适用 & 部分复现 \\
+E50 & 监督式时序生成 & 标准划分 & 不适用 & 部分复现 \\
+E51 & 生成模型 + 对冲联合训练 & 时间切分 & 交易成本 & 部分复现 \\
+E52 & 离散事件市场仿真器 & 不适用 & 内生化 & 部分复现 \\
+E53 & 生成式智能体 & 不适用 & 不适用 & 可复现 \\
+E54 & 供应链动量传导 & 时间切分 & 未报告 & 部分复现 \\
+E55 & 图注意力网络 & 标准划分 & 不适用 & 可复现 \\
+E56 & GNN 股票预测滚动窗对照 & 时间切分 & 未报告 & 部分复现 \\
+E57 & 时序关系排序 & 时间切分 & 未报告 & 部分复现 \\
+E58 & 公司关系图卷积 & 时间切分 & 未报告 & 部分复现 \\
+E59 & 层次图注意力 & 时间切分 & 未报告 & 部分复现 \\
+E60 & 时序异质图 & 时间切分 & 未报告 & 部分复现 \\
+E61 & 文本 + 公司关联图 & 标准划分 & 不适用 & 部分复现 \\
+E62 & 大数据与公司治理 & 时间切分 & 不适用 & 不可复现 \\
+E63 & 众包盈利预测 & 时间切分 & 不适用 & 部分复现 \\
+E64 & 卫星大数据与资本市场 & 时间切分 & 不适用 & 不可复现 \\
+E65 & GARCH 波动率模型 & 不适用 & 不适用 & 可复现 \\
+E66 & 制度切换模型 & 不适用 & 不适用 & 可复现 \\
+E67 & 最优执行解析解 & 不适用 & 解析式 & 可复现（理论） \\
+E68 & 平方根冲击律的经验估计 & 不适用 & 冲击模型 & 部分复现 \\
+E69 & CVaR 优化 & 不适用 & 不适用 & 可复现 \\
+E70 & 极值理论尾部风险 & 未报告 & 不适用 & 可复现 \\
+E71 & 协方差收缩估计 & 未报告 & 不适用 & 可复现 \\
+E72 & 回撤约束优化 & 不适用 & 不适用 & 可复现 \\
+E73 & 波动率目标化 & 时间切分 & 不适用 & 可复现 \\
+E74 & 算法与高频交易理论专著 & 不适用 & 解析式 & 可复现（理论） \\
+E75 & 端到端风险预算 & 时间切分 & 报告 & 部分复现 \\
+E76 & 端到端组合学习 & 时间切分 & 报告费率 & 部分复现 \\
+E77 & Reality Check 数据窥探检验 & 不适用（方法论） & 不适用 & 可复现 \\
+E78 & 近八千条规则联合检验 & 不适用（方法论） & 不适用 & 可复现 \\
+E79 & 多重检验 t>3 门槛 & 不适用（方法论） & 不适用 & 可复现 \\
+E80 & 发表后收益衰减 & 时间切分 & 不适用 & 可复现 \\
+E81 & 因子复现危机 & 时间切分 & 不适用 & 可复现 \\
+E82 & 回测过拟合批判 & 不适用（方法论） & 不适用 & 可复现 \\
+E83 & 缩水夏普 DSR & 不适用（方法论） & 不适用 & 可复现 \\
+E84 & 过拟合概率 PBO（CSCV） & 不适用（方法论） & 不适用 & 可复现 \\
+E85 & 金融机器学习评测纪律专著 & 不适用（方法论） & 不适用 & 可复现 \\
+E86 & 泄漏安全评估 & 前向留出 & 未报告 & 未核实 \\
+E87 & 债券因子复现危机 & 时间切分 & 不适用 & 部分复现 \\
+E88 & 开源量化研究平台 & 滚动前向（内置） & 可配置 & 可复现 \\
+E89 & 方法罗列型综述代表 & 不适用（综述） & 不适用 & 不适用 \\
+E90 & 文献计量/主题建模型综述代表 & 不适用（综述） & 不适用 & 不适用 \\
+\bottomrule
+\end{xltabular}
+}
+
+\noindent 共收录 90 条核心来源。“样本外检验/成本口径/复现状态”三列仅填可确证者，未核实的一律写“未报告/未核实”，不替作者补齐。元数据核验脚本见 \texttt{scripts/} 下的 \texttt{verify\_refs*.py}，结果见 \texttt{outputs/}。

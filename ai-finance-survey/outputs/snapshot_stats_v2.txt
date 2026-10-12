@@ -1,0 +1,12 @@
+digest: 781cadd68dfbd170 T: 1881 N: 400
+  n_universe = 400
+  n_dropped_no_factor = 0
+  n_new_listing_in_window = 153
+  n_bj = 15
+  valid_ratio = 0.8009117490696438
+  sealed_within_valid = 0.01965131445753942
+  sealed_up_ratio = 0.011893939393939394
+  sealed_dn_ratio = 0.003845029239766082
+  one_word_ratio = 0.001625465178096757
+  ex_date_cells = 2132
+  median_amount_cny = 86551868.0

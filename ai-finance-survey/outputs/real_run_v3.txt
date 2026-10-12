@@ -1,0 +1,44 @@
+数据源：TDX vipdoc .day + AKShare 后复权因子 @ D:/Programs\new_tdx_mock\vipdoc（窗口 20190102–20261008）
+  n_universe = 400
+  n_dropped_no_factor = 0
+  n_new_listing_in_window = 153
+  n_bj = 15
+  valid_ratio = 0.8009117490696438
+  sealed_up_ratio = 0.01485049933123799
+  sealed_dn_ratio = 0.004800815126301431
+  sealed_total_ratio = 0.01965131445753942
+  one_word_ratio = 0.002029518458163377
+  ex_date_cells = 2132
+  median_amount_cny = 86551868.0
+数据快照 digest=781cadd68dfbd170  T=1881 N=400 K=8
+不可成交单元占比=0.2134（含封板 / 停牌 / 上市前与历史不足）
+成本口径：逐股 ADV（中位 7.458e+07 元）；费率 2.6bp 双边（佣金 2.5 + 过户费 0.1）＋卖出印花税分段 10.0/5.0bp
+
+试验账本：候选数 N=61 （单特征 8 + 随机组合 50 + 岭参数网格 3）
+
+按样本内夏普排序前 5（零成本）：
+  rand10         is=3.649 wf_oos=2.671 single_oos=3.595
+  rand26         is=3.433 wf_oos=2.469 single_oos=2.908
+  rand1          is=3.090 wf_oos=3.051 single_oos=3.453
+  rand47         is=3.058 wf_oos=1.918 single_oos=2.576
+  rand21         is=2.668 wf_oos=1.313 single_oos=1.385
+
+样本内最优：rand10（按样本内夏普选出）
+  滚动前向 OOS 夏普=2.671；样本外夏普高于它的候选数=1
+
+信号类指标（rand10）：IC均值=0.0129 IC标准差=0.1473 IR=0.088 IC>0占比=0.548（n=1820）
+
+成本三档（该候选，全样本）：
+  zero    ann=0.273 sharpe=3.057 mdd=-0.114 年化成本=0.000 占毛收益=0.00 参与率超限=0
+  fixed   ann=0.154 sharpe=1.720 mdd=-0.133 年化成本=0.120 占毛收益=0.44 参与率超限=0
+  impact  ann=-0.134 sharpe=-1.492 mdd=-0.689 年化成本=0.407 占毛收益=1.49 参与率超限=28
+  换手：日均合计 0.721，年化约 182 倍
+
+缩水夏普 DSR（N=61）：
+  标准误口径  sr0=0.0722 DSR=0.9991
+  截面离散口径 sr0=0.2556 DSR=0.0022
+回测过拟合概率 PBO=0.000（组合数 924）
+  切分敏感性：{8: 0.0, 12: 0.0, 16: 0.0, 20: 3.247526467340709e-05} → 区间 [0.000, 0.000]
+
+试验账本已写入 trial_ledger_real.json
+universe 清单已冻结：.\real_universe.json（400 只）

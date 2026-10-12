@@ -1,0 +1,30 @@
+数据源：TDX vipdoc .day @ D:/Programs\new_tdx_mock\vipdoc（窗口 20190102–20261008）
+数据快照 digest=a08b6e4eca17d7c4  T=1881 N=400 K=8
+不可成交单元占比=0.0563（含涨跌停 / 停牌 / 非成分）
+
+试验账本：候选数 N=61 （单特征 8 + 随机组合 50 + 岭参数网格 3）
+
+按样本内夏普排序前 5（零成本）：
+  rand26         is=3.404 wf_oos=3.109 single_oos=3.129
+  rand10         is=3.299 wf_oos=3.271 single_oos=3.669
+  ridge_lam10.0  is=3.088 wf_oos=1.907 single_oos=1.913
+  ridge_lam1.0   is=3.088 wf_oos=1.907 single_oos=1.913
+  ridge_lam0.1   is=3.088 wf_oos=1.907 single_oos=1.913
+
+样本内最优：rand26（按样本内夏普选出）
+  滚动前向 OOS 夏普=3.109；样本外夏普高于它的候选数=2
+
+信号类指标（rand26）：IC均值=0.0299 IC标准差=0.1437 IR=0.208 IC>0占比=0.591（n=1820）
+
+成本三档（该候选，全样本）：
+  zero    ann=0.259 sharpe=3.176 mdd=-0.084 参与率超限=0
+  fixed   ann=0.195 sharpe=2.394 mdd=-0.089 参与率超限=0
+  impact  ann=0.153 sharpe=1.876 mdd=-0.092 参与率超限=0
+
+缩水夏普 DSR（N=61）：
+  标准误口径  sr0=0.0647 DSR=1.0000
+  截面离散口径 sr0=0.3075 DSR=0.0000
+回测过拟合概率 PBO=0.000（组合数 924）
+  切分敏感性：{8: 0.0, 12: 0.0, 16: 0.0, 20: 0.0015209248955378987} → 区间 [0.000, 0.002]
+
+试验账本已写入 trial_ledger_real.json

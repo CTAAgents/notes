@@ -1,0 +1,41 @@
+  复权因子抓取 50/192
+  复权因子抓取 100/192
+  复权因子抓取 150/192
+数据源：TDX vipdoc .day + AKShare 后复权因子 @ D:/Programs\new_tdx_mock\vipdoc（窗口 20190102–20261008）
+  n_universe = 400
+  n_dropped_no_factor = 0
+  n_new_listing_in_window = 153
+  sealed_up_ratio = 0.011893939393939394
+  sealed_dn_ratio = 0.003845029239766082
+  one_word_ratio = 0.001625465178096757
+  ex_date_cells = 2132
+  median_amount_cny = 86551868.0
+数据快照 digest=781cadd68dfbd170  T=1881 N=400 K=8
+不可成交单元占比=0.2134（含涨跌停 / 停牌 / 非成分）
+
+试验账本：候选数 N=61 （单特征 8 + 随机组合 50 + 岭参数网格 3）
+
+按样本内夏普排序前 5（零成本）：
+  rand10         is=3.649 wf_oos=2.671 single_oos=3.595
+  rand26         is=3.433 wf_oos=2.469 single_oos=2.908
+  rand1          is=3.090 wf_oos=3.051 single_oos=3.453
+  rand47         is=3.058 wf_oos=1.918 single_oos=2.576
+  rand21         is=2.668 wf_oos=1.313 single_oos=1.385
+
+样本内最优：rand10（按样本内夏普选出）
+  滚动前向 OOS 夏普=2.671；样本外夏普高于它的候选数=1
+
+信号类指标（rand10）：IC均值=0.0129 IC标准差=0.1473 IR=0.088 IC>0占比=0.548（n=1820）
+
+成本三档（该候选，全样本）：
+  zero    ann=0.273 sharpe=3.057 mdd=-0.114 参与率超限=0
+  fixed   ann=0.183 sharpe=2.043 mdd=-0.132 参与率超限=0
+  impact  ann=0.104 sharpe=1.164 mdd=-0.148 参与率超限=0
+
+缩水夏普 DSR（N=61）：
+  标准误口径  sr0=0.0722 DSR=0.9991
+  截面离散口径 sr0=0.2556 DSR=0.0022
+回测过拟合概率 PBO=0.000（组合数 924）
+  切分敏感性：{8: 0.0, 12: 0.0, 16: 0.0, 20: 3.247526467340709e-05} → 区间 [0.000, 0.000]
+
+试验账本已写入 trial_ledger_real.json

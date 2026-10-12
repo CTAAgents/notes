@@ -1,0 +1,278 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+\setlist{topsep=0.3em,itemsep=0.2em,parsep=0.15em}
+
+\title{\bfseries AI 交易研究能力建设：落地实施计划\\\large 基于综述 Phase 0--4 路线图，面向小团队与公开数据}
+\author{\large 叨客宁宁}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{计划前提与假设}
+
+本计划把综述第 20 章的 Phase 0--4 路线图，翻译成一个小团队在\textbf{不依赖私有数据}的前提下可以执行的工作包。所有假设明示如下，若任一假设不成立，相应环节需重估。
+
+\begin{table}[htbp]
+\centering
+\caption{前提假设}
+\label{tab:assumptions}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{11.0cm}@{}}
+\toprule
+维度 & 假设 \\
+\midrule
+团队 & 1--3 人：量化研究 1 人（全职）、工程 1 人（全职）、评审/文档 0.5 人（兼职） \\
+数据预算 & 不采购商业数据；仅使用公开或本地可得数据 \\
+算力 & 单机（多核 CPU + 单卡消费级 GPU）+ 按需少量云 GPU \\
+市场 & 以 A 股与国内商品期货为起点（本地通达信数据可得），美股为对照 \\
+目标 & \textbf{建立可信的评测能力与可复现基线}，而非追求高收益 \\
+非目标 & 不做实盘交易、不做容量扩张、不追高频；不把“跑出高夏普”当作成功 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent 需要特别说明：本计划\textbf{以门禁（Gate）顺序组织，不预设日历时长}。每一阶段的真实耗时取决于团队节奏与数据质量，用日历硬排会产生虚假的确定性；用“通过 G$k$ 才进入下一阶段”来驱动，才是对本类工作负责任的做法。若管理层必须看进度，请以“已通过门禁数 / 总门禁数”作为主指标，而非以时间流逝作为主指标。
+
+\section{总体设计原则}
+
+\begin{enumerate}
+  \item \textbf{先立尺子，再比方法。}在写下第一行模型代码之前，先把数据快照、成本层、评测容器三样做出来。这三样不产出任何收益，但决定后面所有结论是否可信。
+  \item \textbf{每个结论都要能被推翻。}任何一次“有效”的判断，都必须伴随一个明确的失效条件与一个可复算的数字。
+  \item \textbf{负面结果与正面结果同等重要。}建立一个负面结果库（“这个方向试过，在统一口径下不成立”），它是团队最省钱的资产。
+  \item \textbf{一人可做，但不可一人独断。}评测规则在被“用完”之前就要定稿并冻结，避免事后调整。
+\end{enumerate}
+
+\section{Phase 0：基建（立尺子）}
+
+\subsection{工作分解}
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{1.0cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+任务 & 内容 & 交付物 & 负责角色 \\
+\midrule
+\endhead
+T0.1 & 数据接入与时点化 & 接入本地通达信日线（含 OI）、公开财报、公开指数成分；全部按“事件时间线”重放，禁止全样本操作 & 工程 + 研究 \\
+T0.2 & 数据快照冻结 & 冻结一份带校验和（如 SHA-256）的数据快照与数据字典；记录来源、区间、频率、许可 & 工程 \\
+T0.3 & 成本层 & 三档成本：零成本 / 固定费率 / 含平方根冲击；冲击率 $=k\sqrt{\text{参与率}}$，参与率设上限并记录超限次数 & 工程 \\
+T0.4 & 交易制度过滤 & 涨跌停、停牌、退市掩码与处理规则（信号不可成交时不交易） & 工程 \\
+T0.5 & 评测容器 & walk-forward 切分、六类指标（收益/风险/信号 IC-IR/显著性 DSR/成本/稳健性 PBO） & 研究 \\
+T0.6 & 试验账本 & 记录每一次试验（模型、参数、特征、随机种子），输出可审计的账本文件 & 研究 \\
+T0.7 & 评测规则冻结 & 把上述规则写成文档并在任何建模之前冻结（版本号 + 冻结日期） & 全体评审 \\
+\bottomrule
+\end{longtable}
+
+\subsection{验收门}
+
+\begin{itemize}
+  \item \textbf{G1（时点审计通过）}：随机抽 20 个交易日，人工核对当日可见信息集与实际使用信息一致；全部无前视。\emph{不通过则 Phase 1 不得启动。}
+  \item \textbf{G2（成本层可复现）}：同一快照与参数下，不同人重跑成本计算得到一致结果（浮点容差内）；参与率超限被正确标记。
+\end{itemize}
+
+\subsection{常见陷阱}
+
+最容易翻车的不是模型，而是数据。三个高发问题：用报告期而非披露日对齐财报；用全样本均值方差做标准化；用“今天的成分股名单”回溯历史。三者都不会报错，只会让回测变漂亮。
+
+\section{Phase 1：基准复现（对齐已知结论）}
+
+\subsection{工作分解}
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{1.0cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+任务 & 内容 & 交付物 & 负责角色 \\
+\midrule
+\endhead
+T1.1 & 复现经典因子基线 & 动量、价值、低波等简单因子的多空组合，统一口径报告六类指标 & 研究 \\
+T1.2 & 复现公开选股基准 & 在公开数据上对齐 Qlib 一类的基准管线（数据可得范围内），核对量级与方向 & 研究 + 工程 \\
+T1.3 & 执行基线 & VWAP/TWAP 与 Almgren--Chriss 基线，作为后续执行类方法的对照 & 工程 \\
+T1.4 & 基线固化 & 确定“最强简单基线”，作为后续一切新方法的比较对象 & 研究 \\
+\bottomrule
+\end{longtable}
+
+\subsection{验收门}
+
+\begin{itemize}
+  \item \textbf{G3（复现数值落在容差内）}：基线指标与公开报告的差异需能解释（数据区间、成本口径、标的池的差异须逐项说明），不能解释的差异视为未通过。
+  \item \textbf{G4（最强基线确定）}：明确写出“本团队的最强简单基线”及其口径。没有这一步，后面所有“提升”都无参照。
+\end{itemize}
+
+\section{Phase 2：前沿对照（公平比较）}
+
+\subsection{工作分解}
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{1.0cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+任务 & 内容 & 交付物 & 负责角色 \\
+\midrule
+\endhead
+T2.1 & 监督/深度基线 & 用同一特征集跑树模型与一个序列模型，口径完全对齐 Phase 1 & 研究 \\
+T2.2 & 增量归因 & 区分“增量来自模型”还是“来自设定”（数据、频率、资产池、成本） & 研究 \\
+T2.3 & 多重检验 & 试验账本计入全部搜索；报告 DSR 与 PBO；PBO$<0.2$ 才进入下一步 & 研究 \\
+T2.4 & 负面结果入库 & 把失败方向连同口径写入负面结果库 & 全体 \\
+\bottomrule
+\end{longtable}
+
+\subsection{验收门}
+
+\begin{itemize}
+  \item \textbf{G5（增量归因完成）}：对每个“提升”给出归因表，明确其来源。
+  \item \textbf{G6（DSR 与 PBO 双通过）}：报告的显著性须经 DSR 校正，且 PBO 低于阈值；二者缺一不可。
+\end{itemize}
+
+\noindent\textbf{这一阶段的纪律}：允许“无可复现增益”作为结论。事实上，在小团队+公开数据的条件下，这很可能是多数方向的诚实结论——把它写下来，比强行找出一个提升更有价值。
+
+\section{Phase 3：前沿验证（可行子集）}
+
+公开数据条件下，并非所有前沿方向都可验证。本计划按“可行性”筛选，而不是按“热度”。
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{7.2cm}>{\raggedright\arraybackslash}p{1.9cm}@{}}
+\toprule
+方向 & 可行性 & 做法 & 门禁 \\
+\midrule
+\endhead
+订单簿/执行 RL & 高 & 用 FI-2010 等公开订单簿数据，训练执行/做市策略，与 VWAP 基线对照 & G7/G8 \\
+生成式压力测试 & 中 & 训练一个生成器合成极端场景，检验组合尾部表现；严守“生成数据不得用于证明策略有效”的红线 & G8 \\
+跨市场泛化 & 中 & 同一管线跑 A 股与商品期货（本地数据可得），报告迁移结果 & G8 \\
+LLM 交易 & 低 & 仅以\textbf{前向样本}做小规模验证；禁止用模型知识截止日之前的样本得出正向结论 & G7 \\
+私有另类数据 & 不可行 & 不纳入 & — \\
+\bottomrule
+\end{longtable}
+
+\subsection{验收门}
+
+\begin{itemize}
+  \item \textbf{G7（泄漏排除成立）}：任何涉及生成式/LLM 的结论，必须附“测试样本不在训练语料/训练分布内”的证据，否则结论作废。
+  \item \textbf{G8（跨 $\geq 3$ 市场 OOS 同号）}：同一策略在多个市场的样本外结果同号，且相对最强基线的成本后增量仍为正；否则记为“无可复现增益”。
+\end{itemize}
+
+\section{Phase 4：沉淀（公共资产）}
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{1.0cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+任务 & 内容 & 交付物 & 负责角色 \\
+\midrule
+\endhead
+T4.1 & 协议开源 & 把 Phase 0 的评测容器与协议开源（含数据字典与口径说明） & 工程 \\
+T4.2 & 负面结果库 & 汇总各阶段失败方向，形成可检索的失败清单 & 全体 \\
+T4.3 & 第三方复现 & 邀请外部人员按协议复现一次，记录并修复不可复现点 & 评审角色 \\
+\bottomrule
+\end{longtable}
+
+\noindent\textbf{G9（第三方可在无作者协助下复现同一结论）}：这是整个计划唯一的“对外交付”门禁。若 G9 不通过，前面阶段的价值仅限于团队内部。
+
+\section{角色分工（RACI）}
+
+\begin{table}[htbp]
+\centering
+\caption{角色分工：R 负责 / A 批准 / C 咨询 / I 知会}
+\label{tab:raci}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}cccc@{}}
+\toprule
+事项 & 量化研究 & 工程 & 评审/文档 \\
+\midrule
+数据快照与成本层 & C & R/A & I \\
+评测容器与指标口径 & R/A & C & C \\
+模型与增量归因 & R/A & C & I \\
+门禁裁定 & C & C & R/A \\
+负面结果库 & C & C & R/A \\
+开源与第三方复现 & C & R & A \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent 关键设计：\textbf{门禁裁定权归评审角色，不归建模角色。}因为建模者天然有动机让结果“通过”，把裁定权交给不建模的人，是防止评测纪律被侵蚀的最简单机制。在小团队里，这意味着由兼职的 0.5 人承担这一职责，且其结论不可被全职成员单方面推翻。
+
+\section{资源门槛与公开数据清单}
+
+\begin{table}[htbp]
+\centering
+\caption{公开数据与工具（示例，均可零采购成本获取）}
+\label{tab:data}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{8.0cm}>{\raggedright\arraybackslash}p{3.4cm}@{}}
+\toprule
+用途 & 来源 & 注意 \\
+\midrule
+A 股/期货日线 & 本地通达信 \texttt{.day} 文件（含主力连续与 OI） & 需自建解析与时点化 \\
+财务数据 & 公司定期报告、公开财务数据接口 & 必须按实际披露日对齐 \\
+订单簿 & FI-2010 等公开数据集 & 规模有限，适合方法验证 \\
+选股基准 & Qlib 开源数据与基准报告 & 口径需自行对齐 \\
+文本 & 公开新闻标题/公告 & 注意转载与使用许可 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent 算力方面，Phase 0--2 的多数工作可在单机完成；订单簿与序列模型的训练可临时租用云 GPU。若采用云资源，建议以“任务为单位”而非“包月”采购，避免闲置。
+
+\section{风险登记表}
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{3.0cm}@{}}
+\toprule
+风险 & 概率 & 影响 & 应对 \\
+\midrule
+\endhead
+数据许可变动 & 中 & 公开数据源关闭或改条款，流程中断 & 快照冻结 + 多源备份；不使用许可含糊的来源 \\
+自建时点数据出错 & 高 & 前视偏差，结论作废 & G1 强制人工抽审；关键字段双人核对 \\
+过度拟合 & 高 & 样本内优良、实盘失效 & 试验账本 + DSR/PBO 双门禁 \\
+人员流失 & 中 & 知识断层 & 文档优先；协议与口径全部落文档 \\
+LLM 结果漂移 & 高 & 同一代码不同时间结果不同 & 只用前向样本；记录模型版本与调用时间 \\
+“无增益”结论挫伤士气 & 中 & 团队转向追逐热点 & 把负面结果库纳入考核，明确其为交付物 \\
+\bottomrule
+\end{longtable}
+
+\section{与综述 P0--P3 的映射}
+
+\begin{table}[htbp]
+\centering
+\caption{方法论纪律（P0--P3）与工程路线（Phase 0--4）的对应}
+\label{tab:mapping}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{9.0cm}@{}}
+\toprule
+综述 P 级 & 对应 Phase & 关系 \\
+\midrule
+P0 数据与成本统一 & Phase 0--1 & P 级是方法纪律，Phase 是工程落地 \\
+P1 评测协议与跨市场 & Phase 1、3 & 跨市场泛化在 Phase 3 执行 \\
+P2 多重检验纪律 & Phase 2 & DSR/PBO 与试验账本在此阶段强制 \\
+P3 前沿公平对照 & Phase 2--3 & 增量归因 + 泄漏排除 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{里程碑与门禁总览}
+
+\begin{table}[htbp]
+\centering
+\caption{门禁序列（按通过顺序推进，不预设日历时长）}
+\label{tab:gates}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{9.4cm}@{}}
+\toprule
+门禁 & 所属阶段 & 通过标准（摘要） \\
+\midrule
+G1 & Phase 0 & 时点审计：无前视 \\
+G2 & Phase 0 & 成本层数值可复现 \\
+G3 & Phase 1 & 基准复现差异可解释 \\
+G4 & Phase 1 & 最强简单基线确定 \\
+G5 & Phase 2 & 增量归因完成 \\
+G6 & Phase 2 & DSR 与 PBO 双通过 \\
+G7 & Phase 3 & 泄漏排除成立 \\
+G8 & Phase 3 & 跨市场 OOS 同号且增量成本后为正 \\
+G9 & Phase 4 & 第三方可独立复现 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{一句话总结这份计划}：它把资源优先投给“规则与尺子”，而不是“模型与收益”；如果执行到位，团队最终得到的不是一个漂亮曲线，而是一套让别人也能复现你结论的流程——对小团队而言，后者才是真正稀缺的资产。
+
+\end{document}

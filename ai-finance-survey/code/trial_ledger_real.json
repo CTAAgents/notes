@@ -1,0 +1,115 @@
+{
+  "source": "real",
+  "snapshot_digest": "781cadd68dfbd170",
+  "window": [
+    20190102,
+    20261008
+  ],
+  "data_stats": {
+    "n_universe": 400,
+    "n_dropped_no_factor": 0,
+    "n_new_listing_in_window": 153,
+    "n_bj": 15,
+    "valid_ratio": 0.8009117490696438,
+    "sealed_up_ratio": 0.01485049933123799,
+    "sealed_dn_ratio": 0.004800815126301431,
+    "sealed_total_ratio": 0.01965131445753942,
+    "one_word_ratio": 0.002029518458163377,
+    "ex_date_cells": 2132,
+    "median_amount_cny": 86551868.0
+  },
+  "search_space": {
+    "n_feature_signals": 8,
+    "n_random_combinations": 50,
+    "ridge_lambda_grid": [
+      0.1,
+      1.0,
+      10.0
+    ],
+    "total_trials_N": 61
+  },
+  "splits": {
+    "walk_forward": {
+      "train": 500,
+      "test": 120,
+      "n_folds": 11
+    },
+    "single_split_cut": 1410
+  },
+  "selected": "rand10",
+  "selected_is_true_signal": null,
+  "oos_sharpe_walkforward": 2.671048795292951,
+  "oos_sharpe_single_split": 3.5954412701395886,
+  "n_candidates_beating_selected_oos": 1,
+  "ic_ir": {
+    "ic_mean": 0.012948986305950042,
+    "ic_std": 0.1473038637634955,
+    "ic_ir": 0.08790663038371048,
+    "ic_positive_ratio": 0.5483516483516484,
+    "ic_n": 1820
+  },
+  "cost_caliber": "逐股 ADV（中位 7.458e+07 元）；费率 2.6bp 双边（佣金 2.5 + 过户费 0.1）＋卖出印花税分段 10.0/5.0bp",
+  "cost_tiers": [
+    {
+      "mode": "zero",
+      "ann_return": 0.27334130637126536,
+      "sharpe": 3.05744237031305,
+      "max_drawdown": -0.11382306243990026,
+      "cost_drag_ann": 0.0,
+      "cost_share_of_gross": 0.0,
+      "violations": 0
+    },
+    {
+      "mode": "fixed",
+      "ann_return": 0.15376835224438615,
+      "sharpe": 1.7201400212071705,
+      "max_drawdown": -0.13276662035847064,
+      "cost_drag_ann": 0.11957295412687914,
+      "cost_share_of_gross": 0.43744926705102294,
+      "violations": 0
+    },
+    {
+      "mode": "impact",
+      "ann_return": -0.13360876611470984,
+      "sharpe": -1.4918619442342165,
+      "max_drawdown": -0.6887359603088536,
+      "cost_drag_ann": 0.40695007248597515,
+      "cost_share_of_gross": 1.4887983008804235,
+      "violations": 28
+    }
+  ],
+  "turnover": {
+    "daily_mean": 0.7205128964824977,
+    "annualized": 181.56924991358943
+  },
+  "dsr_standard_error": {
+    "sr": 0.1682602583824719,
+    "sr0_expected_max": 0.07220896789753677,
+    "dsr": 0.9991198543273103,
+    "se_sr": 0.03070740892546288,
+    "n_trials": 61,
+    "T": 1320,
+    "method": "standard_error"
+  },
+  "dsr_dispersion": {
+    "sr": 0.1682602583824719,
+    "sr0_expected_max": 0.25558638059726535,
+    "dsr": 0.002228861570168328,
+    "n_trials": 61,
+    "T": 1320
+  },
+  "dsr_preferred": "standard_error",
+  "dsr_preferred_reason": "候选池为同 8 个特征的线性组合、彼此高度相关，其样本外夏普的截面离散度主要反映策略质量差异而非估计误差，用作 V(SR_hat) 会高估；标准误口径的 V(SR_hat) 取自单个夏普估计的解析方差，更贴合原式含义。残留余地：E[max_N] 项假设试验独立，候选相关会使该项偏大，故标准误口径略偏保守。",
+  "pbo": 0.0,
+  "pbo_sensitivity": {
+    "by_splits": {
+      "8": 0.0,
+      "12": 0.0,
+      "16": 0.0,
+      "20": 3.247526467340709e-05
+    },
+    "min": 0.0,
+    "max": 3.247526467340709e-05
+  },
+  "tradability_untradeable_ratio": 0.2134077618288145
+}

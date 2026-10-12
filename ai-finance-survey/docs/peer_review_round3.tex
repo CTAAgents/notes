@@ -1,0 +1,215 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+\setlist{topsep=0.3em,itemsep=0.2em,parsep=0.15em}
+
+\title{\bfseries 第三轮评审报告\\\large 复核对象：修订稿（69 页，第二轮意见已落地）}
+\author{\large 叨客宁宁}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{评审方法与偏差声明}
+
+本轮延续前两轮的规矩：不采信作者回执，三路独立验证——正文回验（逐条回章节找证据）、代码级复核（读实现、核对默认参数与论文表述是否一致）、数值重算（关键结论用独立脚本重算，重算与论文不一致时以重算为准）。
+
+\textbf{偏差风险声明}：评审者与修订者仍为同一人。本轮针对这一风险采取一条额外措施：\textbf{凡论文本轮新增的结论，均设一个独立的否证尝试}——即先假定它站不住，再去找能否证伪它的计算。第 \ref{sec:major} 节的三条主要发现，都是这一尝试的产物。
+
+\section{第二轮九条意见的独立回验}
+
+\begin{table}[htbp]
+\centering
+\caption{R1--R9 的回验结果}
+\label{tab:r2status}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}p{11.4cm}>{\raggedright\arraybackslash}p{1.3cm}@{}}
+\toprule
+编号 & 回验证据 & 结论 \\
+\midrule
+R1 & \texttt{costs.py} 的 ADV 接受向量；\texttt{run.py} 传入逐股成交额中位数并构造 A 股费率；第 21 章补报换手率与成本占比 & 已落实 \\
+R2 & \texttt{eval.py} 两处 docstring 已改写；第 21 章有独立的“DSR 两口径的取舍”段 & 已落实（但理由有误，见 Q2） \\
+R3 & 表 18 已含 IC-IR、$t$、通过校正三列；异象举例已更正为 5 日动量不通过 & 已落实 \\
+R4 & \texttt{outputs/real\_universe.json} 含 400 只代码与逐股 ADV，且与快照校验和绑定 & 已落实 \\
+R5 & 第 21 章封板占比声明了分母（有效单元格，占全部 80.1\%），三项数值可对上 & 已落实 \\
+R6 & \texttt{verify\_adjust.py} 默认全量；实测 400 只全过，偏差分位数已写入论文 & 已落实 \\
+R7 & \texttt{costs.py} 含佣金、过户费常量与 \texttt{stamp\_duty\_schedule}，按 2023-08-28 分段 & 已落实 \\
+R8 & 第 21 章新增“可实施性核查”小节与 beta 分解表 & 已落实（但段内指代有误，见 Q3） \\
+R9 & \texttt{rand10} 与量比截面相关 $-0.862$ 已写入正文并给出解读 & 已落实 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+九条都落到了代码与正文上，没有停在回执层面。其中 R1 的修正质量最高：它改的是默认参数与费率构成，而不是把论文里的数字往回调——这是本轮之前最容易走捷径的地方。
+
+\section{本轮主要发现}\label{sec:major}
+
+\subsection{Q1（必须）：成本结论的代表性不足，且把结论说得比证据更宽}
+
+第 21 章用样本内最优候选 \texttt{rand10} 演示成本如何吞噬收益：年化换手 182 倍，含冲击档夏普 $-1.492$，成本占毛收益 1.49，并据此得出“成本已超过毛收益本身”。作为单个案例，这组数字没问题；问题在于论文\textbf{只报告了这一个候选的换手}，而换手在候选之间的跨度是 26 倍——而 \texttt{rand10} 恰好落在最贵的那一类里。
+
+把 8 个特征的两种构建方式各算一遍年化换手与两档夏普（脚本 \texttt{code/audit\_cost\_by\_candidate.py}），得到 16 种构建方式，结果见表 \ref{tab:turnover}。
+
+\begin{table}[htbp]
+\centering
+\caption{按候选的换手与成本敏感性（全样本，零成本与含冲击两档；符号按原特征方向，未取样本内更优方向）}
+\label{tab:turnover}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+特征（口径） & 年化换手 & 零成本夏普 & 含冲击夏普 & 成本耗损 & 读法 \\
+\midrule
+非流动性（多空） & 14 & 1.221 & \textbf{1.014} & 0.21 & 成本后仍成立 \\
+非流动性（仅多头） & 18 & 1.026 & \textbf{0.892} & 0.13 & 成本后仍成立 \\
+波动率（多空） & 28 & $-1.123$ & $-1.518$ & 0.40 & 低成本但无信号 \\
+60 日动量（多空） & 46 & $-1.394$ & $-1.984$ & 0.59 & 中低换手 \\
+20 日动量（多空） & 77 & $-1.630$ & $-2.800$ & 1.17 & 高换手 \\
+距均线偏离（多空） & 92 & $-1.998$ & $-3.496$ & 1.50 & 高换手 \\
+5 日动量（多空） & 152 & $-2.150$ & $-5.166$ & 2.40 & 极高换手 \\
+量比（多空） & 154 & $-3.422$ & $-7.190$ & 3.77 & 极高换手 \\
+1 日反转（多空） & 322 & $-1.294$ & $-10.235$ & 8.94 & 换手最高 \\
+\texttt{rand10}（多空） & 182 & 3.057 & $-1.492$ & 4.55 & 论文所用候选 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表 \ref{tab:turnover} 里最要紧的一行是\textbf{非流动性}：年化换手只有 14--18 倍，含冲击后多空夏普仍为 $1.014$、仅多头仍为 $0.892$。16 种构建方式中只有这 2 种在含冲击后夏普为正。换手分布为最小 14 倍、中位 86 倍、最大 358 倍，跨度 26 倍。也就是说，\textbf{在这批候选里，并非“可预测但不可交易”，而是有的可交易、有的不可交易，分水岭是换手}。而这个特征恰恰是本轮刚补上显著性检验的那一批之一（$|t|>3$ 通过）。论文现在的写法——用换手最高的那类候选演示成本吞噬，再据此收束到“从可预测到可交易横着三道门”——会让读者得出比证据更宽的结论。
+
+\textbf{处置建议}：把表 \ref{tab:turnover} 的换手与含冲击两列并入第 21 章（可放表 18 之后或作为其扩展），并把结论改为条件式：\emph{高换手候选（如 \texttt{rand10}、量比、1 日反转）在成本后为负；低换手候选（如非流动性）在成本后仍为正}。这样“可预测不等于可交易”仍然成立，但它变成一个\textbf{关于换手的可检验陈述}，而不是一个笼统的否定——后者反而更容易被反例推翻。
+
+还有一处必须同时写进去的提醒：非流动性的残留收益很可能反映的是\textbf{流动性补偿}而非可提取的 alpha——Amihud 类因子的收益本就来自持有别人不愿持有的股票，而成本模型只能捕捉成交冲击，捕捉不到这类“持有即承担”的补偿。这一句不写，读者会把 $0.892$ 误读成一条现成的策略。
+
+\subsection{Q2（必须）：DSR 裁决的理由与实测不符，但结论成立}
+
+第 21 章的“DSR 两口径的取舍”段给出的理由是：候选池由同 8 个特征的线性组合构成、\textbf{彼此高度相关}，故截面离散度主要度量策略强弱差异而非估计误差，代入会高估 $V(\widehat{SR})$。
+
+\textbf{这一理由与数据不符。}实测 58 个候选（8 个单特征＋50 个随机组合）样本外收益序列的平均两两相关为 $\bar\rho=-0.012$，即\textbf{平均而言彼此几乎不相关}；最大两两相关 0.977（确有近似重复的少数对），相关矩阵条件数 $1.5\times10^5$。按 $\bar\rho$ 折算的有效试验数为 193，形式上大于候选数——这是 $\bar\rho<0$ 时该公式的已知退化，正确读法是\textbf{平均相关约为零，$N=61$ 作为试验数是合适的}。
+
+结论本身仍然站得住，但正确的理由与“相关”无关：\textbf{截面离散度把两类东西混在了一起}——各候选真实夏普的差异（本池里量比与波动率的真实强弱相差很大），以及每个候选夏普的估计噪声。实测两者的合成量（截面方差 $0.0118$）比纯估计方差（$5.8\times10^{-4}$）大 20 倍，多出来的部分主要是真实质量差异，因此它不能充当 $V(\widehat{SR})$。这才是应当写进论文的理由。
+
+顺带做了一个否证尝试：若改用有效试验数重算，$sr_0$ 由 $0.0652$（$N=61$）升到 $0.0764$（$N=193$），DSR 由 $0.9999$ 变为 $0.9995$——\textbf{结论对这一选择不敏感}。这条稳健性检查值得一并写进正文，它把“口径依赖”这一隐忧关掉了。
+
+\subsection{Q3（必须）：“可实施性核查”一节内有两处指代错位}
+
+该节先给出 \texttt{rand10} 的 beta/alpha 分解，然后写：“这 5.5\% 要再去掉年化成本（\textbf{该组合换手 182 倍}，成本远超 alpha）……换言之，‘\textbf{仅多头 OOS 夏普 1.271}’这类数字里，很大一部分是 beta，不是缝隙。”两处指代都对不上：
+
+\begin{itemize}
+  \item 182 倍是 \texttt{rand10} \textbf{多空}口径的换手；该段讨论的仅多头实测为 147 倍。
+  \item 1.271 是表 18 中\textbf{非流动性}的仅多头 OOS 夏普；而该段做 beta 分解的组合是 \texttt{rand10}，其仅多头 OOS 夏普为 $0.780$。两者不是同一个组合，放在同一句里会让人以为 $0.780$ 与 $1.271$ 是一回事。
+\end{itemize}
+
+建议拆成两句，各配各的组合；若想用 1.271 举例，需另做一次针对非流动性的 beta 分解。按 Q1 的发现，对非流动性做这个分解反而更有价值——它换手低，剥离 beta 后可能仍有余额。
+
+\section{建议级与次要级意见}
+
+\begin{table}[htbp]
+\centering
+\caption{建议级与次要级意见}
+\label{tab:minor3}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{9.8cm}@{}}
+\toprule
+编号 & 级别 & 意见 \\
+\midrule
+Q4 & 建议 & \textbf{合成与真实的成本口径不同，论文未说明。}合成路径仍用单一 $5$bp 与常数 ADV $10^9$，真实路径用佣金＋过户费＋分段印花税与逐股 ADV；论文两处“成本三档”因此不可直接比较。建议在合成表下注明口径，或在合成表内标注“单一费率／常数 ADV”。 \\
+Q5 & 建议 & \textbf{$t$ 值的序列相关稳健性未做自查。}第 21 章的 $t=\text{IC-IR}\times\sqrt{n}$ 假设逐期 IC 独立。实测 IC 的 AR(1) 多在 $0.05$ 以内，Newey--West 调整后仅非流动性由 $3.92$ 降到 $3.45$（仍过 $|t|>3$），量比几乎不动——\textbf{结论稳健}，但这条自查值得写进正文，否则读者无法判断该不该打折。 \\
+Q6 & 建议 & \textbf{市场基准继承了自身的偏差。}基准为等权、日频、零成本，且建在窗口末仍在市的样本上；由它推出的“年化 alpha 5.5\%”继承了这些偏差（方向上使 alpha 偏小还是偏大不易判断）。建议在边界段注明基准口径。 \\
+Q7 & 次要 & \textbf{正文累积了 4 处修订史叙述}（“此前版本……”“两轮实跑……”“本文此前……该表述已按实测更正”等）。这些对内部复核有用，但会让论文读起来像修订日志。建议合并为一条脚注，正文只留结论。 \\
+Q8 & 次要 & \textbf{表 18 的“通过校正”列需表注。}BH 与 $|t|>3$ 的严格程度并非在所有位次上一致（BH 在中段更宽松），并列时应在表注说明两者的关系与判定顺序。 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{数值一致性抽查}
+
+\begin{table}[htbp]
+\centering
+\caption{论文数字与独立复核的对照}
+\label{tab:consistency}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{4.6cm}@{}}
+\toprule
+论文位置 & 独立复核来源 & 结论 \\
+\midrule
+第 21 章表 17（实跑结果） & \texttt{trial\_ledger\_real.json} & 逐项一致 \\
+第 21 章表 18（含新增 $t$ 列） & \texttt{diag\_ls\_lo.py}、\texttt{audit\_significance.py} & 一致（非流动性 $3.91$ 对 $3.92$，差值来自标准差自由度口径，不影响判定） \\
+第 21 章表 19（beta 分解） & \texttt{diag\_alpha\_beta.py} & 逐项一致 \\
+封板占比三项 & \texttt{real\_data.py} 统计输出 & 一致（分母口径已统一） \\
+复权全量核验 & \texttt{verify\_adjust\_full.txt} & 一致（中位 $2.3\times10^{-4}$、95 分位 $9.1\times10^{-4}$、最大 $3.1\times10^{-3}$） \\
+含冲击档数值 & 本次独立重算 & \textbf{一致}（$-1.492$ 可复现）；但代表性不足，见 Q1 \\
+DSR 稳健性 & \texttt{audit\_significance.py} & 一致，且对试验数选择不敏感 \\
+合成路径回归 & \texttt{run.py} 重跑 & 逐项一致（PBO $0.567$） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+除 Q1 所指的代表性问题（不是数字错，是样本选得偏贵）外，抽查未发现数值或口径不一致之处。特别地，本轮新增的显著性结论经独立重算与序列相关调整后依然成立，这比“又发现一个错”更有价值。
+
+\section{结论与建议}
+
+\textbf{总体判断}：第二轮九条意见全部落地，其中 R1 的修正质量最高（改参数而非改措辞）；新增的显著性检验与 beta 分解，方向与做法都对。本轮的主要问题不是“算错”，而是\textbf{把结论说得比证据更宽}——用最贵的候选演示成本，然后收束成一个普遍否定。这与本文自己反复强调的“标注边界”并不一致。
+
+\begin{table}[htbp]
+\centering
+\caption{本轮处置清单}
+\label{tab:actions}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.0cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{9.7cm}@{}}
+\toprule
+编号 & 级别 & 处置 \\
+\midrule
+Q1 & 必须 & 第 21 章补候选级换手与含冲击对照；把成本结论改为关于换手的条件式；补一句“非流动性残留收益可能是流动性补偿” \\
+Q2 & 必须 & 改写 DSR 裁决的理由（去掉“高度相关”）；补 $N$ 选择不敏感的稳健性说明 \\
+Q3 & 必须 & 拆开“可实施性核查”一节中的两处指代，或对非流动性另做 beta 分解 \\
+Q4 & 建议 & 注明合成与真实两处成本口径不同 \\
+Q5 & 建议 & 补 IC 序列相关的稳健性说明 \\
+Q6 & 建议 & 边界段注明基准口径 \\
+Q7 & 次要 & 合并正文中的修订史叙述 \\
+Q8 & 次要 & 表 18 增表注说明 BH 与 $|t|>3$ 的关系 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{推荐处置：小修后可接受。}三项必改都不涉及结构重做：Q1 是补一张表并收窄一句结论，Q2 与 Q3 是改正理由与指代。三项改完之后，本文关于可交易性的论断会比现在更硬——因为它不再依赖“所有候选都不可交易”这个会被反例推翻的强主张，而是给出一个能站住的\textbf{条件}：成本后的存活与否取决于换手，低换手候选可以活下来，高换手候选活不下来。
+
+\section{修订状态（据作者回执逐条复核）}
+
+八条意见全部处理。\textbf{注意一处编号变动}：因第 21 章新增了“候选级换手与成本敏感性”表，beta 分解表由第 19 表顺延为第 20 表；本报告下文所指的“表 19”为评审当时的编号。
+
+\begin{table}[htbp]
+\centering
+\caption{第三轮意见的修订状态}
+\label{tab:status3}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{11.3cm}@{}}
+\toprule
+编号 & 状态 & 证据 \\
+\midrule
+Q1 & 已解决 & 第 21 章新增表 19（10 行候选级换手与两档夏普，脚本 \texttt{code/audit\_cost\_by\_candidate.py}），并把结论改为条件式：“成本后能否存活取决于换手”；同时补入流动性补偿限定，明确非流动性的残留收益不应读作现成策略。 \\
+Q2 & 已解决 & “DSR 两口径的取舍”段删去“彼此高度相关”这一与实测矛盾的理由，改为“截面离散度把真实质量差异与估计噪声混在一起”；并补入 $N$ 选择不敏感的稳健性检查（$sr_0$ 由 $0.0652$ 升到 $0.0764$，DSR 由 $0.9999$ 变为 $0.9995$）。 \\
+Q3 & 已解决 & 拆开两处指代：换手按口径分别给（多空 182 倍、仅多头 147 倍不再混用）；beta 分解表扩为两候选四行，非流动性（仅多头）的 $1.271$ 与其 beta $1.005$、alpha $16.6\%$ 一一对应，\texttt{rand10} 的 $0.780$ 单独列出。 \\
+Q4 & 已解决 & 第 21 章合成演示的“性质声明”后补一段口径差异说明，明示两处“成本三档”不可直接比较。 \\
+Q5 & 已解决 & 显著性段落补入序列相关稳健性：各特征 IC 的 $\text{AR}(1)$ 多在 $0.05$ 以内，Newey--West 调整后仅非流动性由 $3.92$ 降到 $3.45$（仍过门槛）。 \\
+Q6 & 已解决 & 边界段注明基准为日频、零成本、且建在存活样本上，alpha 与 beta 均继承该口径的偏差。 \\
+Q7 & 已解决 & 正文四处修订史叙述已删除，合并为第 21 章开头的一条脚注，指向变更摘要文档。 \\
+Q8 & 已解决 & 表 18 后补表注，说明 BH 与 $|t|>3$ 的严格程度不同阶及三级标注的判定顺序。 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{对修订的总体判断}：三项必改都改到了论证层面，而不是只补数字。Q1 的修正最有价值——它把“可预测不等于可交易”从一句\textbf{普遍否定}改造成一个\textbf{关于换手的条件陈述}，后者既更难被反例推翻，也更有信息量：读者由此知道该去看哪个变量。附带的一处收获是，非流动性这一行让第 2 章的缝隙判据第一次有了一个“通过”的实例——此前全篇只有失败案例，反而不好判断判据本身是否可满足。
+
+仍未解决的是这些结论的\textbf{外推范围}：存活判定只在“多空／仅多头 × 8 个单特征”这 16 种构建方式上做过，更细的权重构造（分层、行业中性、按波动率定权）未逐一检验，这一点已写入第 21 章的剩余待办。
+
+\medskip
+
+\noindent\textbf{一句结语}：第二轮的问题出在“一个写在默认值里的参数”，这一轮出在“一个选得太贵的样本”。两次都不是算错，而是\textbf{口径与样本的代表性}。这也提示同一件事：在一篇以“诚实标注边界”为方法的综述里，最难的不是发现别人的边界，而是发现自己的结论到底覆盖到哪一步——这一轮补上的那条条件句，就是把覆盖范围从“全部”收缩到“取决于换手”的结果。
+
+\end{document}

@@ -1,0 +1,1053 @@
+{
+  "markowitz1952": {
+    "title": "PORTFOLIO SELECTION*",
+    "year": 1952,
+    "doi": "https://doi.org/10.1111/j.1540-6261.1952.tb01525.x",
+    "venue": "The Journal of Finance",
+    "authors": [
+      "Harry M. Markowitz"
+    ],
+    "cited_by": 5649,
+    "src": "openalex",
+    "score": 19,
+    "key": "markowitz1952",
+    "want_title": "Portfolio Selection",
+    "want_year": 1952
+  },
+  "fama1970": {
+    "title": "EFFICIENT CAPITAL MARKETS: A REVIEW OF THEORY AND EMPIRICAL WORK*",
+    "year": 1970,
+    "doi": "https://doi.org/10.1111/j.1540-6261.1970.tb00518.x",
+    "venue": "The Journal of Finance",
+    "authors": [
+      "Burton Gordon Malkiel",
+      "Eugene F. Fama"
+    ],
+    "cited_by": 15854,
+    "src": "openalex",
+    "score": 25,
+    "key": "fama1970",
+    "want_title": "Efficient Capital Markets: A Review of Theory and Empirical Work",
+    "want_year": 1970
+  },
+  "grossmanstiglitz1980": {
+    "title": "On the Impossibility of Informationally Efficient Markets",
+    "year": 1980,
+    "doi": "https://doi.org/10.7916/d8765r99",
+    "venue": "RePEc: Research Papers in Economics",
+    "authors": [
+      "Sanford J. Grossman",
+      "Joseph E. Stiglitz"
+    ],
+    "cited_by": 5311,
+    "src": "openalex",
+    "score": 22,
+    "key": "grossmanstiglitz1980",
+    "want_title": "On the Impossibility of Informationally Efficient Markets",
+    "want_year": 1980
+  },
+  "kyle1985": {
+    "title": "Continuous Auctions and Insider Trading",
+    "year": 1985,
+    "doi": "https://doi.org/10.2307/1913210",
+    "venue": "Econometrica",
+    "authors": [
+      "Albert S. Kyle"
+    ],
+    "cited_by": 10144,
+    "src": "openalex",
+    "score": 22,
+    "key": "kyle1985",
+    "want_title": "Continuous Auctions and Insider Trading",
+    "want_year": 1985
+  },
+  "bollerslev1986": {
+    "title": "Generalized autoregressive conditional heteroskedasticity",
+    "year": 1986,
+    "doi": "https://doi.org/10.1016/0304-4076(86)90063-1",
+    "venue": "Journal of Econometrics",
+    "authors": [
+      "Tim Bollerslev"
+    ],
+    "cited_by": 22673,
+    "src": "openalex",
+    "score": 21,
+    "key": "bollerslev1986",
+    "want_title": "Generalized Autoregressive Conditional Heteroskedasticity",
+    "want_year": 1986
+  },
+  "hamilton1989": {
+    "title": "A New Approach to the Economic Analysis of Nonstationary Time Series and the Business Cycle",
+    "year": 1989,
+    "doi": "https://doi.org/10.2307/1912559",
+    "venue": "Econometrica",
+    "authors": [
+      "James Douglas Hamilton"
+    ],
+    "cited_by": 9883,
+    "src": "openalex",
+    "score": 28,
+    "key": "hamilton1989",
+    "want_title": "A New Approach to the Economic Analysis of Nonstationary Time Series and the Business Cycle",
+    "want_year": 1989
+  },
+  "shleifer1997": {
+    "title": "The Limits of Arbitrage",
+    "year": 1995,
+    "doi": "https://doi.org/10.1111/j.1540-6261.1997.tb03807.x",
+    "venue": "The Journal of Finance",
+    "authors": [
+      "Andrei Shleifer",
+      "Robert W. Vishny"
+    ],
+    "cited_by": 5439,
+    "src": "openalex",
+    "score": 16,
+    "key": "shleifer1997",
+    "want_title": "The Limits of Arbitrage",
+    "want_year": 1997
+  },
+  "almgrenchriss2000": {
+    "title": "Optimal execution of portfolio transactions",
+    "year": 2001,
+    "doi": "https://doi.org/10.21314/jor.2001.041",
+    "venue": "The Journal of Risk",
+    "authors": [
+      "Robert F. Almgren",
+      "Neil A. Chriss"
+    ],
+    "cited_by": 1677,
+    "src": "openalex",
+    "score": 17,
+    "key": "almgrenchriss2000",
+    "want_title": "Optimal Execution of Portfolio Transactions",
+    "want_year": 2000
+  },
+  "almgren2005": {
+    "title": "Direct Estimation of Equity Market Impact",
+    "year": 2005,
+    "doi": null,
+    "venue": null,
+    "authors": [
+      "Robert F. Almgren",
+      "Chee Y. Thum",
+      "Emmanuel Hauptmann",
+      "Hong Li"
+    ],
+    "cited_by": 365,
+    "src": "openalex",
+    "score": 22,
+    "key": "almgren2005",
+    "want_title": "Direct Estimation of Equity Market Impact",
+    "want_year": 2005
+  },
+  "rockafellar2000": {
+    "title": "Optimization of conditional value-at-risk",
+    "year": 2000,
+    "doi": "https://doi.org/10.21314/jor.2000.038",
+    "venue": "The Journal of Risk",
+    "authors": [
+      "Ralph Tyrrell Rockafellar",
+      "Stan Uryasev"
+    ],
+    "cited_by": 6761,
+    "src": "openalex",
+    "score": 21,
+    "key": "rockafellar2000",
+    "want_title": "Optimization of Conditional Value-at-Risk",
+    "want_year": 2000
+  },
+  "mcneil2000": {
+    "title": "Estimation of tail-related risk measures for heteroscedastic financial time series: an extreme value approach",
+    "year": 2000,
+    "doi": "https://doi.org/10.1016/s0927-5398(00)00012-8",
+    "venue": "Journal of Empirical Finance",
+    "authors": [
+      "Alexander J. McNeil",
+      "Rüdiger Frey"
+    ],
+    "cited_by": 1765,
+    "src": "openalex",
+    "score": 27,
+    "key": "mcneil2000",
+    "want_title": "Estimation of tail-related risk measures for heteroscedastic financial time series",
+    "want_year": 2000
+  },
+  "ledoitwolf2004": {
+    "title": "A well-conditioned estimator for large-dimensional covariance matrices",
+    "year": 2003,
+    "doi": "https://doi.org/10.1016/s0047-259x(03)00096-4",
+    "venue": "Journal of Multivariate Analysis",
+    "authors": [
+      "Olivier Ledoit",
+      "Michael Wolf"
+    ],
+    "cited_by": 3060,
+    "src": "openalex",
+    "score": 21,
+    "key": "ledoitwolf2004",
+    "want_title": "A well-conditioned estimator for large-dimensional covariance matrices",
+    "want_year": 2004
+  },
+  "chekhlov2005": {
+    "title": "DRAWDOWN MEASURE IN PORTFOLIO OPTIMIZATION",
+    "year": 2005,
+    "doi": "https://doi.org/10.1142/s0219024905002767",
+    "venue": "International Journal of Theoretical and Applied Finance",
+    "authors": [
+      "Alexei Chekhlov",
+      "Stan Uryasev",
+      "Michael Zabarankin"
+    ],
+    "cited_by": 337,
+    "src": "openalex",
+    "score": 21,
+    "key": "chekhlov2005",
+    "want_title": "Drawdown measure in portfolio optimization",
+    "want_year": 2005
+  },
+  "harvey2018": {
+    "title": "The Impact of Volatility Targeting",
+    "year": 2018,
+    "doi": "https://doi.org/10.3905/jpm.2018.45.1.014",
+    "venue": "The Journal of Portfolio Management",
+    "authors": [
+      "Campbell R. Harvey",
+      "Edward Hoyle",
+      "Russell Korgaonkar",
+      "Sandy Rattray",
+      "Matthew Sargaison",
+      "Otto Van Hemert"
+    ],
+    "cited_by": 66,
+    "src": "openalex",
+    "score": 21,
+    "key": "harvey2018",
+    "want_title": "The Impact of Volatility Targeting",
+    "want_year": 2018
+  },
+  "cohenfrazzini2008": {
+    "title": "Economic Links and Predictable Returns",
+    "year": 2008,
+    "doi": "https://doi.org/10.1111/j.1540-6261.2008.01379.x",
+    "venue": "The Journal of Finance",
+    "authors": [
+      "Lauren H. Cohen",
+      "Andrea Frazzini"
+    ],
+    "cited_by": 1430,
+    "src": "openalex",
+    "score": 22,
+    "key": "cohenfrazzini2008",
+    "want_title": "Economic Links and Predictable Returns",
+    "want_year": 2008
+  },
+  "tetlock2007": {
+    "title": "Giving Content to Investor Sentiment: The Role of Media in the Stock Market",
+    "year": 2007,
+    "doi": "https://doi.org/10.1111/j.1540-6261.2007.01232.x",
+    "venue": "The Journal of Finance",
+    "authors": [
+      "Paul C. Tetlock"
+    ],
+    "cited_by": 4697,
+    "src": "openalex",
+    "score": 26,
+    "key": "tetlock2007",
+    "want_title": "Giving Content to Investor Sentiment: The Role of Media in the Stock Market",
+    "want_year": 2007
+  },
+  "bakerwurgler2006": {
+    "title": "Investor Sentiment and the Cross‐Section of Stock Returns",
+    "year": 2006,
+    "doi": "https://doi.org/10.1111/j.1540-6261.2006.00885.x",
+    "venue": "The Journal of Finance",
+    "authors": [
+      "Malcolm P. Baker",
+      "Jeffrey A. Wurgler"
+    ],
+    "cited_by": 6327,
+    "src": "openalex",
+    "score": 25,
+    "key": "bakerwurgler2006",
+    "want_title": "Investor Sentiment and the Cross-Section of Stock Returns",
+    "want_year": 2006
+  },
+  "loughranmcdonald2011": {
+    "key": "loughranmcdonald2011",
+    "want_title": "When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10-Ks",
+    "error": "HTTP 400"
+  },
+  "white2000": {
+    "title": "A Reality Check for Data Snooping",
+    "year": 2000,
+    "doi": "https://doi.org/10.1111/1468-0262.00152",
+    "venue": "Econometrica",
+    "authors": [
+      "Halbert White"
+    ],
+    "cited_by": 1889,
+    "src": "openalex",
+    "score": 22,
+    "key": "white2000",
+    "want_title": "A Reality Check for Data Snooping",
+    "want_year": 2000
+  },
+  "sullivan1999": {
+    "key": "sullivan1999",
+    "want_title": "Data-Snooping, Technical Trading Rule Performance, and the Bootstrap",
+    "error": "HTTP 400"
+  },
+  "harveylz2016": {
+    "title": "… and the Cross-Section of Expected Returns",
+    "year": 2015,
+    "doi": "https://doi.org/10.1093/rfs/hhv059",
+    "venue": "Review of Financial Studies",
+    "authors": [
+      "Campbell R. Harvey",
+      "Yan Liu",
+      "Caroline Zhu"
+    ],
+    "cited_by": 2188,
+    "src": "openalex",
+    "score": 19,
+    "key": "harveylz2016",
+    "want_title": "... and the Cross-Section of Expected Returns",
+    "want_year": 2016
+  },
+  "mcleanpontiff2016": {
+    "key": "mcleanpontiff2016",
+    "want_title": "Does Academic Research Destroy Stock Return Predictability?",
+    "error": "HTTP 400"
+  },
+  "jensen2023": {
+    "key": "jensen2023",
+    "want_title": "Is There a Replication Crisis in Finance?",
+    "error": "HTTP 400"
+  },
+  "bailey2014pseudo": {
+    "title": "Pseudo-Mathematics and Financial Charlatanism: The Effects of Backtest Overfitting on Out-of-Sample Performance",
+    "year": 2014,
+    "doi": "https://doi.org/10.1090/noti1105",
+    "venue": "Notices of the American Mathematical Society",
+    "authors": [
+      "David H. Bailey",
+      "Jonathan Michael Borwein",
+      "Marcos López de Prado",
+      "Qiji Jim Zhu"
+    ],
+    "cited_by": 211,
+    "src": "openalex",
+    "score": 29,
+    "key": "bailey2014pseudo",
+    "want_title": "Pseudo-Mathematics and Financial Charlatanism: The Effects of Backtest Overfitting on Out-of-Sample Performance",
+    "want_year": 2014
+  },
+  "bailey2014dsr": {
+    "key": "bailey2014dsr",
+    "want_title": "The Deflated Sharpe Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality",
+    "error": "HTTP 400"
+  },
+  "bailey2016pbo": {
+    "title": "The probability of backtest overfitting",
+    "year": 2016,
+    "doi": "https://doi.org/10.21314/jcf.2016.322",
+    "venue": "The Journal of Computational Finance",
+    "authors": [
+      "David H. Bailey",
+      "Jonathan Michael Borwein",
+      "Marcos López de Prado",
+      "Qiji Jim Zhu"
+    ],
+    "cited_by": 104,
+    "src": "openalex",
+    "score": 21,
+    "key": "bailey2016pbo",
+    "want_title": "The Probability of Backtest Overfitting",
+    "want_year": 2016
+  },
+  "gukellyxiu2020": {
+    "title": "Empirical Asset Pricing via Machine Learning",
+    "year": 2020,
+    "doi": "https://doi.org/10.1093/rfs/hhaa009",
+    "venue": "Review of Financial Studies",
+    "authors": [
+      "Shihao Gu",
+      "Bryan Kelly",
+      "Dacheng Xiu"
+    ],
+    "cited_by": 2534,
+    "src": "openalex",
+    "score": 23,
+    "key": "gukellyxiu2020",
+    "want_title": "Empirical Asset Pricing via Machine Learning",
+    "want_year": 2020
+  },
+  "gukellyxiu2021": {
+    "title": "Autoencoder asset pricing models",
+    "year": 2020,
+    "doi": "https://doi.org/10.1016/j.jeconom.2020.07.009",
+    "venue": "Journal of Econometrics",
+    "authors": [
+      "Shihao Gu",
+      "Bryan Kelly",
+      "Dacheng Xiu"
+    ],
+    "cited_by": 453,
+    "src": "openalex",
+    "score": 17,
+    "key": "gukellyxiu2021",
+    "want_title": "Autoencoder Asset Pricing Models",
+    "want_year": 2021
+  },
+  "chenpelgerzhu2024": {
+    "title": "Deep Learning in Asset Pricing",
+    "year": 2023,
+    "doi": "https://doi.org/10.1287/mnsc.2023.4695",
+    "venue": "Management Science",
+    "authors": [
+      "Luyang Chen",
+      "Markus Pelger",
+      "Jason Zhu"
+    ],
+    "cited_by": 458,
+    "src": "openalex",
+    "score": 17,
+    "key": "chenpelgerzhu2024",
+    "want_title": "Deep Learning in Asset Pricing",
+    "want_year": 2024
+  },
+  "kellymalamudzhou2024": {
+    "title": "The Virtue of Complexity in Return Prediction",
+    "year": 2023,
+    "doi": "https://doi.org/10.1111/jofi.13298",
+    "venue": "The Journal of Finance",
+    "authors": [
+      "Bryan Kelly",
+      "Semyon Malamud",
+      "Kangying Zhou"
+    ],
+    "cited_by": 226,
+    "src": "openalex",
+    "score": 18,
+    "key": "kellymalamudzhou2024",
+    "want_title": "The Virtue of Complexity in Return Prediction",
+    "want_year": 2024
+  },
+  "fenggiglioxu2020": {
+    "title": "Taming the Factor Zoo: A Test of New Factors",
+    "year": 2020,
+    "doi": "https://doi.org/10.1111/jofi.12883",
+    "venue": "The Journal of Finance",
+    "authors": [
+      "Guanhao Feng",
+      "Stefano Giglio",
+      "Dacheng Xiu"
+    ],
+    "cited_by": 749,
+    "src": "openalex",
+    "score": 24,
+    "key": "fenggiglioxu2020",
+    "want_title": "Taming the Factor Zoo: A Test of New Factors",
+    "want_year": 2020
+  },
+  "krauss2017": {
+    "key": "krauss2017",
+    "want_title": "Deep neural networks, gradient-boosted trees, random forests: Statistical arbitrage on the S&P 500",
+    "error": "HTTP 429"
+  },
+  "fischerkrauss2018": {
+    "key": "fischerkrauss2018",
+    "want_title": "Deep learning with long short-term memory networks for financial market predictions",
+    "error": "HTTP 429"
+  },
+  "deng2017": {
+    "key": "deng2017",
+    "want_title": "Deep Direct Reinforcement Learning for Financial Signal Representation and Trading",
+    "error": "HTTP 429"
+  },
+  "zhang2019deeplob": {
+    "title": "DeepLOB: Deep Convolutional Neural Networks for Limit Order Books",
+    "year": "2018",
+    "arxiv_id": "1808.03668v6",
+    "authors": [
+      "Zihao Zhang",
+      "Stefan Zohren",
+      "Stephen Roberts"
+    ],
+    "src": "arxiv",
+    "key": "zhang2019deeplob",
+    "want_title": "DeepLOB: Deep Convolutional Neural Networks for Limit Order Books",
+    "want_year": 2019
+  },
+  "tsantekidis2017": {
+    "key": "tsantekidis2017",
+    "want_title": "Forecasting Stock Prices from the Limit Order Book Using Convolutional Neural Networks",
+    "error": "HTTP 429"
+  },
+  "ntakaris2018fi2010": {
+    "title": "Benchmark Dataset for Mid-Price Forecasting of Limit Order Book Data with Machine Learning Methods",
+    "year": "2017",
+    "arxiv_id": "1705.03233v5",
+    "authors": [
+      "Adamantios Ntakaris",
+      "Martin Magris",
+      "Juho Kanniainen",
+      "Moncef Gabbouj",
+      "Alexandros Iosifidis"
+    ],
+    "src": "arxiv",
+    "key": "ntakaris2018fi2010",
+    "want_title": "Benchmark Dataset for Mid-Price Forecasting of Limit Order Book Data with Machine Learning Methods",
+    "want_year": 2018
+  },
+  "cartea2015": {
+    "title": "Algorithmic and High-Frequency Trading Problems for Semi-Markov and Hawkes Jump-Diffusion Models",
+    "year": "2024",
+    "arxiv_id": "2409.12776v2",
+    "authors": [
+      "Luca Lalor",
+      "Anatoliy Swishchuk"
+    ],
+    "src": "arxiv",
+    "key": "cartea2015",
+    "want_title": "Algorithmic and High-Frequency Trading",
+    "want_year": 2015
+  },
+  "chen2018gcn": {
+    "key": "chen2018gcn",
+    "want_title": "Incorporating Corporation Relationship via Graph Convolutional Neural Networks for Stock Price Prediction",
+    "error": "HTTP 429"
+  },
+  "feng2019rsr": {
+    "title": "Temporal Relational Ranking for Stock Prediction",
+    "year": "2018",
+    "arxiv_id": "1809.09441v2",
+    "authors": [
+      "Fuli Feng",
+      "Xiangnan He",
+      "Xiang Wang",
+      "Cheng Luo",
+      "Yiqun Liu",
+      "Tat-Seng Chua"
+    ],
+    "src": "arxiv",
+    "key": "feng2019rsr",
+    "want_title": "Temporal Relational Ranking for Stock Prediction",
+    "want_year": 2019
+  },
+  "matsunaga2019": {
+    "title": "Exploring Graph Neural Networks for Stock Market Predictions with Rolling Window Analysis",
+    "year": "2019",
+    "arxiv_id": "1909.10660v3",
+    "authors": [
+      "Daiki Matsunaga",
+      "Toyotaro Suzumura",
+      "Toshihiro Takahashi"
+    ],
+    "src": "arxiv",
+    "key": "matsunaga2019",
+    "want_title": "Exploring Graph Neural Networks for Stock Market Predictions with Rolling Window Analysis",
+    "want_year": 2019
+  },
+  "zhu2019": {
+    "key": "zhu2019",
+    "want_title": "Big Data as a Governance Mechanism",
+    "error": "HTTP 429"
+  },
+  "jame2016": {
+    "key": "jame2016",
+    "want_title": "The Value of Crowdsourced Earnings Forecasts",
+    "error": "HTTP 429"
+  },
+  "katona2018": {
+    "key": "katona2018",
+    "want_title": "On the Capital Market Consequences of Alternative Data: Evidence from Outer Space",
+    "error": "HTTP 429"
+  },
+  "costa2022": {
+    "title": "End-to-End Risk Budgeting Portfolio Optimization with Neural Networks",
+    "year": "2021",
+    "arxiv_id": "2107.04636v1",
+    "authors": [
+      "Ayse Sinem Uysal",
+      "Xiaoyue Li",
+      "John M. Mulvey"
+    ],
+    "src": "arxiv",
+    "key": "costa2022",
+    "want_title": "End-to-end risk budgeting portfolio optimization with neural networks",
+    "want_year": 2022
+  },
+  "vaswani2017": {
+    "title": "Attention Is All You Need",
+    "year": "2017",
+    "arxiv_id": "1706.03762v7",
+    "authors": [
+      "Ashish Vaswani",
+      "Noam Shazeer",
+      "Niki Parmar",
+      "Jakob Uszkoreit",
+      "Llion Jones",
+      "Aidan N. Gomez"
+    ],
+    "src": "arxiv",
+    "key": "vaswani2017",
+    "want_title": "Attention Is All You Need",
+    "want_year": 2017
+  },
+  "velickovic2018gat": {
+    "title": "Graph Attention Networks",
+    "year": "2017",
+    "arxiv_id": "1710.10903v3",
+    "authors": [
+      "Petar Veličković",
+      "Guillem Cucurull",
+      "Arantxa Casanova",
+      "Adriana Romero",
+      "Pietro Liò",
+      "Yoshua Bengio"
+    ],
+    "src": "arxiv",
+    "key": "velickovic2018gat",
+    "want_title": "Graph Attention Networks",
+    "want_year": 2018
+  },
+  "lim2021tft": {
+    "title": "Temporal Fusion Transformers for Interpretable Multi-horizon Time Series Forecasting",
+    "year": "2019",
+    "arxiv_id": "1912.09363v3",
+    "authors": [
+      "Bryan Lim",
+      "Sercan O. Arik",
+      "Nicolas Loeff",
+      "Tomas Pfister"
+    ],
+    "src": "arxiv",
+    "key": "lim2021tft",
+    "want_title": "Temporal Fusion Transformers for interpretable multi-horizon time series forecasting",
+    "want_year": 2021
+  },
+  "zhou2021informer": {
+    "title": "Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting",
+    "year": "2020",
+    "arxiv_id": "2012.07436v3",
+    "authors": [
+      "Haoyi Zhou",
+      "Shanghang Zhang",
+      "Jieqi Peng",
+      "Shuai Zhang",
+      "Jianxin Li",
+      "Hui Xiong"
+    ],
+    "src": "arxiv",
+    "key": "zhou2021informer",
+    "want_title": "Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting",
+    "want_year": 2021
+  },
+  "wu2021autoformer": {
+    "title": "Autoformer: Decomposition Transformers with Auto-Correlation for Long-Term Series Forecasting",
+    "year": "2021",
+    "arxiv_id": "2106.13008v5",
+    "authors": [
+      "Haixu Wu",
+      "Jiehui Xu",
+      "Jianmin Wang",
+      "Mingsheng Long"
+    ],
+    "src": "arxiv",
+    "key": "wu2021autoformer",
+    "want_title": "Autoformer: Decomposition Transformers with Auto-Correlation for Long-Term Series Forecasting",
+    "want_year": 2021
+  },
+  "zeng2023dlinear": {
+    "title": "Are Transformers Effective for Time Series Forecasting?",
+    "year": "2022",
+    "arxiv_id": "2205.13504v3",
+    "authors": [
+      "Ailing Zeng",
+      "Muxi Chen",
+      "Lei Zhang",
+      "Qiang Xu"
+    ],
+    "src": "arxiv",
+    "key": "zeng2023dlinear",
+    "want_title": "Are Transformers Effective for Time Series Forecasting?",
+    "want_year": 2023
+  },
+  "ansari2024chronos": {
+    "title": "Chronos: Learning the Language of Time Series",
+    "year": "2024",
+    "arxiv_id": "2403.07815v3",
+    "authors": [
+      "Abdul Fatir Ansari",
+      "Lorenzo Stella",
+      "Caner Turkmen",
+      "Xiyuan Zhang",
+      "Pedro Mercado",
+      "Huibin Shen"
+    ],
+    "src": "arxiv",
+    "key": "ansari2024chronos",
+    "want_title": "Chronos: Learning the Language of Time Series",
+    "want_year": 2024
+  },
+  "das2024timesfm": {
+    "title": "A decoder-only foundation model for time-series forecasting",
+    "year": "2023",
+    "arxiv_id": "2310.10688v4",
+    "authors": [
+      "Abhimanyu Das",
+      "Weihao Kong",
+      "Rajat Sen",
+      "Yichen Zhou"
+    ],
+    "src": "arxiv",
+    "key": "das2024timesfm",
+    "want_title": "A decoder-only foundation model for time-series forecasting",
+    "want_year": 2024
+  },
+  "rasul2023lagllama": {
+    "title": "Lag-Llama: Towards Foundation Models for Probabilistic Time Series Forecasting",
+    "year": "2023",
+    "arxiv_id": "2310.08278v3",
+    "authors": [
+      "Kashif Rasul",
+      "Arjun Ashok",
+      "Andrew Robert Williams",
+      "Hena Ghonia",
+      "Rishika Bhagwatkar",
+      "Arian Khorasani"
+    ],
+    "src": "arxiv",
+    "key": "rasul2023lagllama",
+    "want_title": "Lag-Llama: Towards Foundation Models for Probabilistic Time Series Forecasting",
+    "want_year": 2023
+  },
+  "jiang2017": {
+    "title": "A Deep Reinforcement Learning Framework for the Financial Portfolio Management Problem",
+    "year": "2017",
+    "arxiv_id": "1706.10059v2",
+    "authors": [
+      "Zhengyao Jiang",
+      "Dixing Xu",
+      "Jinjun Liang"
+    ],
+    "src": "arxiv",
+    "key": "jiang2017",
+    "want_title": "A Deep Reinforcement Learning Framework for the Financial Portfolio Management Problem",
+    "want_year": 2017
+  },
+  "liu2021finrl": {
+    "title": "FinRL: A Deep Reinforcement Learning Library for Automated Stock Trading in Quantitative Finance",
+    "year": "2020",
+    "arxiv_id": "2011.09607v2",
+    "authors": [
+      "Xiao-Yang Liu",
+      "Hongyang Yang",
+      "Qian Chen",
+      "Runjia Zhang",
+      "Liuqing Yang",
+      "Bowen Xiao"
+    ],
+    "src": "arxiv",
+    "key": "liu2021finrl",
+    "want_title": "FinRL: A Deep Reinforcement Learning Library for Automated Stock Trading in Quantitative Finance",
+    "want_year": 2020
+  },
+  "nevmyvaka2006": {
+    "key": "nevmyvaka2006",
+    "want_title": "Reinforcement Learning for Optimized Trade Execution",
+    "error": "HTTP 429"
+  },
+  "spooner2018": {
+    "title": "Market Making via Reinforcement Learning",
+    "year": "2018",
+    "arxiv_id": "1804.04216v1",
+    "authors": [
+      "Thomas Spooner",
+      "John Fearnley",
+      "Rahul Savani",
+      "Andreas Koukorinis"
+    ],
+    "src": "arxiv",
+    "key": "spooner2018",
+    "want_title": "Market Making via Reinforcement Learning",
+    "want_year": 2018
+  },
+  "araci2019finbert": {
+    "title": "FinBERT: Financial Sentiment Analysis with Pre-trained Language Models",
+    "year": "2019",
+    "arxiv_id": "1908.10063v1",
+    "authors": [
+      "Dogu Araci"
+    ],
+    "src": "arxiv",
+    "key": "araci2019finbert",
+    "want_title": "FinBERT: Financial Sentiment Analysis with Pre-trained Language Models",
+    "want_year": 2019
+  },
+  "yang2020finbert": {
+    "title": "FinBERT: A Pretrained Language Model for Financial Communications",
+    "year": "2020",
+    "arxiv_id": "2006.08097v2",
+    "authors": [
+      "Yi Yang",
+      "Mark Christopher Siy UY",
+      "Allen Huang"
+    ],
+    "src": "arxiv",
+    "key": "yang2020finbert",
+    "want_title": "FinBERT: A Pretrained Language Model for Financial Communications",
+    "want_year": 2020
+  },
+  "huang2022finbert": {
+    "key": "huang2022finbert",
+    "want_title": "FinBERT: A Large Language Model for Extracting Information from Financial Text",
+    "error": "HTTP 429"
+  },
+  "wu2023bloomberggpt": {
+    "title": "BloombergGPT: A Large Language Model for Finance",
+    "year": "2023",
+    "arxiv_id": "2303.17564v3",
+    "authors": [
+      "Shijie Wu",
+      "Ozan Irsoy",
+      "Steven Lu",
+      "Vadim Dabravolski",
+      "Mark Dredze",
+      "Sebastian Gehrmann"
+    ],
+    "src": "arxiv",
+    "key": "wu2023bloomberggpt",
+    "want_title": "BloombergGPT: A Large Language Model for Finance",
+    "want_year": 2023
+  },
+  "yang2023fingpt": {
+    "title": "FinGPT: Open-Source Financial Large Language Models",
+    "year": "2023",
+    "arxiv_id": "2306.06031v2",
+    "authors": [
+      "Hongyang Yang",
+      "Xiao-Yang Liu",
+      "Christina Dan Wang"
+    ],
+    "src": "arxiv",
+    "key": "yang2023fingpt",
+    "want_title": "FinGPT: Open-Source Financial Large Language Models",
+    "want_year": 2023
+  },
+  "lopezlira2023": {
+    "title": "Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models",
+    "year": "2023",
+    "arxiv_id": "2304.07619v6",
+    "authors": [
+      "Alejandro Lopez-Lira",
+      "Yuehua Tang"
+    ],
+    "src": "arxiv",
+    "key": "lopezlira2023",
+    "want_title": "Can ChatGPT Forecast Stock Price Movements? Return Predictability and Large Language Models",
+    "want_year": 2023
+  },
+  "chenkellyxiu2022": {
+    "key": "chenkellyxiu2022",
+    "want_title": "Expected Returns and Large Language Models",
+    "error": "HTTP 429"
+  },
+  "yu2023finmem": {
+    "title": "FinMem: A Performance-Enhanced LLM Trading Agent with Layered Memory and Character Design",
+    "year": "2023",
+    "arxiv_id": "2311.13743v2",
+    "authors": [
+      "Yangyang Yu",
+      "Haohang Li",
+      "Zhi Chen",
+      "Yuechen Jiang",
+      "Yang Li",
+      "Denghui Zhang"
+    ],
+    "src": "arxiv",
+    "key": "yu2023finmem",
+    "want_title": "FinMem: A Performance-Enhanced LLM Trading Agent with Layered Memory and Character Design",
+    "want_year": 2023
+  },
+  "wiese2020quantgan": {
+    "title": "Quant GANs: Deep Generation of Financial Time Series",
+    "year": "2019",
+    "arxiv_id": "1907.06673v2",
+    "authors": [
+      "Magnus Wiese",
+      "Robert Knobloch",
+      "Ralf Korn",
+      "Peter Kretschmer"
+    ],
+    "src": "arxiv",
+    "key": "wiese2020quantgan",
+    "want_title": "Quant GANs: Deep Generation of Financial Time Series",
+    "want_year": 2020
+  },
+  "takahashi2019": {
+    "key": "takahashi2019",
+    "want_title": "Modeling financial time-series with generative adversarial networks",
+    "error": "HTTP 429"
+  },
+  "yoon2019timegan": {
+    "title": "Fully Embedded Time-Series Generative Adversarial Networks",
+    "year": "2023",
+    "arxiv_id": "2308.15730v2",
+    "authors": [
+      "Joe Beck",
+      "Subhadeep Chakraborty"
+    ],
+    "src": "arxiv",
+    "key": "yoon2019timegan",
+    "want_title": "Time-series Generative Adversarial Networks",
+    "want_year": 2019
+  },
+  "buehler2019deephedging": {
+    "title": "Deep Hedging",
+    "year": "2018",
+    "arxiv_id": "1802.03042v1",
+    "authors": [
+      "Hans Bühler",
+      "Lukas Gonon",
+      "Josef Teichmann",
+      "Ben Wood"
+    ],
+    "src": "arxiv",
+    "key": "buehler2019deephedging",
+    "want_title": "Deep Hedging",
+    "want_year": 2019
+  },
+  "byrd2020abides": {
+    "title": "ABIDES: Towards High-Fidelity Market Simulation for AI Research",
+    "year": "2019",
+    "arxiv_id": "1904.12066v1",
+    "authors": [
+      "David Byrd",
+      "Maria Hybinette",
+      "Tucker Hybinette Balch"
+    ],
+    "src": "arxiv",
+    "key": "byrd2020abides",
+    "want_title": "ABIDES: Towards High-Fidelity Market Simulation for AI Research",
+    "want_year": 2020
+  },
+  "park2023generative": {
+    "title": "Generative Agents: Interactive Simulacra of Human Behavior",
+    "year": "2023",
+    "arxiv_id": "2304.03442v2",
+    "authors": [
+      "Joon Sung Park",
+      "Joseph C. O'Brien",
+      "Carrie J. Cai",
+      "Meredith Ringel Morris",
+      "Percy Liang",
+      "Michael S. Bernstein"
+    ],
+    "src": "arxiv",
+    "key": "park2023generative",
+    "want_title": "Generative Agents: Interactive Simulacra of Human Behavior",
+    "want_year": 2023
+  },
+  "xu2021hats": {
+    "title": "HATS: A Hierarchical Graph Attention Network for Stock Movement Prediction",
+    "year": "2019",
+    "arxiv_id": "1908.07999v3",
+    "authors": [
+      "Raehyun Kim",
+      "Chan Ho So",
+      "Minbyul Jeong",
+      "Sanghoon Lee",
+      "Jinkyu Kim",
+      "Jaewoo Kang"
+    ],
+    "src": "arxiv",
+    "key": "xu2021hats",
+    "want_title": "HATS: A Hierarchical Graph Attention Network for Stock Movement Prediction",
+    "want_year": 2019
+  },
+  "wang2021thgnn": {
+    "title": "Temporal and Heterogeneous Graph Neural Network for Financial Time Series Prediction",
+    "year": "2023",
+    "arxiv_id": "2305.08740v1",
+    "authors": [
+      "Sheng Xiang",
+      "Dawei Cheng",
+      "Chencheng Shang",
+      "Ying Zhang",
+      "Yuqi Liang"
+    ],
+    "src": "arxiv",
+    "key": "wang2021thgnn",
+    "want_title": "Temporal and Heterogeneous Graph Neural Network for Financial Time Series Prediction",
+    "want_year": 2021
+  },
+  "sawhney2020": {
+    "key": "sawhney2020",
+    "want_title": "Deep Attentive Learning for Stock Movement Prediction from Social Media Text and Company Correlations",
+    "error": "HTTP 429"
+  },
+  "zhang2020dlpo": {
+    "title": "Deep Learning for Portfolio Optimization",
+    "year": "2020",
+    "arxiv_id": "2005.13665v3",
+    "authors": [
+      "Zihao Zhang",
+      "Stefan Zohren",
+      "Stephen Roberts"
+    ],
+    "src": "arxiv",
+    "key": "zhang2020dlpo",
+    "want_title": "Deep Learning for Portfolio Optimization",
+    "want_year": 2020
+  },
+  "martin2011": {
+    "title": "Mean Reversion Pays, but Costs",
+    "year": "2011",
+    "arxiv_id": "1103.4934v1",
+    "authors": [
+      "Richard Martin",
+      "Torsten Schöneborn"
+    ],
+    "src": "arxiv",
+    "key": "martin2011",
+    "want_title": "Mean Reversion Pays, but Costs",
+    "want_year": 2011
+  },
+  "guant2019": {
+    "title": "Deep reinforcement learning for market making in corporate bonds: beating the curse of dimensionality",
+    "year": "2019",
+    "arxiv_id": "1910.13205v1",
+    "authors": [
+      "Olivier Guéant",
+      "Iuliia Manziuk"
+    ],
+    "src": "arxiv",
+    "key": "guant2019",
+    "want_title": "Deep Reinforcement Learning for Market Making in Corporate Bonds",
+    "want_year": 2019
+  },
+  "lopezdeprado2018": {
+    "key": "lopezdeprado2018",
+    "want_title": "Advances in Financial Machine Learning",
+    "error": "HTTP 429"
+  },
+  "qlib": {
+    "title": "Qlib: An AI-oriented Quantitative Investment Platform",
+    "year": "2020",
+    "arxiv_id": "2009.11189v1",
+    "authors": [
+      "Xiao Yang",
+      "Weiqing Liu",
+      "Dong Zhou",
+      "Jiang Bian",
+      "Tie-Yan Liu"
+    ],
+    "src": "arxiv",
+    "key": "qlib",
+    "want_title": "Qlib: An AI-oriented Quantitative Investment Platform",
+    "want_year": 2020
+  }
+}

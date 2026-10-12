@@ -1,0 +1,170 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+\setlist{topsep=0.3em,itemsep=0.2em,parsep=0.15em}
+
+\title{\bfseries 剥离规模因子的补充方案\\\large 为非流动性线索收尾：数据来源、中性化方法与验收判据}
+\author{\large 叨客宁宁}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{要解决什么，以及什么算解决}
+
+\subsection{问题}
+
+《非流动性线索的跟进分析》的结论是：Amihud 非流动性过了成本关，但没过多可提取性关——含冲击夏普 1.02，可是这份收益长在最不流动的一端（时点安全地逐级筛到只保留较流动的 30\% 时，夏普衰减到 0.08）。据此推断它更像流动性补偿而非可提取 alpha。
+
+这个推断有一个\textbf{尚未排除的竞争解释}：Amihud 非流动性在横截面上与市值高度相关，因此上述结果也可能只是说“小市值因子在小盘股里更有效”——那样的话，本文关于“流动性补偿”的表述就需要改写，因为收益的驱动变量不是流动性，而是规模。
+
+本方案要排除的正是这一项：\textbf{在控制规模之后，非流动性的收益还剩多少}。
+
+\subsection{判据（先说清什么算通过）}
+
+主判据沿用第 21 章的成本口径（逐股 ADV、佣金＋过户费＋分段印花税、平方根冲击）：
+
+\begin{itemize}
+  \item \textbf{规模中性化后，含冲击夏普仍 $\geq 0.7$}：判定存在超出规模解释的流动性维度；
+  \item \textbf{中性化后落在 $0.3$ 以下}：判定此前结果主要由规模驱动，流动性补偿的表述须撤回或大幅弱化；
+  \item 落在两者之间：如实报告为“无法分离”，并把区间写进论文。
+\end{itemize}
+
+辅助判据两条：十层收益的单调性（0.975）在中性化后是否保留；2019--2020 两个负年度是否依旧。
+
+\section{数据来源：三条路线的实测取舍}
+
+“算不出市值”这个限制来自本地日线不含股本。本轮把三条可能的数据路线都实测了一遍，结论与依据如下。
+
+\begin{table}[htbp]
+\centering
+\caption{股本数据三条路线的实测结果}
+\label{tab:routes}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{5.4cm}>{\raggedright\arraybackslash}p{6.0cm}@{}}
+\toprule
+路线 & 实测情况 & 结论 \\
+\midrule
+A. 本地 \texttt{T0002/hq\_cache/base.dbf} & 含 \texttt{ZGB}（总股本）、\texttt{LTAG}（流通 A 股）等字段；但去重后仅 2139 只代码，\textbf{缺贵州茅台、宁德时代、北交所全部个股}；且为\textbf{当前快照}，无历史 & 否决（覆盖不全 ＋ 前视） \\
+\addlinespace
+B. 本地 \texttt{vipdoc/cw} 逐股财务文件 & 文件齐全（9229 个：gpsh 4544、gpsz 4051、gpbj 339、gpcw 295），\texttt{gpsh600519.dat} 存在（347632 字节） & 备选（格式未公开、需逆向，参见 \texttt{gbbq} 加密不可解析的先例） \\
+\addlinespace
+C. AKShare \texttt{stock\_zh\_a\_daily} 的 \texttt{outstanding\_share} 字段 & \textbf{逐日时点值}，在股本变动处阶跃；沪深北均可取 & \textbf{主选} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+路线 A 不只是“覆盖不全”的问题。它是\textbf{当前快照}——用今天的股本去除 2019 年的价格，等于把七年里所有送转与增发都提前告诉了模型。这个错误的量级很大，见表 \ref{tab:shares}。
+
+\begin{table}[htbp]
+\centering
+\caption{流通股本在样本期内的变化（AKShare 时点数据实测）}
+\label{tab:shares}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{3.0cm}@{}}
+\toprule
+代码 & 期初流通股本 & 期末流通股本 & 变化倍数 & 取值阶跃次数 \\
+\midrule
+sh600519 & $1.2562\times10^9$ & $1.2501\times10^9$ & 0.995 & 3 \\
+sz002594 & $1.1422\times10^9$ & $3.4871\times10^9$ & 3.053 & 16 \\
+sz300750 & $2.1724\times10^8$ & $4.2606\times10^9$ & 19.612 & 66 \\
+bj920002 & $4.7500\times10^6$ & $4.4597\times10^7$ & 9.389 & 8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+宁德时代的流通股本在样本期内放大了近 20 倍。用当前快照回填 2019 年的市值，这家公司会被误判成一只大盘股——它的规模分位会从当年的位置被拉到完全不同的地方。这正是本文反复强调的那类错误：不是算错，而是口径里混进了未来信息。
+
+\textbf{口径确认}：该字段是\textbf{流通股本}而非总股本。用中国平安（sh601318）验证：取值为 $1.0660\times10^{10}$，对应 A 股流通约 108 亿股，而非总股本约 182 亿股。以流通市值作为规模代理是 A 股研究的通行做法，本方案沿用。
+
+\textbf{交叉校验}（沿用复权因子的做法：本地验证第三方）：把 \texttt{base.dbf} 中 2139 只重叠个股的 \texttt{LTAG} 与 AKShare 的最新 \texttt{outstanding\_share} 比对，报告偏差分布。两者若一致，说明第三方字段在“当前时点”这一锚点上可信；不一致的个股单独列出，不纳入。
+
+\section{中性化方法：三种，互相印证}
+
+单用一种方法容易被“方法本身的假设”绊住，故设计三种由粗到细的做法，结论一致才采信。
+
+\subsection{M1 双重排序（最直观，无模型假设）}
+
+每个截面先按\textbf{当期流通市值}分 5 层，再在每层内部按非流动性分 5 层，得到 $5\times5$ 网格。观察两件事：同一规模层内“最不流动减最流动”的价差是否稳定为正；以及该价差随规模层的变化。这一方法不依赖任何回归假设，任何异常都能被直接看见。
+
+\subsection{M2 截面回归取残差（主判据用）}
+
+每期做横截面回归 $\text{Amihud}_i = a + b\ln(\text{流通市值}_i) + e_i$，用残差 $e_i$ 作为规模中性的流动性信号，重建多空组合，按第 21 章口径计算含冲击夏普。这一口径与国际文献里“规模中性化的流动性因子”一致。
+
+可选加强：本地 \texttt{T0002/hq\_cache/tdxhy.cfg}（150550 字节）含行业分类，可在回归中加行业哑变量，同时做行业中性化。是否加入取决于该文件能否可靠解析——按路线 B 的同一标准，解析不可靠则只做规模中性。
+
+\subsection{M3 规模中性组合（最保守的构造）}
+
+在每个规模层内分别构造非流动性多空，再对各层的结果等权合成。此法不依赖回归，且组合的规模暴露被构造性地压掉；代价是多空两端的个股更少、噪声更大。它用于给 M2 的结论做一个下界式的对照。
+
+\section{风险、边界与验证门}
+
+\begin{table}[htbp]
+\centering
+\caption{风险与本方案的应对}
+\label{tab:risks}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{10.0cm}@{}}
+\toprule
+风险 & 应对 \\
+\midrule
+股本变动日的时点对齐 & 该字段按日给出，但“何时生效”需核对：抽 \texttt{sz300750} 的 66 次阶跃中的 3 次，与公开送转／增发公告日期比对（验证门 G1）。若生效日晚于公告日，属保守（不会前视）；若早于，则须回退。 \\
+\addlinespace
+第三方字段的重述风险 & 与复权因子同样的处置：结果缓存到 \texttt{outputs/outstanding\_shares.json}，记录快照日期；若后续重述，以缓存为准并标注。 \\
+\addlinespace
+流通股本 ≠ 总股本 & 明确采用流通市值；A 股限售股占比在样本期内变化，故规模分位会有噪声。此点写入论文边界。 \\
+\addlinespace
+规模分层本身的前视 & M1／M2／M3 一律使用\textbf{当期}流通市值，不使用全窗口均值。这正是《跟进分析》里踩过的坑：同一检验用不用时点信息会给出\textbf{方向相反}的结论。 \\
+\addlinespace
+样本被分层后变薄 & $5\times5$ 网格下每格约 16 只（$N=400$ 时），噪声上升。故同时报告 $2\times5$ 的粗网格结果作对照。 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+验证门三条：\textbf{G1} 股本变动日的时点对齐抽样核对通过；\textbf{G2} M1／M2／M3 三种方法的结论方向一致（都保留或都消失）；\textbf{G3} 中性化前后使用完全相同的成本口径与 ADV，差异只来自信号本身。
+
+\section{交付物与工作量}
+
+\begin{table}[htbp]
+\centering
+\caption{交付物}
+\label{tab:deliverables}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{9.2cm}@{}}
+\toprule
+交付物 & 内容 \\
+\midrule
+\texttt{code/audit\_size\_neutral.py} & M1／M2／M3 三种中性化，输出含冲击夏普、十层单调性、逐年夏普；附 $2\times5$ 粗网格对照 \\
+\texttt{outputs/outstanding\_shares.json} & 400 只的逐日流通股本缓存（首次联网，之后离线复算） \\
+\texttt{docs/illiquidity\_note.tex} 增补一节 & 把结论并入现有跟进报告，不另立文档 \\
+论文第 21 章 & 按第 1 节的三档判据更新那句限定；若结论反转，剩余待办中的“无法剥离规模因子”一项相应删除 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+工作量与已知任务同量级：约 400 次接口调用（与复权核验的 400 只同规模），缓存后离线可复算。核心计算（分层、回归、组合）都是轻量的横截面操作，不涉及此前导致内存问题的岭回归路径。
+
+\section{两种结果各意味着什么}
+
+先把两种结果的含义写下来，是为了避免“无论跑出什么都讲得通”的事后解释。
+
+\textbf{若中性化后消失}（夏普 $\leq 0.3$）：说明此前的 1.02 主要由规模解释，非流动性只是小市值因子的一个代理。论文应把结论从“流动性补偿”改成更强的否定：\emph{在这 8 个因子里，没有任何一个能同时通过信息关、成本关与可提取性关}——这比现在的表述更彻底，也更符合本文的主题。
+
+\textbf{若中性化后存活}（夏普 $\geq 0.7$）：说明存在一个超出规模的流动性维度。论文应更新为：\emph{该维度在规模中性化后仍然存在，但收益仍集中在低流动端，因此仍应理解为承担流动性风险的报酬而非免费 alpha}。
+
+\textbf{若落在中间}：如实标注“本样本无法分离规模与流动性”，并在剩余待办中保留该项——不为了给结论一个漂亮的收尾而把中间结果说成两端之一。
+
+\medskip
+
+\noindent\textbf{一句话概括本方案}：它要买的不是一个新的收益来源，而是一次\textbf{证伪机会}——用规模中性化去检验上一轮那个“流动性补偿”的判断是否站得住。若站不住，论文的结论会更强；若站得住，结论会更准。两者都比现在这种“推断存在竞争解释但未排除”的状态好。
+
+\end{document}

@@ -1,0 +1,213 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+\setlist{topsep=0.3em,itemsep=0.2em,parsep=0.15em}
+
+\title{\bfseries 非流动性线索的跟进分析\\\large 它是流动性补偿，还是可提取的 alpha}
+\author{\large 叨客宁宁}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{这条线索从哪来}
+
+综述第 21 章做了一项候选级成本对照：把 8 个价量特征按“多空／仅多头”两种构建方式各算一遍换手与含冲击夏普，16 种构建里只有 2 种在成本后仍为正——都来自 Amihud 非流动性（多空 1.014、仅多头 0.892），因其年化换手只有 14--18 倍。
+
+但“过了成本这一关”并不等于“收益可以提取”。本文反复强调可预测不等于可交易；同样的逻辑要求我们再走一步：\textbf{可交易也不等于可提取}。一个能扛住成交成本的信号，仍可能只是承担某种风险的报酬——你拿到的钱，正是你承担该风险的代价，而这份风险本身可能是你不愿承受的。
+
+对非流动性来说，这个疑问有明确的经济学来源。Amihud 类信号按定义买入最不流动的股票、卖出最流动的股票，它的收益在文献里长期被解释为\textbf{流动性补偿}：持有“想卖时卖不掉”的资产，理应获得更高预期收益。若这个解释成立，那么这份收益就不是一条可以自由提取的缝隙，而是风险的定价。本报告用六项检验来分辨这两种读法。
+
+\section{检验设计，以及一处必须先修正的方法问题}
+
+六项检验：分层单调性、子期稳定性、可投资子集、与其余因子的相关、流动性压力期依赖、以及成本假设的稳健性。全部脚本为 \texttt{code/audit\_illiquidity.py}，输出见 \texttt{outputs/audit\_illiquidity.txt}。
+
+设计过程中先发现并修正了一处方法问题，值得单独说明，因为它直接影响结论方向。“可投资子集”检验的做法是：筛掉偏不流动的个股，在剩下的较流动子集里重建多空，看溢价是否还在。第一版用\textbf{全样本 ADV 中位数}做筛除——这本身就是前视：一只股票“全窗口平均是否流动”，包含了未来信息。改成\textbf{时点安全}的构造后（滚动 250 日中位数、每 21 日重算一次并前向填充），同一检验给出了相反方向的结论，见表 \ref{tab:lookahead}。
+
+\begin{table}[htbp]
+\centering
+\caption{子集筛选的两种做法给出相反结论（Amihud 非流动性多空，零成本夏普，括号内为年化换手倍数）}
+\label{tab:lookahead}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{2.2cm}@{}}
+\toprule
+保留（按 ADV 分位） & 前视筛法（全样本 ADV） & 时点安全（滚动 ADV） & 方向 \\
+\midrule
+100\%（全部） & 1.221（14） & 1.221（14） & —— \\
+70\% & 1.849（15） & 1.026（17） & 相反 \\
+50\% & 1.931（16） & 0.831（19） & 相反 \\
+30\% & 1.883（16） & 0.438（20） & 相反 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+前视筛法说“越只做流动的股票，溢价越强”（1.22 升到 1.93），时点安全筛法说“越只做流动的股票，溢价越弱”（1.22 降到 0.44）。前者是筛选时用到了未来信息所制造的假象。本报告此后一律采用时点安全的构造。
+
+\section{结果}
+
+\subsection{分层与尾部依赖}
+
+按逐期截面把个股分成十层，第 1 层最流动、第 10 层最不流动，各层平均下期收益（基点）为：
+
+\begin{table}[htbp]
+\centering
+\caption{非流动性十层的平均下期收益（基点／日）}
+\label{tab:decile}
+\begin{tabular}{@{}*{11}{>{\raggedright\arraybackslash}p{1.05cm}}@{}}
+\toprule
+第 1 层 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 第 10 层 & 相关 \\
+\midrule
+0.5 & 0.9 & 1.4 & 2.7 & 3.5 & 5.8 & 5.8 & 9.4 & 8.5 & 11.3 & 0.975 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+层序与收益的相关系数 0.975，几乎完全单调；首末层价差日均 10.8 个基点、胜率 53.0\%。这说明它\textbf{不是尾部少数极端个股驱动的形态}，而是一个横跨整个横截面的单调梯度——教科书里流动性溢价的样子。
+
+\subsection{逐年稳定性}
+
+\begin{table}[htbp]
+\centering
+\caption{逐年的含冲击夏普（ADV 与费率按第 21 章口径）}
+\label{tab:year}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.0cm}@{}}
+\toprule
+年份 & 交易日 & 多空零成本 & 多空含冲击 & 仅多头含冲击 \\
+\midrule
+2019 & 244 & $-0.89$ & $-1.47$ & $-0.79$ \\
+2020 & 243 & 0.07 & $-0.30$ & 0.67 \\
+2021 & 243 & 1.93 & 1.66 & 2.45 \\
+2022 & 242 & 2.17 & 1.86 & 0.20 \\
+2023 & 242 & 1.96 & 1.83 & 1.82 \\
+2024 & 242 & 0.71 & 0.57 & 0.43 \\
+2025 & 243 & 3.40 & 3.12 & 2.72 \\
+2026 & 182 & 0.25 & 0.08 & $-0.38$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+全样本夏普 1.014 掩盖了一段不短的不利期：头两年（2019--2020，共 487 个交易日，占样本 26\%）含冲击夏普为 $-1.47$ 与 $-0.30$。此后 2021--2023 连续三年在 1.7--1.9，2025 年最高 3.12，2026 年（仅 182 天）回到零附近。\textbf{稳定性并不像全样本夏普暗示的那么好}。
+
+\subsection{可投资子集：溢价长在最不流动的一端}
+
+\begin{table}[htbp]
+\centering
+\caption{时点安全筛除后重建多空的夏普与换手}
+\label{tab:subset}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+保留（按当期 ADV 分位） & 零成本夏普 & 含冲击夏普 & 年化换手 \\
+\midrule
+100\%（全部） & 1.221 & 1.022 & 14 \\
+70\% & 1.026 & 0.692 & 17 \\
+50\% & 0.831 & 0.469 & 19 \\
+30\% & 0.438 & 0.083 & 20 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+这是本报告最关键的一张表。把偏不流动的个股逐级剔除后，含冲击夏普\textbf{单调衰减}：$1.02 \to 0.69 \to 0.47 \to 0.08$。在保留流动性最好那 30\% 的子集里，溢价基本消失。也就是说，\textbf{这份收益长在最不流动的那一端}——而那一端恰恰是“想卖时卖不掉”风险最高的地方。
+
+\subsection{与其他因子的相关}
+
+与其余七个因子的多空收益序列的相关都在 $\pm0.28$ 以内（最大是与 60 日动量 $-0.272$，与量比 $+0.182$，其余不足 $0.08$）。所以它\textbf{不是某个已知异象的替身}，在这个小因子库里有独立的信息。
+
+\subsection{流动性压力期依赖}
+
+把截面平均非流动性上升最快的 25\% 交易日定义为流动性恶化期，最慢的 25\% 定义为改善期：恶化期日均 $6.6$ 个基点，改善期 $0.2$ 个基点，差 $6.4$ 个基点。方向与“流动性补偿”的解释一致——钱是在流动性变差的时候赚到的。但必须如实说明：\textbf{这个差值的 $t$ 值只有 $+1.47$，在常规水平上不显著}，因子收益与流动性变化的相关也只有 $+0.018$。因此它只能算方向性证据，不能作为结论支柱。
+
+\subsection{成本假设的稳健性}
+
+把逐股 ADV 打到一半、四分之一后重算含冲击夏普：多空 $1.014 \to 0.971 \to 0.914$，仅多头 $0.892 \to 0.860 \to 0.819$。低换手带来的好处在这里体现得很清楚：即使成本假设严苛四倍，结论也不翻转。
+
+\section{判读}
+
+把六项检验合起来，可以得到一个比“它在成本后活着”更完整的判断。
+
+\textbf{第一，这个形态本身是真实的。}十层收益近乎完全单调（相关 0.975），与其余七个因子近乎正交（最大相关 0.272），对成本假设不敏感（ADV 打四分之一仍有 0.91）。它不是尾部噪声，也不是已知异象的替身。
+
+\textbf{第二，但它的收益几乎全部来自最不流动的一端。}时点安全地逐级筛除后，含冲击夏普单调衰减到 0.08。结合流动性补偿的经济含义，最合理的读法是：\textbf{这是持有“想卖时卖不掉”风险所获得的报酬，而不是可以自由提取的 alpha}。成本模型能算清正常时段的成交冲击，算不清的是“需要卖的时候恰好卖不掉”这件事——那部分风险以更高预期收益的形式被定价，而从风险调整的角度看，它不是免费的。
+
+\textbf{第三，稳定性没有全样本夏普暗示的那么好。}8 个年度里有 2 个年度含冲击为负（2019、2020），且它们恰好出现在样本前段。若只看全样本夏普 1.014，会高估这个信号的可靠程度。
+
+顺带说明一处方法论上的收获：本次分析中，子集筛选用不用时点信息，会让结论\textbf{方向相反}（表 \ref{tab:lookahead}）。这提醒的是，时点纪律不只要施加在数据层与特征层，也要施加在\textbf{分析者自己的筛选动作}上——因为“按什么分组”本身就是研究者的一次选择，而选择可以偷偷用到未来。
+
+\section{对综述的影响与未解决的问题}
+
+综述第 21 章关于非流动性的表述原为“在这批候选里，它至少没有在成本这一关被否掉”。按本次跟进，这句话\textbf{应再收紧一步}：它过了成本关，但没过多可提取性关——收益长在最不流动的一端、且有两个年度为负。综述正文已按此更新。
+
+未解决的部分也要写明，否则上述判断会被读得比证据更硬：
+
+\begin{enumerate}
+  \item \textbf{无法剥离规模（size）}。本地日线不含股本，算不出市值；Amihud 与市值高度相关，因此无法判断这份收益在剔除规模因子后还剩多少。这是最需要补的一项。
+  \item \textbf{压力期检验的证据偏弱}。$t$ 值 1.47，只能作方向性参考；若要用它支撑“流动性风险定价”的结论，需要更直接的风险因子（如买卖价差、换手率骤降、市场冲击指标），本地数据不可得。
+  \item \textbf{做空约束未建模}。“多空 1.014”仍假设可对最不流动的个股做空，A 股难以实现；仅多头的 0.892 更贴近可行范围，但它 beta 接近 1，需要先剥离市场暴露。
+  \item \textbf{子集筛选只做了单维}。本次只按 ADV 分位筛，未按行业、价格水平、停牌频率等维度交叉筛选。
+\end{enumerate}
+
+\section{规模中性化：它是不是只是小市值因子}\label{sec:size}
+
+上述判读有一个未排除的竞争解释：Amihud 非流动性在横截面上与市值高度相关，因此“收益长在最不流动的一端”也可能只是“小市值因子在小盘股里更有效”。本节按单独拟定的方案（\texttt{docs/size\_control\_plan.tex}）排除这一项。
+
+\textbf{数据。}规模代理用流通市值 $=$ 原始收盘价 $\times$ 当日流通股本，股本取 AKShare 的逐日 \texttt{outstanding\_share}（时点值，缓存于 \texttt{outputs/outstanding\_shares.json}）。不用本地 \texttt{base.dbf} 快照：它只有 2139 只、且是当前值——实测宁德时代的流通股本在样本期内放大 $19.6$ 倍，用今天的股本回填 2019 年会把它误判成大盘股。
+
+\textbf{数据门。}外部锚点核对通过：AKShare 给出的 sz300750 期末流通股本为 $4.2606\times10^9$ 股，与东方财富披露的 426{,}061.71 万股完全一致，且确认该字段是流通股本（总股本 46.27 亿股）。原计划的“与本地 \texttt{base.dbf} 交叉校验”\textbf{无法执行}——该文件记录布局无法可靠解析（\texttt{LTAG} 字段读出恒为 0），这与它覆盖不全的发现一致。故本节的股本数据只有单一来源；该风险的确切边界、影响方向与补强路径见 \texttt{docs/share\_source\_note.tex}，要点是：形态自检五项全过、影响仅限本节、且方向上是使本节的实测值\textbf{偏乐观}。
+
+\textbf{三种方法。}M1 双重排序（先按当期流通市值分层、层内再按非流动性分层）；M2 每期做横截面回归 $\text{Amihud}_i = a + b\ln(\text{流通市值}_i) + e_i$，取残差重建多空（主判据）；M3 各规模层内分别构造多空再等权合成（下界对照）。所有分层一律使用\textbf{当期}值。
+
+\begin{table}[htbp]
+\centering
+\caption{M1 双重排序：各规模层内的“最不流动减最流动”价差（基点／日，规模层由小到大）}
+\label{tab:m1}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{3.0cm}@{}}
+\toprule
+网格 & 层 1（小） & 层 2 & 层 3 & 层 4 & 层 5（大） & 均值 \\
+\midrule
+$5\times5$ & 15.1 & 11.4 & 8.4 & 5.4 & 2.0 & 8.5 \\
+$2\times5$ & 13.7 & 5.1 & —— & —— & —— & 9.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+价差在\textbf{每一个}规模层内都为正，说明非流动性并非市值的替身；但它随规模单调衰减，从最小规模层的 15.1 个基点降到最大规模层的 2.0 个基点——效应确实集中在小盘端。
+
+\begin{table}[htbp]
+\centering
+\caption{规模中性化后的结果（成本口径与第 21 章一致：逐股 ADV＋分段印花税）}
+\label{tab:m2m3}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+口径 & 零成本夏普 & 含冲击夏普 & 年化换手 \\
+\midrule
+基准（未中性化） & 1.221 & 1.022 & 14 \\
+M2 回归取残差（主判据） & 1.001 & 0.611 & 19 \\
+M3 层内多空等权合成 & 0.844 & 0.607 & 8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+M2 与 M3 两种完全不同的构造给出几乎相同的净夏普（$0.611$ 对 $0.607$），互证通过。M2 的回归中 $\ln(\text{规模})$ 系数均值为 $-0.4077$（规模越大非流动性越低，符合定义）。
+
+\textbf{判据与结论。}按方案预先设定的三档：含冲击夏普 $\geq0.7$ 判定存在超出规模的流动性维度，$\leq0.3$ 判定由规模驱动，中间如实记为“无法分离”。实测 $0.611$ 落在中间区间，故\textbf{结论记为“无法分离”}，不向两端靠。
+
+具体要说清的界限有三条。第一，\textbf{规模不能解释全部}：中性化后毛夏普由 $1.221$ 降到 $1.001$，仍保留约八成；且 M1 显示每个规模层内价差都为正。第二，\textbf{但中性化把净夏普压到了阈值之下}：原因主要是换手从 14 倍升到 19 倍（残差信号更噪、调仓更频繁），成本吃掉的部分比信号损失更多——这一点值得单独指出，因为它说明“规模中性化”这件事本身是有成本的。第三，\textbf{逐年不稳定依然存在}：M2 的逐年含冲击夏普为 2019 年 $-1.35$、2020 年 $-0.15$、2021 年 $1.38$、2022 年 $1.67$、2023 年 $0.93$、2024 年 $0.57$、2025 年 $2.10$、2026 年 $-0.23$，负年度与中性化之前一样。
+
+因此第 4 节的判读\textbf{得到支持而非推翻}：这份收益既不是纯粹的规模代理，也够不上一条干净的可提取 alpha；它更像“以低流动端为主、随规模递减的补偿”，规模中性化后剩下的部分仍为正，但已不足以称为可交易。
+
+\medskip
+
+\noindent\textbf{一句话结论}：非流动性这条线索的价值不在于它提供了一个能用的信号，而在于它把综述的判据链条走完了最后一环——\textbf{信息上显著、成本后存活、但收益不可提取}；而“不可提取”的理由经规模中性化后更为清楚：它集中在低流动端，且中性化本身会抬高换手、进一步压低净收益。
+
+\end{document}

@@ -1,0 +1,82 @@
+{
+  "sullivan1999": [
+    "1999 | Sullivan | Data‐Snooping, Technical Trading Rule Performance, and the Bootstrap | 10.1111/0022-1082.00163 | The Journal of Finance | journal-article",
+    "2019 | Yang | Tactical asset allocation on technical trading rules and data snooping | 10.1016/j.pacfin.2018.08.003 | Pacific-Basin Finance Journal | journal-article",
+    "2025 | Wang | Evaluating Technical Trading Strategies in US Stocks: Insights From Data-S | 10.33423/jaf.v25i1.7511 | Journal of Accounting and Finance | journal-article"
+  ],
+  "jame2016": [
+    "2016 | JAME | The Value of Crowdsourced Earnings Forecasts | 10.1111/1475-679x.12121 | Journal of Accounting Research | journal-article",
+    "2013 | Jame | The Value of Crowdsourced Earnings Forecasts | 10.2139/ssrn.2333671 |  | posted-content",
+    "1987 | Jennings | Unsystematic Security Price Movements, Management Earnings Forecasts, and  | 10.2307/2491260 | Journal of Accounting Research | journal-article"
+  ],
+  "katona2018": [
+    "2019 | Katona | On the Capital Market Consequences of Big Data: Evidence from Outer Space | 10.2139/ssrn.3222741 |  | posted-content",
+    "2024 | Katona | On the Capital Market Consequences of Big Data: Evidence from Outer Space | 10.1017/s0022109023001448 | Journal of Financial and Quantitativ | journal-article",
+    "2026 | Hu | Does Mobile Communication Technology Have Capital Market Consequences? Evi | 10.2139/ssrn.6728280 |  | posted-content"
+  ],
+  "huang2022finbert": [
+    "2023 | Huang | <scp>FinBERT</scp>\n                    : A Large Language Model for Extrac | 10.1111/1911-3846.12832 | Contemporary Accounting Research | journal-article",
+    "2025 | Stuhler | From Codebooks to Promptbooks: Extracting Information from Text with Gener | 10.31235/osf.io/wjvfq_v1 |  | posted-content",
+    "2025 | Stuhler | From Codebooks to Promptbooks: Extracting Information from Text with Gener | 10.1177/00491241251336794 | Sociological Methods &amp; Research | journal-article"
+  ],
+  "chenkellyxiu2022": [
+    "2025 | Wang | Expected Option Returns and Large Language Models | 10.2139/ssrn.5010938 |  | posted-content",
+    "2019 | Ke | Predicting Returns With Text Data | 10.3386/w26186 |  | report",
+    "2019 | Ke | Predicting Returns with Text Data | 10.2139/ssrn.3489226 |  | posted-content"
+  ],
+  "takahashi2019": [
+    "2019 | Takahashi | Modeling financial time-series with generative adversarial networks | 10.1016/j.physa.2019.121261 | Physica A: Statistical Mechanics and | journal-article",
+    "2025 | Guo | Application of Generative Adversarial Networks in Financial Time Series Da | 10.2139/ssrn.5142078 |  | posted-content",
+    "2023 | Vuletić | Fin-GAN: Forecasting and Classifying Financial Time Series via Generative  | 10.2139/ssrn.4328302 |  | posted-content"
+  ],
+  "sawhney2020": [
+    "2020 | Sawhney | Deep Attentive Learning for Stock Movement Prediction From Social Media Te | 10.18653/v1/2020.emnlp-main.676 | Proceedings of the 2020 Conference o | proceedings-article",
+    "2021 |  | Peer Review #2 of \"Harvesting social media sentiment analysis to enhance s | 10.7287/peerj-cs.476v0.1/reviews/2 |  | peer-review",
+    "2021 |  | Peer Review #3 of \"Harvesting social media sentiment analysis to enhance s | 10.7287/peerj-cs.476v0.1/reviews/3 |  | peer-review"
+  ],
+  "lopezdeprado2018": [
+    "2020 | Schwendner | Advances in Financial Machine Learning | 10.1080/14697688.2019.1703030 | Quantitative Finance | journal-article",
+    "2018 | Lopez de Prado | Ten Financial Applications of Machine Learning | 10.2139/ssrn.3197726 | SSRN Electronic Journal | journal-article",
+    "2018 | Lopez de Prado | Financial Machine Learning in 10 Minutes (Presentation Slides) | 10.2139/ssrn.3177534 | SSRN Electronic Journal | journal-article"
+  ],
+  "cartea2015": [
+    "2010 | Cartea | Modeling Asset Prices for Algorithmic and High Frequency Trading | 10.2139/ssrn.1722202 | SSRN Electronic Journal | journal-article",
+    "2015 | Cartea | Algorithmic Trading of Co-Integrated Assets | 10.2139/ssrn.2637883 |  | posted-content",
+    "2014 | Cartea | Algorithmic Trading with Learning | 10.2139/ssrn.2373196 |  | posted-content"
+  ],
+  "grossmanstiglitz1980": [
+    "2014 | Ou-Yang | Informationally Efficient Markets in Grossman and Stiglitz (1980) | 10.2139/ssrn.2433662 |  | posted-content",
+    "2005 | Keiber | Reconsidering the Impossibility of Informationally Efficient Markets | 10.2139/ssrn.695922 |  | posted-content",
+    "1989 | Gale | A Simple Proof That Futures Markets are Almost Always Informationally Inef | 10.3386/w3209 |  | report"
+  ],
+  "zhu2019": [
+    "2019 | Zhu | Big Data as a Governance Mechanism | 10.1093/rfs/hhy081 | The Review of Financial Studies | journal-article",
+    "2026 | Si | Does data governance improve capital allocation efficiency? The case of Ch | 10.1016/j.irfa.2026.105265 | International Review of Financial An | journal-article",
+    "2025 | Choowan | Artificial Intelligence in Data Governance for Financial Decision-Making:  | 10.3390/bdcc10010008 | Big Data and Cognitive Computing | journal-article"
+  ],
+  "mcleanpontiff2016": [
+    "2012 | McLean | Does Academic Research Destroy Stock Return Predictability? | 10.2139/ssrn.2080900 |  | posted-content",
+    "2016 | MCLEAN | Does Academic Research Destroy Stock Return Predictability? | 10.1111/jofi.12365 | The Journal of Finance | journal-article",
+    "2016 | Wiggins | Does Academic Research Destroy Stock Return Predictability? | 10.2469/dig.v46.n6.16 | CFA Digest | journal-article"
+  ],
+  "wiese2020quantgan": [
+    "2020 | Wiese | Quant GANs: deep generation of financial time series | 10.1080/14697688.2020.1730426 | Quantitative Finance | journal-article",
+    "2023 | Liao | Sig‐Wasserstein GANs for conditional time series generation | 10.1111/mafi.12423 | Mathematical Finance | journal-article",
+    "2025 | Takahashi | Generation of synthetic financial time series by diffusion models | 10.1080/14697688.2025.2528697 | Quantitative Finance | journal-article"
+  ],
+  "nevmyvaka2006": [
+    "2006 | Nevmyvaka | Reinforcement learning for optimized trade execution | 10.1145/1143844.1143929 | Proceedings of the 23rd internationa | proceedings-article",
+    "2005 | Nevmyvaka | Optimized Execution Via Order Book Simulation | 10.2139/ssrn.671963 |  | posted-content",
+    "None | Nevmyvaka | Electronic Trading in Order-Driven Markets: Efficient Execution | 10.1109/icect.2005.42 | Seventh IEEE International Conferenc | proceedings-article"
+  ],
+  "almgren2005": [
+    "None | None | Disaggregating foreign investor influence: direct holdings, NVDRs, and sto | 10.58837/chula.the.2025.137 |  | dissertation",
+    "2009 | Mitra | Equity Portfolio Risk (Volatility) Estimation Using Market Information and | 10.2139/ssrn.1425624 |  | posted-content",
+    "2021 | Jitender | Value-at-Risk Estimation of Equity Market Risk in India | 10.2478/auseb-2021-0001 | Acta Universitatis Sapientiae, Econo | journal-article"
+  ],
+  "yoon2019timegan": [
+    "2020 | Yoon | Anonymization Through Data Synthesis Using Generative Adversarial Networks | 10.1109/jbhi.2020.2980262 | IEEE Journal of Biomedical and Healt | journal-article",
+    "2026 | Engler | Can Generative Adversarial Networks Compete against Diffusion Models at Ge | 10.5220/0014478500004052 | Proceedings of the 18th Internationa | proceedings-article",
+    "None | Zou | Attentive Continuous-Time Generative Adversarial Networks for Irregular Ti | 10.1109/tkde.2025.3617659/mm1 |  | component"
+  ]
+}

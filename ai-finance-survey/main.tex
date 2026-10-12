@@ -1,0 +1,72 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{xltabular}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=black
+}
+
+\captionsetup{font=small,labelfont=bf}
+\newtheorem{definition}{定义}[section]
+\newtheorem{proposition}{命题}[section]
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+\setlist{topsep=0.3em,itemsep=0.15em,parsep=0.15em}
+
+\title{\bfseries AI 在金融交易中的应用：一份可落地的研究综述\\\large 从信息到可交易缝隙——方法族、评测口径与复现状态}
+\author{\large 叨客宁宁}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\input{sections/abstract}
+
+\tableofcontents
+
+\input{sections/intro}
+\input{sections/foundations}
+\input{sections/framework}
+
+\input{sections/supervised}
+\input{sections/deep}
+\input{sections/rl}
+\input{sections/nlp_llm}
+\input{sections/generative}
+\input{sections/gnn}
+\input{sections/altdata}
+\input{sections/integration}
+
+\input{sections/evidence}
+\input{sections/matrix}
+\input{sections/audit}
+\input{sections/repro_audit}
+\input{sections/repro_protocol}
+\input{sections/ecosystem}
+
+\input{sections/confidence}
+\input{sections/limitations}
+\input{sections/future}
+\input{sections/checklist}
+\input{sections/glossary}
+
+\newpage
+\input{sections/references}
+
+\end{document}

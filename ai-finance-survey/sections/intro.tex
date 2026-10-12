@@ -1,0 +1,111 @@
+% 第1章 引言与综述口径
+\section{引言与综述口径}\label{sec:intro}
+
+金融交易这门行当，过去几十年一直在做同一件事：把某种别人还没用上的信息，变成一张能赚钱的仓位。早年间这信息可能是纽约港的货船到港记录，可能是交易所大厅里一个熟人的手势，也可能只是比别人早半小时看到报价纸带。到了机器学习的年代，这件事第一次变得可以被规模化地自动化——模型替人去看海量的价量数据、新闻、财报电话会记录、订单簿挂单流，再从里头找出统计规律并落成买卖指令。
+
+问题也正出在这里。学术论文和行业报告里，“用深度学习/强化学习/大语言模型做交易”的标题几乎是取之不尽的，报告的样本内收益动辄年化几十个百分点，可真正落到账户上的东西，往往少得可怜。这个落差不是靠“模型还不够大”就能补上的，它是真正值得写一篇综述去弄清楚的事。
+
+这篇文章想回答两个问题。第一，人工智能在这条“信息 $\to$ 定价偏差 $\to$ 可交易缝隙”的链条上，到底站在哪个位置，能做什么，不能做什么。第二，现有研究的成果里，哪些经得起重读，哪些经得起复现，哪些只是样本内的偶然。
+
+\subsection{为什么用“信息 $\to$ 定价偏差 $\to$ 可交易缝隙”这条链}
+
+把交易拆成三段，能让很多混乱的讨论立刻清楚起来。
+
+第一段是\textbf{信息}。市场里存在一些别人还没反映进价格的信息，这是交易能赚钱的前提。信息的存量不是无限的：信息含量越高的信息越早被人抢走，剩下的边际信息越来越稀薄。
+
+第二段是\textbf{定价偏差}。信息要能变成钱，前提是价格还没有把这信息充分反映进去，或者反映得过火了。偏差的存在，一半来自人（行为、情绪、注意力约束），一半来自制度（流动性、摩擦、套利限制）。
+
+第三段是\textbf{可交易缝隙}。就算前两段都成立，这个偏差还得足够大、足够持久、能扛住交易成本和冲击成本，才是一道能真正落袋的缝。缝隙的宽度是被执行摩擦从两头削出来的。
+
+\subsection*{关于“可交易缝隙”这个说法}
+
+有必要先把用词交代清楚。“信息”与“定价偏差”都是文献里的成熟概念（后者即 mispricing），“可交易缝隙”\textbf{不是}。它是本文为了方便组织全篇而临时采用的一个\textbf{工作术语}，指代的却是文献里早已有、只是分散在若干名目下面对应的同一件事。本文不打算为它争一个正式名分，也不把它当作一个有出处的概念引用；之所以仍要用它，是因为“错误定价”这个词过于平静，容易让人忘记那道缝隙是被摩擦从两头削出来的——而这一点恰恰是全篇的论证重心。下面这张对齐表说明它对应到哪些既有概念，免得读者误以为它是某个新提出来的理论对象。
+
+\begin{table}[htbp]
+\centering
+\caption{“可交易缝隙”及其相关提法与既有概念的对应}
+\label{tab:termalign}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{4.3cm}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{3.8cm}@{}}
+\toprule
+本文提法 & 文献中的标准概念 & 代表来源 & 差异说明 \\
+\midrule
+定价偏差 & mispricing（错误定价） & 通行概念，无需特指 & 本文与文献用法一致 \\
+可交易缝隙 & profitable trading opportunity；在套利受限语境下最接近“可交易性”这一侧 & Shleifer \& Vishny（1997）\cite{shleifer1997} & 文献通常只说“机会”，本文强调其宽度由摩擦决定 \\
+缝隙被摩擦削窄 & market impact、transaction cost & Almgren \& Chriss（2000）\cite{almgrenchriss2000} & 概念一致；本文把它写成对缝隙宽度的直接扣减 \\
+缝隙随参与者增多而变薄 & alpha decay、因子发表后收益衰减 & McLean \& Pontiff（2016）\cite{mcleanpontiff2016} & 概念一致；本文用信息租金耗散机制解释其成因 \\
+缝隙存在判据 $\delta_0>c$ & 与“alpha 必须覆盖成本”的工程口径同构 & 本文自推，非文献标准结果 & \textbf{本文提出}，见第 \ref{sec:foundations} 章命题 2.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent 需要如实说明两点：其一，“可交易缝隙”与判据 $\delta_0>c$ 均为本文自造或自推，不是引自任何文献，若引用请引本文；其二，如果你更习惯既有说法，把下文所有“缝隙”替换成“可交易错误定价”不会改变任何结论——术语是包装，判据才是内容。
+
+AI 的价值，就落在“把这三段各自做得更好”上：更好地表示信息（特征学习、另类数据）、更好地估计偏差（预测模型）、更好地决策收割（执行、组合、风控）。而它的能力上限，恰好被第一条和第三条夹住——这就是为什么本文在全篇反复回到“信息存量的天花板”和“执行摩擦的地板”这两个约束上。这个框架还有一个好处，它天然解释了为什么不同方法族的“看起来好”并不等价：有的方法是在把信息榨得更干（天花板提升），有的方法是在把摩擦降得更低（地板下移），二者需要分开评估。
+
+\subsection{综述边界}
+
+\begin{itemize}
+  \item \textbf{时间范围}：方法学源头可追溯到 Markowitz（1952）与现代组合理论；主体覆盖 1990 年代统计套利、2010 年后深度学习与强化学习、2020 年后大模型与生成式模型，至 2026 年 10 月的预印本。
+  \item \textbf{资产类别}：股票（美股、A 股、日股、欧股、新兴市场）、期货与商品、外汇、固定收益、加密货币；以股票与期货为主，其余作对照。
+  \item \textbf{交易环节}：信号生成（alpha）、组合构建、交易执行（含做市与最优执行）、风险管理、另类数据与微观结构。
+  \item \textbf{来源类型}：同行评审期刊论文、工作论文（NBER/SSRN）、arXiv 预印本、会议论文（NeurIPS/ICML/ICLR/ICAIF/AAAI）、官方开源仓库与基准报告。
+  \item \textbf{排除}：与交易无关的通用机器学习方法介绍；纯营销材料与无实证或无理论贡献的二手转述；把“预测准确率”当作终点、不涉及任何交易环节的纯预测工作只作背景引用。
+\end{itemize}
+
+\subsection{检索策略与证据链}\label{sec:search}
+
+检索采用多源交叉核验，所有元数据来自接口真实返回，未编造 DOI 或年份。为便于独立复现，检索式、脚本与全部中间产物一并给出（脚本见 \texttt{scripts/retrieve\_sources.py}，原始返回见 \texttt{outputs/sources.json}）。三个源的分工是：
+
+\begin{enumerate}
+  \item \textbf{OpenAlex API}（47 条标题检索）：按标题检索经典金融与计量期刊文献（\emph{Journal of Finance}、\emph{Review of Financial Studies}、\emph{Journal of Financial Economics}、\emph{Management Science}、\emph{Quantitative Finance} 等），记录 DOI、发表年份、被引数与来源期刊。
+  \item \textbf{arXiv API}（45 条关键词检索）：检索 q-fin 与 cs 分类下的预印本，覆盖六个方法族（alpha 挖掘、序列建模、强化学习、NLP/LLM、生成式、图神经网络）与五个交易环节（执行、组合、风控、微观结构、另类数据），并专门检索评测方法论（数据窥探、回测过拟合、缩水夏普、复现危机）。
+  \item \textbf{Crossref}（10 条书目检索）：对前两源命中但元数据缺失或存疑的条目做书目级补核验（\texttt{verify\_refs2.py}、\texttt{verify\_refs3.py}），并以 GitHub API 核验官方开源仓库的可用性与许可。
+\end{enumerate}
+
+\subsection*{检索与筛选流程（PRISMA 式）}
+
+\begin{table}[htbp]
+\centering
+\caption{检索与筛选流程及计数}
+\label{tab:prisma}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{7.6cm}@{}}
+\toprule
+阶段 & 记录数 & 说明 \\
+\midrule
+识别（识别命中） & 556 & OpenAlex 154 + arXiv 375 + Crossref 27（接口返回的记录条数） \\
+去重（按 DOI/arXiv 编号） & 528 & 合并同一 DOI 与同一 arXiv 编号的重复记录 \\
+纳入（按边界与排除标准） & 90 & 按六方法族与五环节筛选；剔除超出边界、无实证或无理论贡献者 \\
+入表 & 90 & 全部进入证据表；其中元数据层\textsc{已核验} 86 条、\textsc{部分核验} 4 条 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent 代表性检索式举例（完整清单见脚本）：OpenAlex 标题如 \texttt{Empirical Asset Pricing via Machine Learning}、\texttt{Optimal Execution of Portfolio Transactions}；arXiv 关键词如 \texttt{abs:"reinforcement learning" AND abs:"optimal execution"}、\texttt{abs:"large language model" AND abs:"stock" AND abs:"trading"}、\texttt{abs:"backtest overfitting" AND cat:q-fin}。检索执行日为 2026-10-09，未设起始年份限制，纳入截止于当日可见的预印本。
+
+\subsection*{两条口径约定}
+
+\textbf{（一）年份口径}：期刊与会议条目记\textbf{正式发表年}；若工作先以预印本发布后正式发表，以正式发表年为准（如 TimesFM 记 2024 年，其 arXiv 首发为 2023 年）；未正式发表者记 arXiv 首发年。正文中的“作者（年份）”均遵循此约定，读者若按 arXiv 首发年检索，可能相差一年。
+
+\textbf{（二）核验等级}：本文只用两级——\textsc{已核验}（DOI / arXiv / 官方链接与元数据互证）、\textsc{部分核验}（元数据确认，但样本区间、模型参数等细节待全文复核）。\textbf{不设“待复核”一档}：凡无法确证元数据者，一律不入表。需要强调的是，\textsc{已核验}仅指\textbf{元数据层}，与结论是否可靠无关——结论的可靠性请对照证据表 B 的“复现状态”列。
+
+\subsection{与已有综述的关系}\label{sec:positioning}
+
+“AI + 金融”并不缺综述，但既有综述大致分三类，各有一块盲区。
+
+第一类是\textbf{文献计量与主题建模型}综述，统计发文量、主题词与引用网络（如 \cite{mltopic2021}），它告诉你这个领域多热、热点在哪，却几乎不回答“哪些结果可信”。第二类是\textbf{方法罗列型}综述，把模型按代际排开（线性 → 树 → 深度 → 大模型）逐一介绍结构与改进（如 \cite{sezer2020survey}），读起来像教科书目录，但很少触及成本、样本外与复现。第三类是\textbf{经济学实证传统}的方法学工作，把机器学习放进资产定价的经验研究里（如 \cite{gukellyxiu2020}），讨论严谨，但覆盖面集中在横截面收益预测，对执行、做市、生成式与 LLM 智能体这些更靠近“摩擦”的方向着墨有限。
+
+本文的三点不同：
+
+\begin{enumerate}
+  \item \textbf{用一条判据贯穿全篇}。不是按“方法新旧”排序，而是按“是否在扣成本、扣多重检验后仍然为正”的统一判据（第 \ref{sec:foundations} 章）评估每一族。因此本文会明确写出“这一族在当前口径下增量不可判定”，而不是含糊地说“有潜力”。
+  \item \textbf{把评测本身当作研究对象}。第 \ref{sec:audit} 章的污染审计与第 \ref{sec:repro_audit} 章的复现核验，占据的篇幅不亚于方法介绍。因为对落地者而言，“哪些能重跑”比“有哪些新方法”更决定成败。
+  \item \textbf{区分架构事实与判断结论}。凡属可验证的架构/协议事实（如某基准公开了哪些指标、某仓库的许可与活跃度），本文给出可核验依据；凡属判断性结论（如“RL 在组合管理上证据薄弱”），本文标明置信度与边界条件。
+\end{enumerate}
+
+同样要说清楚本文\textbf{不做}什么：不做文献计量统计，不追求覆盖每一篇边际改进，也不对未公开数据/模型的结论给出超出“不可独立验证”的判断。这三条既是本文的边界，也是它能把力气花在“可落地”上的原因。
+
+\subsection{这篇综述的读法}
+
+如果你只关心“哪些方法能落地”，从第 \ref{sec:framework} 章的双轴框架和第 \ref{sec:repro_audit} 章的复现状态核验表读起，再跳到第 \ref{sec:repro_protocol} 章的实验方案。如果你想搞清楚“AI 到底改变了什么”，先读第 \ref{sec:foundations} 章，那里把交易的数学底座和 AI 的作用位置讲清楚，后面每一族方法都是它的实例。如果你怀疑现有研究的可靠性，第 \ref{sec:audit} 章的评测污染审计和第 \ref{sec:confidence} 章的置信度分级会给你一把尺子。
+
+有一句话我想先放在开头，后面会一次次用到它：\textbf{在金融里，一个模型能把样本内拟合得多好，往往和它能不能赚钱关系不大；真正相关的是它抓到的信息还有多少没被别人用掉，以及它赚到的钱够不够付摩擦的账。}

@@ -1,0 +1,250 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+\setlist{topsep=0.3em,itemsep=0.2em,parsep=0.15em}
+
+\title{\bfseries 第二轮评审报告\\\large 复核对象：修订稿（68 页，含第 21 章真实数据最小实证）}
+\author{\large 叨客宁宁}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{评审方法，以及一处必须先声明的偏差风险}
+
+本轮评审对修订稿做三路独立验证，不采信作者回执中的结论性表述：
+
+\begin{enumerate}
+  \item \textbf{正文回验}：把上一轮 15 条 Major 与 8 条 Minor 逐条回到章节正文找证据，找不到证据即判未解决。
+  \item \textbf{代码级复核}：通读 \texttt{code/} 下与第 21 章实证相关的全部脚本，核对论文描述与实现是否一致，并检查默认参数是否与样本实际匹配。
+  \item \textbf{数值重算}：对论文表格中的每一个数字回到 \texttt{outputs/} 的日志与试验账本核对，关键项独立重跑复现。
+\end{enumerate}
+
+\textbf{偏差风险声明}：本轮评审者与修订稿的作者为同一人。这不是理想的评审安排——自我评审系统性偏向确认而非否定。为压制这一偏差，本报告采取两条约束：所有判断必须给出可复现的证据位置（文件与行号、或可重跑的脚本）；凡是重算结果与论文不一致的，一律以重算为准并列明差异，即使该差异对作者不利。
+
+\section{上一轮意见的独立回验}
+
+\subsection{Major 意见（M1--M15）}
+
+\begin{table}[htbp]
+\centering
+\caption{上一轮 15 条 Major 意见的回验结果}
+\label{tab:major}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{6.3cm}@{}}
+\toprule
+编号 & 回验证据位置 & 结论 \\
+\midrule
+M1 & 证据表表头“核验等级约定（两级）”；第 21 章“核验状态约定” & 已解决 \\
+M2 & 证据表 A/B 共用 E 编号；比较矩阵每行首列标注 E 编号 & 已解决 \\
+M3 & 证据表 A 链接说明段；无 DOI 条目如实标注 & 已解决 \\
+M4 & 证据表 A 增设“类型”列；表头声明已核验仅指元数据层 & 已解决 \\
+M5 & \texttt{eval.py} 的 \texttt{ic\_series}；\texttt{run.py} 输出 IC/IR & 已解决 \\
+M6 & \texttt{run.py} 用滚动前向组装样本外，另存单次切分对照 & 已解决 \\
+M7 & \texttt{eval.py} 两个 DSR 口径；PBO 四档切分敏感性 & 已解决（但见 R2） \\
+M8 & 合成侧 \texttt{data.py}、真实侧 \texttt{real\_data.py} 的制度掩码 & 已解决（但见 R1、R5） \\
+M9 & 第 16 章“协议条款 $\leftrightarrow$ 参考实现”对照表 & 已解决 \\
+M10 & 试验账本 $N=61$ 的构成逐项列明 & 已解决 \\
+M11 & 第 2 章核心命题弱化为可检验形式 & 已解决 \\
+M12 & 第 2 章给出 $\delta_0$ 与 $c$ 的代理估计与置信下界形式 & 已解决 \\
+M13 & 第 21 章新增真实数据最小实证 & 已解决（本轮重点复核对象） \\
+M14 & 第 1 章 PRISMA 式流程与检索式清单 & 已解决 \\
+M15 & 术语表声明“可交易缝隙”为本文工作术语并给出对齐表 & 已解决 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+八条 Minor（综述分类举例、年份口径、扩充图网络与生成式两章、A 股制度小节、术语表、仓库表使用说明、核验等级同步、“关键定位”填写规范）均在正文找到对应内容。其中 A 股制度小节（第 10 章）质量高于预期：它把涨跌停、T+1、融券约束、披露集中度四条差异逐条落到“回测会怎么错”上，且“融券约束使教科书式多空对称在 A 股不可实现”这一条，与第 21 章真实数据实证的仅多头对照形成了前后呼应。
+
+综合判断：上一轮意见 15 条全部达“已解决”，无一条停留在纸面回执。但 M7 与 M8 的修订在真实数据侧引入了本轮的三条主要问题，见下节。
+
+\section{新增实证（第 21 章）的专项评审}
+
+\subsection{值得肯定的三点}
+
+其一，把“合成面板不能外推”这一步做实了，而且做的方式对自己不利：真实数据上按样本内夏普挑选并没有选到噪声，DSR（标准误口径）$0.9991$、PBO $0.000$，直接推翻了合成演示那条外推。多数综述在这类地方会选择不提。
+
+其二，第 21 章主动交代了“随机组合”在合成与真实两种数据上含义不同——合成里随机组合由噪声主导，真实里 8 个特征本身都含信号，随机组合只是它们的随机线性混合。这个澄清是必要的，否则“随机组合表现好”极易被误读。
+
+其三，复权影响的单变量对照（仅换标签、不动特征与权重，8 项 IC 差异 $\le 0.0011$）把一个想当然的因果解释证伪了，并把脚本留在仓库里。这类自我证伪的记录，比结论本身更有交接价值。
+
+\subsection{R1（必须修改）：冲击成本模型的 ADV 与样本实际量级不符}
+
+第 21 章报告的“含冲击”一档，用的是 \texttt{costs.py} 的默认参数 \texttt{adv}$=10^9$ 元，且对全部 400 只个股取同一常数；\texttt{run.py} 调用 \texttt{CostModel} 时没有传入任何与个股或样本相关的 ADV。但快照统计显示，样本个股的日成交额中位数为 $7.46\times10^7$ 元，即该常数相当于样本中位数的 $13.4$ 倍。参与率与 ADV 成反比，冲击率又按参与率的平方根计，两个方向叠加，使冲击成本被系统性低估。
+
+把该常数换成逐个股在窗口内的日成交额中位数重算同一候选（脚本 \texttt{code/audit\_cost\_caliber.py}），结果见表 \ref{tab:adv}。
+
+\begin{table}[htbp]
+\centering
+\caption{ADV 假设对“含冲击”一档的影响（候选 rand10，资本 $10^8$ 元）}
+\label{tab:adv}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.2cm}@{}}
+\toprule
+ADV 口径 & 年化 & 夏普 & 最大回撤 & 参与率超限 \\
+\midrule
+零成本（对照） & 0.273 & 3.057 & $-0.114$ & 0 \\
+论文口径：常数 $10^9$ & 0.104 & 1.164 & $-0.148$ & 0 \\
+逐股：成交额中位数 & $-0.105$ & $-1.170$ & $-0.619$ & 28 \\
+逐股：中位数 $/2$ & $-0.222$ & $-2.473$ & $-0.832$ & 1004 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+年化成本随之从 $0.169$ 升到 $0.378$。差异并非来自单笔规模——该组合单票权重均值约 $0.25\%$、最大 $4.4\%$，资本 $10^8$ 元下单票成交额多在百万元级——而是来自小市值个股：参与率超过 $10\%$ 上限的 28 个单元格集中在 14 只 ADV 约 $2\times10^7$ 元的个股上，正是这批个股把尾部成本抬高。
+
+同时要指出一处协议自洽性问题：第 16 章明文规定强制报告六类指标，其中成本类要求报告\textbf{换手率与成本占比}；第 21 章的成本三档只给了净值指标，没有报告换手率与成本占比。实测该候选的日均合计换手 $\sum|\Delta w|$ 为 $0.721$，折合年化约 $182$ 倍——这是一个决定性的数字，读者有理由知道它。
+
+\textbf{处置建议}：把 ADV 改为逐个股的滚动成交额（快照里已持有该数据），并在第 21 章补报年化换手率与成本占比。需要说明的是，\textbf{这条修改不改变论文结论的方向，反而使其更强}：在贴近样本实际的成本下，“多空夏普 3.057”不是被压到 $1.164$，而是被压成负数，正好把“可预测不等于可交易”的论证推得更彻底。第 11 章已把 ADV $=10^9$ 作为示例性假设写明，问题只在于第 21 章沿用时没有重新校准。
+
+\subsection{R2（必须修改）：DSR 两口径未作裁决，且对原文定义的引用需要核实}
+
+第 21 章并列报告两个 DSR：标准误口径 $0.9991$、截面离散口径 $0.0022$。两者分处两个极端，观测到的夏普落在两个基准之间，因此“信息层确有稳定信号”这一判断实际上完全取决于选哪个口径。论文只在表内附了一句“两口径分叉本身即是一处需警惕之处”，正文却仍下了肯定判断。
+
+更需核实的是口径的正当性来源。核对 \texttt{eval.py} 可见，两个实现的\textbf{标准化方式完全相同}（把 $(sr-sr_0)$ 除以同一个解析标准误），差别只在 $sr_0$ 的计算所用的 $V(\widehat{SR})$：离散口径用 61 个候选样本外夏普的截面方差，标准误口径用单个夏普估计的解析方差。论文把后者称为“与原文定义一致”，但 Bailey 与 López de Prado 原文的 DSR 恰恰是以试验集的夏普方差估计 $V(\widehat{SR})$——按字面，反而是离散口径更贴近原文。这个表述需要核实并改正。
+
+另一方面，候选池的 61 个候选都是同 8 个特征的线性组合，彼此高度相关，其截面离散度主要反映“策略质量差异”而非“估计误差”，直接用作 $V(\widehat{SR})$ 会失真。因此正确的做法不是并列两个数字，而是给出裁决与理由：说明本候选池下哪个 $V(\widehat{SR})$ 更可信、为什么，并把另一个降为参考。
+
+\subsection{R3（必须修改）：单特征显著性未做多重检验校正，且举例与本刊标准不符}
+
+第 21 章下了“A 股这几条经典价量异象在该窗口里确实稳定存在”的判断，举例为“量比与 5/20/60 日动量”，但通篇没有给出 $t$ 统计量，也没有按第 16 章自己援引的 Harvey--Liu--Zhu $t>3$ 门槛与 Benjamini--Hochberg 校正做判定（该章还写明成功标准之一是报告“校正后 $p$ 值”）。把 8 个特征的截面 IC 序列补齐检验（\texttt{code/diag\_ls\_lo.py} 已输出，重跑可复现），结果见表 \ref{tab:tstat}。
+
+\begin{table}[htbp]
+\centering
+\caption{单特征截面 IC 的显著性（$t=\text{IC-IR}\times\sqrt{n}$，$n=1820$）}
+\label{tab:tstat}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.4cm}@{}}
+\toprule
+特征 & IC 均值 & IC-IR & $t$ & 过 BH 5\% & 过 $|t|>3$ \\
+\midrule
+量比 & $-0.0303$ & $-0.212$ & $-9.03$ & 是 & 是 \\
+1 日反转 & $0.0240$ & $0.159$ & $6.77$ & 是 & 是 \\
+非流动性 & $0.0108$ & $0.092$ & $3.91$ & 是 & 是 \\
+20 日动量 & $-0.0098$ & $-0.056$ & $-2.38$ & 是 & 否 \\
+60 日动量 & $-0.0094$ & $-0.053$ & $-2.28$ & 是 & 否 \\
+距均线偏离 & $-0.0077$ & $-0.044$ & $-1.89$ & 否 & 否 \\
+波动率 & $-0.0072$ & $-0.040$ & $-1.71$ & 否 & 否 \\
+5 日动量 & $-0.0051$ & $-0.031$ & $-1.32$ & 否 & 否 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+按 $|t|>3$ 门槛，8 个特征中只有 3 个通过（量比、1 日反转、非流动性）；按 BH 5\%，5 个通过。论文举例中的“5 日动量”$|t|=1.32$，既不过 BH 也不过 $|t|>3$；而真正过 $|t|>3$ 的 1 日反转与非流动性却未被提及。这句举例与本刊自己援引的标准不一致，应当按表 \ref{tab:tstat} 改写。
+
+\subsection{建议级与次要级意见}
+
+\begin{table}[htbp]
+\centering
+\caption{建议级与次要级意见}
+\label{tab:minor2}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{9.7cm}@{}}
+\toprule
+编号 & 级别 & 意见 \\
+\midrule
+R4 & 建议 & \textbf{universe 未冻结，跨机器不可复现}。\texttt{real\_data.py} 按本地 vipdoc 的文件清单排序后等距抽样，抽样框取决于本机安装的数据完整度；试验账本里也没有 400 只的代码清单。建议输出 \texttt{outputs/real\_universe.json} 并在论文标注，使“最小实证”可被他人复算。 \\
+R5 & 建议 & \textbf{封板占比两个分母混用}。文中“有效样本内封板占 1.97\%（涨停 1.19\%、跌停 0.38\%）”里，前者以有效单元格为分母、后者以全部单元格为分母（$1.19+0.38=1.57$，除以有效率 $0.8009$ 得 $1.96$）。数值自洽，但同句分母不一致易被误读，建议统一并注明。 \\
+R6 & 建议 & \textbf{复权核验是便利样本}。\texttt{scripts/verify\_adjust.py} 的抽样表为手工指定的 8 只（含 2 只北交所）。作为链路自洽性检查足够，但不构成对 400 只的误差上界。建议对全部个股跑一遍，报告偏差的中位数、95 分位与最大值。 \\
+R7 & 建议 & \textbf{费率未分时段}。\texttt{CostModel} 对买卖双向统一按 $5$bp 计费；样本跨越 2019--2026，其间卖出印花税经历了 $0.1\%$ 到 $0.05\%$（2023 年 8 月）的调整，过户费未计入。建议按日期分段，或在第 21 章边界段显式声明这一简化。 \\
+R8 & 次要 & \textbf{仅多头未剥离 beta，且未给基准}。论文已声明该缺口，但可以量化：补一个同期等权全市场基准的夏普，读者才能判断 $1.271$ 里有多少是市场暴露。 \\
+R9 & 次要 & \textbf{rand10 的权重是随机的，却承担了汇报主指标的角色}。建议补一句它与最强单特征（量比）的关系，说明随机混合是否只是量比的近似替身；否则“随机组合 OOS 2.671”容易被读成“随机也能赚钱”。 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{数值一致性抽查}
+
+\begin{table}[htbp]
+\centering
+\caption{论文数字与独立复核的对照}
+\label{tab:consistency}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{4.6cm}@{}}
+\toprule
+论文位置 & 独立复核来源 & 结论 \\
+\midrule
+第 21 章表 17（实跑结果，11 项） & \texttt{code/trial\_ledger\_real.json} & 逐项一致 \\
+第 21 章表 18（多空/仅多头，8 行） & \texttt{code/diag\_ls\_lo.py} 本次重跑 & 逐项一致 \\
+第 21 章复权影响对照（8 行） & \texttt{code/diag\_adjust\_effect.py} & 逐项一致 \\
+复权拼装链核验（8 只） & \texttt{scripts/verify\_adjust.py} & 一致（抽样范围见 R6） \\
+第 21 章成本三档 & \texttt{code/audit\_cost\_caliber.py} 重算 & \textbf{不一致}，见 R1 \\
+第 21 章合成面板表 & \texttt{code/run.py} 重跑 & 逐项一致（PBO $0.567$，区间 $[0.400,0.584]$） \\
+全文引用完整性 & \texttt{scripts/check\_cites.py} & 正文 90 $=$ 参考文献 90，无孤儿、无悬空 \\
+排版 & 编译日志 & 错误 0、Overfull 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+除成本一档外，抽查未发现数字或口径不一致之处。特别值得肯定的是：第 21 章主动保留了两轮实跑之间的 IC 差异，并明确把它归因于 universe 与掩码收紧、以及被选中候选不同，而不是归因于复权——这个归因在单变量对照下站得住。
+
+\section{结论与建议}
+
+\textbf{对本轮修订的总体判断}：上一轮 15 条 Major 与 8 条 Minor 全部落到实处，且新增的第 21 章真实数据最小实证是本次修订最有价值的部分——它完成了从“合成演示”到“经验对照”的升级，并且敢于报告与预期相反的发现（选到的不是噪声、复权对 IC 几乎无影响）。论文的核心论证（成本与可实施性决定缝隙是否可交易）在收紧口径后依然成立。
+
+\textbf{但成本一档存在实质问题}（R1），它直接改变论文中的关键数字：含冲击夏普由 $+1.164$ 变为负值。这一条加上 R2、R3，构成本轮的三项必改项。三项都不是推翻结论，而是让结论更硬：R1 让“不可交易”的证据更强，R2、R3 让统计判断与本文自己援引的标准对齐。
+
+\begin{table}[htbp]
+\centering
+\caption{本轮的处置清单}
+\label{tab:actions}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.0cm}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{8.6cm}@{}}
+\toprule
+编号 & 级别 & 处置 \\
+\midrule
+R1 & 必须 & 冲击成本改用逐股 ADV；补报年化换手率与成本占比（第 16 章的强制项） \\
+R2 & 必须 & 为 DSR 两口径给出裁决与理由；核实并改正“与原文定义一致”的表述 \\
+R3 & 必须 & 补单特征 $t$ 值与 BH 校正；按表 \ref{tab:tstat} 改写异象举例 \\
+R4 & 建议 & 输出并冻结 400 只代码清单 \\
+R5 & 建议 & 统一封板占比的分母 \\
+R6 & 建议 & 复权核验扩到全部个股，报告分位数 \\
+R7 & 建议 & 费率按印花税调整分段，或显式声明简化 \\
+R8 & 次要 & 补市场等权基准，量化 beta 占比 \\
+R9 & 次要 & 说明 rand10 与最强单特征的关系 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{推荐处置：小修后接受。}三项必改项都是口径与披露层面的修正，不涉及论证结构重做，且修正方向与论文自身主张一致。若第 21 章按 R1 更新数字，本文关于“可预测不等于可交易”的经验证据会比现在更有力——因为那时结论不再依赖一个对流动性过分乐观的假设。
+
+\section{修订状态（据作者回执逐条复核）}
+
+九条意见全部处理，逐条证据如下。
+
+\begin{table}[htbp]
+\centering
+\caption{第二轮意见的修订状态}
+\label{tab:status}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{11.3cm}@{}}
+\toprule
+编号 & 状态 & 证据 \\
+\midrule
+R1 & 已解决 & \texttt{costs.py} 支持逐资产 ADV 与卖出侧附加费；\texttt{run.py} 传入逐股成交额中位数（样本中位 $7.46\times10^7$ 元）与分段印花税。实测含冲击一档由 $+1.164$ 变为 $-1.492$（年化 $-13.4\%$，成本占毛收益 1.49）；并补报换手率（日均 $\sum|\Delta w|=0.721$、年化约 182 倍）与成本占比，兑现第 16 章的强制项。 \\
+R2 & 已解决 & \texttt{eval.py} 两个口径的 docstring 均已改写，删去“与原文定义一致”的错误表述，改为说明两个口径只差 $V(\widehat{SR})$ 的取法。第 21 章新增“DSR 两口径的取舍”段，明确以标准误口径为准并给出理由与两点残留边界。 \\
+R3 & 已解决 & 表 18 增设 IC-IR、$t$、通过校正三列（$t=\text{IC-IR}\times\sqrt{n}$，$n=1820$，BH 5\%）；并按实测更正异象举例——5 日动量 $|t|=1.32$ 不通过，真正过硬门槛的是量比、1 日反转与非流动性。 \\
+R4 & 已解决 & 新增 \texttt{outputs/real\_universe.json}，冻结 400 只代码与逐股 ADV，并在第 21 章标注其用途。 \\
+R5 & 已解决 & \texttt{real\_data.py} 的封板统计一律改用有效单元格为分母：涨停 1.49\%、跌停 0.48\%、合计 1.96\%、一字板 0.20\%；论文同口径并注明分母定义。 \\
+R6 & 已解决 & \texttt{verify\_adjust.py} 扩到冻结 universe 全量 400 只并报告分位数：中位数 $2.3\times10^{-4}$、95 分位 $9.1\times10^{-4}$、最大 $3.1\times10^{-3}$（17 只超 $10^{-3}$，无一只超 $10^{-2}$）；参考价缓存至 \texttt{outputs/adjust\_check.json}，重跑不再联网。 \\
+R7 & 已解决 & \texttt{costs.py} 增列 A 股费率构成（佣金 2.5bp＋过户费 0.1bp 双边）与印花税分段函数（2023-08-28 起由 10bp 降至 5bp），在真实数据侧生效。 \\
+R8 & 已解决 & 新增 \texttt{code/diag\_alpha\_beta.py} 与表 19：等权全市场基准年化 12.1\%、夏普 0.523（OOS 0.597）；仅多头 beta $=0.991$、年化 alpha 5.5\%、剥离 beta 后残差夏普 1.082；多空 beta $=0.025$。 \\
+R9 & 已解决 & \texttt{rand10} 与量比的逐期截面相关为 $-0.862$，论文明确其“基本是量比因子的反向近似”，并说明随机组合胜出并不等于出现新信号。 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{对修订的总体判断}：三项必改都改到了根上，而不是只改论文表述——R1 改的是默认参数与费率构成，R2 改的是实现文档里的错误论断，R3 改的是判定标准本身。九条中 R1 的修正使第 21 章的核心数字发生方向性变化（含冲击档由正转负），这不仅没有削弱论文，反而把“可预测不等于可交易”从“被成本压低”升级为“被成本击穿”。R9 的补充意外地加强了论证：样本内最优的“随机组合”被证明只是量比的反向复制，说明真实数据上并没有出现新的信号源。
+
+一处遗留的自我一致性检查：第 21 章现在同时报告了换手率（182 倍）、成本占比（1.49）与 beta（0.991），三项都指向同一结论；第 16 章协议表也已同步。三者与第 10 章“融券约束使多空对称不可实现”、第 11 章“预测噪声大时换手率飙升”的论述方向一致，未见相互矛盾之处。
+
+\medskip
+
+\noindent\textbf{一句结语}：上一轮评审要求作者把诚实标准施加到自己的证据表与代码上；这一轮看下来，作者基本做到了。本轮唯一一处漏网出在最不显眼的地方——一个写在函数默认值里的 ADV 常数；它提醒的是同一件事：口径的诚实，最终要落到每一个默认参数上。该常数现已改为逐股取值，缺陷闭环。
+\end{document}

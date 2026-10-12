@@ -1,0 +1,191 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+\setlist{topsep=0.3em,itemsep=0.2em,parsep=0.15em}
+
+\title{\bfseries 成本口径修正与统计披露补齐\\\large 变更摘要（第二轮评审修订，面向交接与复核）}
+\author{\large 叨客宁宁}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{这份摘要解决什么问题}
+
+第二轮评审对修订稿提出九条意见（三项必须、四项建议、两项次要），本轮全部落地。改动集中在\textbf{真实数据实证那一支}：成本模型、统计口径与披露项。合成面板（\texttt{data.py}）与评测层（\texttt{eval.py} 的计算逻辑）未改动，仅改了两个 DSR 实现的说明文档。
+
+一句话概括本轮的净效果：\textbf{唯一发生方向性变化的数字是“含冲击”一档，它由 $+1.164$ 变为 $-1.492$}。其余指标（快照校验和、样本内最优候选、OOS 夏普、IC/IR、DSR 两口径、PBO）逐项未变，原因见第 \ref{sec:delta} 节。
+
+\section{九条意见与处置}
+
+\begin{table}[htbp]
+\centering
+\caption{第二轮评审意见的处置与影响}
+\label{tab:items}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.8cm}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{7.4cm}>{\raggedright\arraybackslash}p{2.4cm}@{}}
+\toprule
+编号 & 级别 & 类型 & 处置 & 是否改变数字 \\
+\midrule
+R1 & 必须 & 口径 & 冲击成本改用逐股 ADV；补报换手率与成本占比 & 是（含冲击档） \\
+R2 & 必须 & 披露 & 为 DSR 两口径给出裁决与理由；改正实现文档中的错误论断 & 否 \\
+R3 & 必须 & 披露 & 补单特征 $t$ 值与 BH 校正；据实更正异象举例 & 否（新增检验） \\
+R4 & 建议 & 实现 & 冻结 universe 清单，使实证可被他人复算 & 否 \\
+R5 & 建议 & 披露 & 封板占比统一以有效单元格为分母 & 否（同值换分母） \\
+R6 & 建议 & 实现 & 复权核验扩到全量 400 只并报分位数 & 否（扩大证据） \\
+R7 & 建议 & 口径 & 费率按 A 股构成计入，印花税按日期分段 & 是（并入 R1） \\
+R8 & 次要 & 披露 & 补市场基准与 beta/alpha 分解 & 否（新增分解） \\
+R9 & 次要 & 披露 & 说明最优候选与最强单特征的关系 & 否（新增说明） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+九条里只有 R1（含 R7 的费率构成）真正改动数字，其余六条改的是披露完整性与可复算性。这一点值得留意：评审提的问题多数不是“算错了”，而是“没说清”或“别人复算不了”。
+
+\section{文件级变更清单}
+
+\begin{table}[htbp]
+\centering
+\caption{本轮改动的文件}
+\label{tab:files}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{8.4cm}@{}}
+\toprule
+文件 & 类型 & 内容 \\
+\midrule
+\texttt{code/costs.py} & 修改 & ADV 支持标量或逐资产向量；新增卖出侧附加费参数；新增 A 股费率构成常量与印花税分段函数 \\
+\texttt{code/run.py} & 修改 & 新增成本模型构造（逐股 ADV＋分段费率）与换手统计；成本三档输出换手率与成本占比；试验账本增记成本口径、三档明细、$\text{DSR}$ 裁决；输出 universe 冻结文件 \\
+\texttt{code/eval.py} & 修改 & 两个 DSR 实现的说明改写：删去“与原文定义一致”的错误论断，写明两口径只差 $V(\widehat{SR})$ 的取法及各自适用条件 \\
+\texttt{code/real\_data.py} & 修改 & 封板、一字板占比一律改用有效单元格为分母，新增合计项 \\
+\texttt{code/diag\_ls\_lo.py} & 修改 & 增列 IC-IR 与 $t$ 值、$|t|>3$ 汇总；抽出仅多头权重函数供复用 \\
+\texttt{code/diag\_alpha\_beta.py} & 新增 & 等权市场基准、beta/alpha 分解、最优候选与单特征的截面相关 \\
+\texttt{code/audit\_cost\_caliber.py} & 新增 & 成本口径审计：ADV 假设与样本实际成交额的对照（评审证据） \\
+\texttt{scripts/verify\_adjust.py} & 修改 & 核验范围扩到冻结 universe 全量，报告偏差分位数；参考价结果缓存；保留抽样快速模式 \\
+\texttt{outputs/real\_universe.json} & 新增 & 400 只代码与逐股 ADV（随快照冻结） \\
+\texttt{outputs/adjust\_check.json} & 新增 & 全量复权交叉核验的参考价缓存 \\
+\texttt{sections/checklist.tex} & 修改 & 第 21 章重写：成本口径、换手披露、显著性表、DSR 裁决、beta 分解、候选与量比关系；新增可实施性核查小节 \\
+\texttt{sections/repro\_protocol.tex} & 修改 & 协议对照表两行（成本、六类指标） \\
+\texttt{sections/integration.tex} & 修改 & 第 11 章补记 ADV 示意假设与真实取值的差别 \\
+\texttt{docs/peer\_review\_round2.tex} & 修改 & 追加九条意见的修订状态表与总体判断 \\
+\texttt{docs/change\_summary.tex} & 修改 & 原摘要的成本数字加“已更新”指引，避免与本文冲突 \\
+\texttt{README.md} & 修改 & 目录结构、运行命令、产物清单、页数 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{口径变更对照}
+
+\begin{table}[htbp]
+\centering
+\caption{六项口径的变更前后对照}
+\label{tab:caliber}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{5.4cm}>{\raggedright\arraybackslash}p{6.4cm}@{}}
+\toprule
+维度 & 变更前 & 变更后 \\
+\midrule
+冲击模型 ADV & 常数 $10^9$ 元，对全部个股相同 & 逐个股成交额中位数（样本中位 $7.46\times10^7$ 元，为原常数 $1/13.4$） \\
+费率构成 & 单一 $5$bp 双边 & 佣金 $2.5$bp＋过户费 $0.1$bp 双边；卖出印花税分段：2023-08-28 前 $10$bp、之后 $5$bp \\
+换手披露 & 未报告 & 日均合计 $\sum|\Delta w|=0.721$，年化约 182 倍；并报成本占毛收益之比 \\
+封板占比分母 & 有效单元格与全部单元格混用 & 一律以有效单元格为分母：涨停 1.49\%、跌停 0.48\%、合计 1.96\%、一字板 0.20\% \\
+DSR 口径 & 并列两个数字，未作裁决 & 明确以标准误口径为准并给出理由，另注明两点残留边界 \\
+复权核验范围 & 手选 8 只，仅报最大值 & 冻结 universe 全量 400 只，报中位、95 分位与最大值 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+ADV 这一项是本次修正的实质所在。原口径把 400 只个股的流动性都按 $10^9$ 元处理，而样本中位数只有 $7.46\times10^7$ 元；参与率与 ADV 成反比、冲击率又按参与率的平方根计，两个方向叠加，使冲击成本被系统性低估。修正后参与率超过 10\% 上限的单元格有 28 个，集中在 14 只 ADV 约 $2\times10^7$ 元的小市值个股上——正是这批个股把尾部的成本抬了起来。
+
+\section{实测结果：变了什么，没变什么}\label{sec:delta}
+
+\begin{table}[htbp]
+\centering
+\caption{关键指标的变更前后对照（候选 rand10，资本 $10^8$ 元）}
+\label{tab:results}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{4.4cm}@{}}
+\toprule
+项目 & 变更前 & 变更后 \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{发生变化的项}} \\
+\quad 固定费率档（年化 / 夏普） & 0.183 / 2.043 & 0.154 / 1.720 \\
+\quad 含冲击档（年化 / 夏普） & 0.104 / 1.164 & $-0.134$ / $-1.492$ \\
+\quad 成本占毛收益（含冲击） & 未报告 & 1.49 \\
+\quad 参与率超限单元格数 & 0 & 28 \\
+\addlinespace
+\multicolumn{3}{@{}l}{\emph{未发生变化的项（逐项复核）}} \\
+\quad 快照校验和 & \texttt{781cadd68dfbd170} & 同左 \\
+\quad 样本内最优候选 & \texttt{rand10}，3.649 & 同左 \\
+\quad 滚动前向 OOS 夏普 & 2.671（单次切分 3.595） & 同左 \\
+\quad IC 均值 / IR & 0.0129 / 0.088 & 同左 \\
+\quad DSR（标准误 / 离散） & 0.9991 / 0.0022 & 同左 \\
+\quad PBO（切分区间） & 0.000（$[0.000,0.000]$） & 同左 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+为什么这些项一个都没动，值得说明清楚，否则容易被当成“改了但没生效”：
+
+\begin{itemize}
+  \item 快照校验和只覆盖 \texttt{X}/\texttt{r}/\texttt{mask}/\texttt{tradable} 与复权因子。本轮 \texttt{real\_data.py} 只改了统计字典的\textbf{分母}，数据本体一字未动，故校验和不变（已重跑复现确认）。
+  \item 成本模型只作用于\textbf{组合收益序列}，不参与信号构造、权重生成与任何评测统计，因此 IC、IR、DSR、PBO 在原理上不该受影响。若它们变了，反而是 bug。
+  \item 变化只出现在“含成本”的档位，与成本模型的依赖关系一致。
+\end{itemize}
+
+换言之，本轮是一次外科式修改：改动方向与受影响范围严格对应，没有扩散。
+
+\section{本轮新增的三项发现}
+
+除了修口径，本轮补做的三件事各自带出了新信息，都不是“补个数字”而已。
+
+\textbf{（一）单特征显著性并不支持原来的举例。}补齐 $t$ 值（$t=\text{IC-IR}\times\sqrt{n}$，$n=1820$）与 BH 校正后，8 个特征中只有 3 个过 $|t|>3$ 门槛（量比 $-9.03$、1 日反转 $6.77$、非流动性 $3.91$），另有 2 个仅过 BH。原文并列作为稳定异象例子的“5 日动量”$|t|=1.32$，两项校正都不过；而真正过硬门槛的 1 日反转与非流动性反而没被提到。该表述已按实测更正。
+
+\textbf{（二）仅多头的 alpha 很薄。}用同期等权全市场组合作基准（年化 12.1\%、夏普 0.523、OOS 0.597）做一元回归分解：多空口径 beta $=0.025$（近似市场中性）、年化 alpha $27.0\%$；仅多头口径 beta $=0.991$、年化 alpha 仅 $5.5\%$，剥离市场暴露后的残差夏普 1.082 对应的年化也只有 $5.5\%$。仅多头的 beta 近乎 1，说明它基本上是“加了一层选股的市场组合”，其夏普里很大一部分是 beta，不是缝隙。
+
+\textbf{（三）样本内最优的“随机组合”其实是量比的反向复制。}\texttt{rand10} 与量比的逐期截面相关为 $-0.862$（另与 1 日反转 $-0.545$、与非流动性 $-0.270$）。所以“随机组合在真实数据上胜出”并不意味着凭空产生了新信号，而是它把最强的单因子反向复制一遍再稀释。这一条顺带把上一版留下的一处含糊表述补实了。
+
+\section{复现与核验}
+
+\begin{table}[htbp]
+\centering
+\caption{复现步骤与产出}
+\label{tab:repro}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{8.8cm}@{}}
+\toprule
+步骤 & 命令与产出 \\
+\midrule
+全流程实跑 & \texttt{cd code; python run.py {-}{-}real} $\rightarrow$ \texttt{trial\_ledger\_real.json}、\texttt{real\_universe.json} \\
+成本口径审计 & \texttt{python audit\_cost\_caliber.py} $\rightarrow$ 表 \ref{tab:caliber} 的 ADV 对照 \\
+多空与显著性 & \texttt{python diag\_ls\_lo.py} $\rightarrow$ 论文第 21 章表 18 \\
+beta 分解 & \texttt{python diag\_alpha\_beta.py} $\rightarrow$ 论文第 21 章表 19 \\
+复权全量核验 & \texttt{python scripts/verify\_adjust.py} $\rightarrow$ 400 只分位数（首次联网，之后走缓存） \\
+合成路径回归 & \texttt{python run.py} $\rightarrow$ PBO $0.567$、区间 $[0.400,0.584]$，与改动前一致 \\
+论文编译 & \texttt{xelatex main.tex} 连续三次 \\
+质量门 & 编译错误 0、Overfull 0、正文引用键 90 $=$ 参考文献 90、69 页 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+论文第 21 章的全部数字已逐项与 \texttt{trial\_ledger\_real.json}、\texttt{real\_run\_v3.txt}、\texttt{diag\_alpha\_beta.txt}、\texttt{verify\_adjust\_full.txt} 核对一致；复权全量核验的结果为：相对偏差中位数 $2.3\times10^{-4}$、95 分位 $9.1\times10^{-4}$、最大 $3.1\times10^{-3}$（17 只超过 $10^{-3}$，无一只超过 $10^{-2}$）。
+
+\section{未收敛的边界}
+
+\begin{enumerate}
+  \item \textbf{ADV 用窗口内中位数而非滚动值}。个股流动性会在窗口内变化，用单一时点中位数会平滑掉流动性骤降的时段，方向上仍偏乐观。
+  \item \textbf{幸存者偏差仍在}。universe 只保留窗口末仍在市、且成交额达标的股票，退市股不在本地库中。
+  \item \textbf{复权因子依赖第三方}。本地权息文件加密不可解析；全量核验下最大相对偏差 $3.1\times10^{-3}$，若该因子在某处滞后于真实除权日仍会残留局部跳空。
+  \item \textbf{涨跌停判定的例外情形}。按四档固定幅度尝试，未处理上市首日、重大资产重组复牌等无涨跌幅限制或特殊安排。
+  \item \textbf{停牌频率未进一步筛除}。仅用成交额中位数做了一道流动性门槛。
+\end{enumerate}
+
+最后要说清一句适用范围：表 \ref{tab:results} 里“含冲击档为负”是\textbf{针对 rand10 这一高换手候选}（年化换手 182 倍）的结果，不能读成“A 股价量因子一律不可交易”。换手低的策略在同一成本模型下未必如此。本轮的结论是：这一条候选在贴近实际的成本下不成立，而不是所有候选都不成立。
+\end{document}

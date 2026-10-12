@@ -1,0 +1,75 @@
+% 第15章 复现状态核验表
+\section{复现状态核验表}\label{sec:repro_audit}
+
+这一章回答一个很实际的问题：文献里的工作，哪些你真的能重跑。判定依据分两类——对开源工具与基准，查其仓库的公开可见信息（可用性、许可、最近更新、基准披露）；对论文结论，看去数据与代码是否可得、评测协议是否可重建。所有仓库信息经 GitHub API 实测（核验时间：2026-10-09），未编造。
+
+\subsection{公开工具与基准的仓库核验}
+
+\begin{table}[htbp]
+\centering
+\caption{公开工具/基准仓库核验（GitHub API 实测，2026-10-09）}
+\label{tab:repos}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.5cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{4.4cm}@{}}
+\toprule
+仓库 & Stars & 许可 & 最近推送 & 复现评估 \\
+\midrule
+microsoft/qlib & 49.2k & MIT & 2026-10-08 & 可复现：公开基准 + 活跃维护 \\
+AI4Finance-Foundation/FinRL & 16.6k & MIT & 2026-10-08 & 部分：流程可跑，收益随设定变 \\
+AI4Finance-Foundation/FinRL-Meta & 1.9k & MIT & 2026-10-06 & 部分：数据/环境封装，活跃 \\
+AI4Finance-Foundation/FinGPT & 21.4k & MIT & 2026-09-23 & 部分：模型权重与许可受限 \\
+hudson-and-thames/mlfinlab & 4.9k & 未声明 & 2023-10-02 & 部分：停更，许可不明确 \\
+esvhd/pypbo & 142 & AGPL-3.0 & 2026-07-06 & 可复现：PBO 参考实现 \\
+mementum/backtrader & 23.4k & GPL-3.0 & 2024-08-19 & 可复现（引擎）：已停更 \\
+quantopian/alphalens & 4.5k & Apache-2.0 & 2024-02-12 & 可复现：因子分析，已停更 \\
+quantopian/zipline & 20.1k & Apache-2.0 & 2024-02-13 & 部分：回测引擎，已停更 \\
+polakowo/vectorbt & 9.3k & 未声明 & 2026-09-26 & 可复现：活跃，许可待核 \\
+quantopian/empyrical & 1.5k & Apache-2.0 & 2024-07-26 & 可复现：指标库，已停更 \\
+quantopian/pyfolio & 6.4k & Apache-2.0 & 2023-12-23 & 可复现：业绩分析，已停更 \\
+abides-sim/abides & 579 & 未声明 & 2023-07-06 & 部分：市场仿真，停更 \\
+stefan-jansen/ML-for-trading & 21.3k & MIT & 2026-10-08 & 可复现：教材配套代码，活跃 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent 从这张表能读出一条清晰的规律：\textbf{越靠近“研究基础设施”（数据、评测、教材）的工具，越活跃、越可复现；越靠近“策略本体”的代码，可复现性越差。}另一个值得注意的现象是，Quantopian 系（zipline、alphalens、empyrical、pyfolio）虽然质量高、许可清晰，但都已停止更新，反映了量化开源生态“研究平台易建、维护难续”的现实。
+
+\noindent\textbf{两点使用说明}：其一，表中数据为 2026-10-09 的 GitHub API 快照，\textbf{star 数、最近推送时间等会随时间变化，重跑脚本得到的结果可能与本文不同}；其二，\textbf{star 数高不等于质量高、更不等于结论可复现}，它只是一个活跃度与关注度的粗略信号；判断可复现性应看“是否公开基准、有无许可、评测协议是否可重建”这几项，本表把它们列在“复现评估”一列。
+
+\subsection{代表性论文的复现状态}
+
+\begin{table}[htbp]
+\centering
+\caption{代表性工作复现状态}
+\label{tab:paperrepro}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{6.4cm}@{}}
+\toprule
+工作 & 复现状态 & 依据 / 障碍 \\
+\midrule
+Gu, Kelly \& Xiu (2020) 机器学习资产定价 & 部分复现 & 特征来自商业数据库（CRSP/Compustat），许可受限；结论在换市场后存疑 \\
+Chen, Pelger \& Zhu (2024) 深度学习资产定价 & 部分复现 & 数据许可受限；结构假设需复刻 \\
+Zhang et al. (2019) DeepLOB & 部分复现 & 数据（FI-2010）与代码公开，协议较清晰 \\
+Araci (2019) / Yang et al. (2020) FinBERT & 可复现 & 预训练权重与语料公开，任务可重建 \\
+Liu et al. FinRL & 部分复现 & 代码公开，但报告收益高度依赖环境与成本设定 \\
+Nevmyvaka et al. (2006) 执行 RL & 部分复现 & 数据（历史订单簿）私有，难以完全复刻 \\
+一般“LSTM 预测股价”类论文 & 不可复现 & 多数不给代码、切分与成本口径不明 \\
+一般“LLM 交易智能体”论文 & 不可复现 & API 版本漂移 + 训练语料泄漏无法排除 \\
+私有另类数据类研究 & 不可复现 & 数据私有，外部无验证途径 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{为什么复现状态如此分化}
+
+把两张表放在一起看，分化的原因可以归结为三点，且都不是“作者不努力”：
+
+\begin{enumerate}
+  \item \textbf{数据许可壁垒}。越是有价值的金融数据（CRSP、TAQ、私有另类数据），许可越严，代码再完整也无法替代数据。这是结构性障碍。
+  \item \textbf{环境与成本设定的自由度}。同样的算法，换一个成本模型或影响模型，结论可能从“有效”翻到“无效”。评测协议不统一时，“复现”本身就没有唯一答案。
+  \item \textbf{模型漂移与泄漏}。依赖商业 LLM 的工作，其“可复现性”被模型升级直接摧毁；而训练语料泄漏又让复现出的高收益无法区分于“背答案”。
+\end{enumerate}
+
+\subsection{一个可操作的结论}
+
+对本综述的读者，最实用的建议是：\textbf{先看复现状态，再决定要不要读方法细节。}一个复现状态为“不可复现”的工作，无论方法多新颖，都无法成为你决策的依据；而一个复现状态为“可复现”的工作，即使方法朴素，也值得作为你系统的基线。这也是本文把复现审计单列一章的原因——它是把前面所有方法学讨论，落回到“能不能用”的最后一道关。
+
+本章要记住的一句话是：\textbf{在金融机器学习里，“公开了代码”和“能被复现”之间隔着的，往往不是工程能力，而是数据许可、评测口径与模型漂移这三道非技术鸿沟。}

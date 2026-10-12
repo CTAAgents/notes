@@ -1,0 +1,100 @@
+% 第16章 可复现实验方案
+\section{可复现实验方案：从 P0 到 P3}\label{sec:repro_protocol}
+
+前面几章反复指出一件事：现有研究的结论之所以难以互证，根源在于口径不统一与评测污染。这一章把它变成可执行的方案。方案分四级，P0 是地基，P3 是前沿对照；每一级都给出\textbf{可验证的成功标准}，配套的参考实现骨架放在随附的 \texttt{code/} 目录。
+
+\subsection{P0：把数据、成本、评价三层统一钉死}
+
+这一级不追求新方法，只追求“让不同方法在同一把尺子下比较”。
+
+\textbf{（1）统一数据层。}
+\begin{itemize}
+  \item 使用\textbf{时点（point-in-time）}数据：时点成分股、按实际披露日对齐的财报、按首次可见时间对齐的文本。
+  \item 固定交易时点约定：信号在 $t$ 收盘计算，$t+1$ 开盘或 VWAP 成交，全流程禁止盘中信息前移。
+  \item 冻结一份数据快照（含校验和），保证任何人重跑得到同一份输入。
+  \item \textbf{交易制度掩码}：涨跌停、停牌、退市的股票构成“不可成交单元”，必须在数据层显式标出；回测中不得假设这些单元仍可自由调仓（涨跌停不可买、不可卖，停牌不可交易）。这一条直接改变可交易性与成本，遗漏会让回测系统性偏乐观。
+\end{itemize}
+
+\textbf{（2）统一成本层。}对每个策略至少报告三档：零成本 / 固定费率 / 含冲击成本。冲击成本用参与率模型，参与率设上限（如不超过当日成交量的 10\%），超限标记；冲击形态采用平方根律（Almgren 等 2005\cite{almgren2005}）。
+
+\textbf{（3）统一评价层。}强制报告六类指标：收益（年化、累计）、风险（波动、最大回撤、CVaR）、信号（IC/IR）、显著性（$t$ 统计量、DSR）、成本（换手率、成本占比）、稳健性（PBO、跨市场一致性）。缺一不可。
+
+\textbf{成功标准}：同一策略在固定快照上，由不同人重跑得到数值一致（差异在浮点容差内）的结果。
+
+\subsection{P1：统一评测协议}
+
+\begin{itemize}
+  \item \textbf{滚动前向（walk-forward）}：用扩展窗或滚动窗，逐段训练、逐段前向测试，禁止用测试段信息调参。
+  \item \textbf{多重切分}：至少用一个“时间上更晚”的留出段做最终确认，模拟真实上线的时间顺序。
+  \item \textbf{跨市场/跨资产}：同一管线在 $\geq 3$ 个市场（如 A 股、美股、期货）上运行，报告迁移结果。
+  \item \textbf{基线对齐}：与“最强已知简单基线”对照（如等权买入持有、经典动量/价值因子、VWAP 执行），而非与“无脑策略”对照。
+\end{itemize}
+
+\textbf{成功标准}：同一策略在 $\geq 3$ 个市场的样本外结果同号，且相对最强基线的增量在成本后仍为正；否则结论记为“无可复现增益”。
+
+\subsection{P2：多重检验纪律}
+
+这一级是本文与前人工作最大的分歧点，也是最容易被跳过的一级。
+
+\begin{itemize}
+  \item \textbf{维护“试验账本”}：把每一次模型、参数、特征的尝试都计入试验次数 $N$，并在报告时公开 $N$。
+  \item \textbf{缩水夏普（DSR）}：用 DSR\cite{bailey2014dsr} 校正选择偏差、样本长度与非正态，报告 DSR 而非原始夏普。
+  \item \textbf{回测过拟合概率（PBO）}：用 CSCV\cite{bailey2016pbo} 计算 PBO，要求 PBO $<0.2$ 才允许进入下一阶段。
+  \item \textbf{多重比较校正}：对多市场多参数的结果做 Benjamini--Hochberg 或 Romano--Wolf 校正；对因子类研究采用 Harvey--Liu--Zhu 的 $t>3$ 门槛\cite{harveylz2016}。
+\end{itemize}
+
+\textbf{成功标准}：报告“试验次数 $N$、样本长度 $T$、DSR、PBO、校正后 $p$ 值”五项，且校正后结论仍显著。
+
+\subsection{P3：前沿方法的公平对照}
+
+\begin{itemize}
+  \item \textbf{同数据、同成本、同协议}：把深度/强化/LLM 方法放在 P0--P2 的统一口径下，与 P0 的经典基线对照。
+  \item \textbf{增量归因}：明确区分“增量来自模型”还是“增量来自设定”（数据、成本、频率、资产池）。
+  \item \textbf{LLM 类方法的前向验证}：使用模型知识截止日\textbf{之后}的样本，或提供证据证明测试文本不在训练语料中（第 \ref{sec:nlp} 章、第 \ref{sec:audit} 章）。
+  \item \textbf{公开可复现资产}：固定随机种子、公开数据快照、公开代码与超参数搜索空间。
+\end{itemize}
+
+\textbf{成功标准}：前沿方法在统一口径下的 DSR 超过经典基线且通过 PBO 与多重检验校正；否则如实报告“在当前口径下无可复现增益”。
+
+\subsection{协议条款与参考实现的对照}
+
+为避免把“协议要求”误读为“已经做到”，下表逐条列出每一项条款在随附代码中的落实状态。凡标“仅协议”者，本文并未实现，读者需自行接入。
+
+\begin{table}[htbp]
+\centering
+\caption{协议条款 $\leftrightarrow$ 参考实现对照}
+\label{tab:impl}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{5.4cm}@{}}
+\toprule
+协议条款 & 实现位置 & 状态 & 说明 \\
+\midrule
+时点数据快照（含校验和） & \texttt{data.py}、\texttt{real\_data.py} & 部分实现 & 合成面板 + 通达信真实日线（后复权、封板价精确判定、新股剔除）；完整时点库（成分、按披露日对齐财报、按首次可见时间对齐文本）仍需替换 \\
+三档成本 + 平方根冲击 & \texttt{costs.py} & 已实现 & 参与率设上限并记录超限次数；真实数据侧 ADV 取逐股成交额中位数，费率含佣金、过户费与分段卖出印花税 \\
+交易制度掩码（涨跌停/停牌/退市） & \texttt{data.py}、\texttt{real\_data.py}、\texttt{baseline.py} & 已实现 & 真实数据侧按封板价精确判定（5/10/20/30\% 自动区分）、一字板与停牌不可成交、新股上市初期剔除；不可成交单元沿用上一期权重 \\
+六类指标（含 IC/IR） & \texttt{eval.py}、\texttt{run.py} & 已实现 & 信号类指标 IC/IR 已补齐；成本类已按本节要求报告换手率与成本占比 \\
+滚动前向（walk-forward） & \texttt{eval.py}、\texttt{run.py} & 已实现 & 并保留单次切分作对照 \\
+跨 $\geq 3$ 市场泛化 & —— & 仅协议 & 需接入多市场数据后才可实现 \\
+缩水夏普（标准误口径） & \texttt{eval.py} & 已实现 & 另附截面离散口径作对照 \\
+回测过拟合概率 PBO + 切分敏感性 & \texttt{eval.py} & 已实现 & 报告多个切分段数下的 PBO 区间 \\
+多重比较校正（BH / Romano--Wolf） & —— & 仅协议 & 参考实现未提供，需自行接入 \\
+试验账本（覆盖搜索空间） & \texttt{run.py} & 已实现 & 计入随机组合数与岭参数网格 \\
+LLM 前向验证 & —— & 仅协议 & 依赖具体模型与数据，本文不实现 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{参考实现骨架}
+
+随附的 \texttt{code/} 目录给出一个最小但完整的研究骨架，用于承载上述 P0--P2：
+
+\begin{itemize}
+  \item \texttt{data.py}：时点数据加载与快照冻结（伪实现，接口稳定）。
+  \item \texttt{costs.py}：三档成本与平方根冲击模型。
+  \item \texttt{eval.py}：walk-forward 切分、六类指标、DSR/PBO 计算。
+  \item \texttt{baseline.py}：经典基线与一个最小学习型基线，用于对照。
+  \item \texttt{run.py}：端到端串起数据--成本--评测，输出结构化结果与试验账本。
+\end{itemize}
+
+需要说明的是，这套骨架不绑定任何具体数据源与第三方库，读者可把 \texttt{data.py} 换成自己的数据接入。\textbf{它的价值不在于跑出什么收益，而在于提供一个“按 P0--P2 记账”的容器}——把评测纪律固化进代码，而不是靠人自觉。
+
+本章要记住的一句话是：\textbf{可复现不是把代码传上去就完了，而是要让别人用你没想到的参数组合重跑时，得到的结论和你一致——做到这一点，靠的是把口径、成本与试验次数写死在流程里。}

@@ -1,0 +1,49 @@
+% 第18章 结论置信度分级
+\section{结论置信度分级}\label{sec:confidence}
+
+把全篇的判断收拢到一张表里，并按证据强度分级。分级标准：\textbf{高}=多源独立证据、跨市场/跨样本稳健、且经得起成本与多重检验；\textbf{中}=有权威来源或明确机制，但存在清晰的边界条件；\textbf{低}=预印本为主、单一样本、缺乏独立复现或存在未排除的数据泄漏。
+
+\begin{table}[htbp]
+\centering
+\caption{核心结论与置信度}
+\label{tab:confidence}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{6.6cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{6.6cm}@{}}
+\toprule
+结论 & 置信度 & 依据与边界 \\
+\midrule
+金融预测信噪比极低（月度 $R^2$ 常在 0.5\% 以下），但低 $R^2$ 可经杠杆/横截面聚合转化为可交易收益 & 高 & 多源一致\cite{gukellyxiu2020}；边界：取决于成本与容量 \\
+\midrule
+信息租金随参与者增多而耗散，被广泛使用的信号毛利被压薄 & 高 & 机制清晰\cite{grossmanstiglitz1980,kyle1985}；经验证据\cite{mcleanpontiff2016} \\
+\midrule
+交易成本与冲击常常决定策略净收益的生死 & 高 & 理论与实证一致\cite{almgrenchriss2000,martin2011}；边界：低频/大容量策略影响较小 \\
+\midrule
+评测污染（数据窥探、前瞻、幸存者、回测过拟合）是重现性危机的系统性根源 & 高 & 方法论文献一致\cite{white2000,harveylz2016,bailey2016pbo}；因子复现证据\cite{jensen2023} \\
+\midrule
+监督学习/树模型在横截面选股上相对线性基线存在稳定增量 & 中 & \cite{gukellyxiu2020,krauss2017}；边界：增量随市场与样本变化，需成本后确认 \\
+\midrule
+把经济结构（如无套利）注入模型优于纯黑箱拟合 & 中 & \cite{chenpelgerzhu2024,gukellyxiu2021}；边界：结构假设错误时反受其害 \\
+\midrule
+“复杂性红利”在高维稀疏设定下存在 & 中--低 & \cite{kellymalamudzhou2024}；争议大，对假设敏感，需独立复现 \\
+\midrule
+深度序列模型在日频选股上的增量缺乏独立复现 & 低--中 & 精度指标多、交易绩效少，且常缺成本与 OOS 审计 \\
+\midrule
+订单簿/微观结构建模是深度学习在交易中最可复现的落地场景 & 中--高 & 公开数据集与代码\cite{ntakaris2018fi2010,zhang2019deeplob}；边界：数据成本高 \\
+\midrule
+RL 在最优执行与做市上有价值 & 中 & \cite{nevmyvaka2006,guant2019,spooner2018}；边界：强依赖仿真环境保真度 \\
+\midrule
+RL 在组合管理上相对经典方法有稳定增量 & 低 & 反例与工程问题多，缺成本后独立复现 \\
+\midrule
+LLM 直接预测收益的证据被“模型知道答案”严重污染 & 高（方法论） & 泄漏机制明确\cite{lookaheadbias2023,honesteval2026} \\
+\midrule
+LLM 交易智能体整体证据强度低 & 低 & 评测协议薄弱、泄漏难排除、成本与可复现性问题突出\cite{lmasurvey2024} \\
+\midrule
+生成式模型能缓解样本稀缺，但不能外推“未发生过的历史” & 中 & 方法论共识；边界：平静期训练无法做真正的极端压力测试 \\
+\midrule
+GNN 的关系增量高度依赖“边如何定义”，证据混杂 & 中--低 & \cite{feng2019rsr,xu2021hats}；边界：关系可能已被价格吸收 \\
+\midrule
+另类数据的超额收益衰减快，且私有数据结果无法独立验证 & 中--高 & 机制明确；边界：微观结构类数据衰减较慢 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent 表中“低”并不等于“错”，而是“尚不足以作为决策依据”。本文对该类结论的处理方式是：在正文中如实呈现，但不将其纳入任何推荐做法。反过来，凡是在统一口径下无法判定增量的方向，本文统一标记为“增量不可判定”，留待第 \ref{sec:future} 章的路线图中以严格协议检验。

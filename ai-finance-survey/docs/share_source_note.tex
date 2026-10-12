@@ -1,0 +1,168 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.4em}
+\setlength{\emergencystretch}{3em}
+\setlist{topsep=0.3em,itemsep=0.2em,parsep=0.15em}
+
+\title{\bfseries 股本数据单一来源风险：补充说明\\\large 已知什么、未知什么、影响往哪个方向偏}
+\author{\large 叨客宁宁}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{这份说明针对什么}
+
+《非流动性线索的跟进分析》第 5 节的规模中性化，其规模代理为流通市值 $=$ 原始收盘价 $\times$ 当日流通股本。股本只有 \textbf{AKShare} 一个来源：本地 \texttt{base.dbf} 的记录布局无法可靠解析（\texttt{LTAG} 字段读出恒为 0），原计划的来源间交叉校验因此无法执行。该节把这一点标注为“残留风险”，但没有说明风险的\textbf{确切边界}与\textbf{影响方向}。
+
+本说明补上这两件事。核心结论先行：\textbf{风险不能消除，但可以被界定；且在方向上是温和的——它使中性化后的结果偏乐观，而不是偏悲观。}
+
+\section{风险分三层，逐层界定}
+
+把“单一来源”这个笼统说法拆开，风险其实是三个不同的问题，可验证程度依次递减。
+
+\begin{table}[htbp]
+\centering
+\caption{风险的三层分解}
+\label{tab:layers}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{5.6cm}>{\raggedright\arraybackslash}p{6.2cm}@{}}
+\toprule
+层次 & 问题 & 状态 \\
+\midrule
+第一层：脏数据 & 序列里有没有非正、缺失、明显错位的值 & \textbf{已排除}（形态自检 5 项全过，见表 \ref{tab:screen}） \\
+\addlinespace
+第二层：口径与锚点 & 字段是不是流通股本、量级对不对 & \textbf{已抽样验证}（口径判定 1 只、外部锚点核对 1 只） \\
+\addlinespace
+第三层：系统性偏差 & 口径定义是否整体偏离、变动日是否整体滞后 & \textbf{无法排除}——内部检验对这类错误天然不敏感 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+第三层是这份说明真正要交代的东西。第一、二层可以靠检验解决，第三层不能：如果数据源在定义上整体偏了（例如把某个口径当成流通股本），或者所有变动都比真实生效日晚一天，那么\textbf{所有内部一致性检验都会照常通过}——因为序列依然干净、分段常数、变动集中在合理月份。能发现这类错误的只有来源间比对或人工核对，而前者在本环境不可得。
+
+\section{已做的四项验证}
+
+\subsection{口径判定}
+
+字段单位是股，量级与 A 股流通股本一致。用中国平安（sh601318）判定口径：取值 $1.0660\times10^{10}$，对应 A 股流通约 108 亿股，而非总股本约 182 亿股。**确认是流通股本**——这一点重要，因为用总股本会系统性放大大盘股的规模分位。
+
+\subsection{外部锚点核对（G1）}
+
+这是唯一一次与数据源之外的比对。宁德时代（sz300750）期末流通股本取值为 $4.2606\times10^9$ 股，与东方财富披露的 \textbf{426{,}061.71 万股}完全一致；同期总股本为 46.27 亿股，进一步印证口径。
+
+需要如实说明这次验证的覆盖范围：\textbf{它证明的是“一只股票的期末值正确”，不是“400 只的整条历史序列正确”}。把单个锚点的可信度外推到全样本，本身就是一种未经检验的推断。
+
+\subsection{序列形态自检}
+
+既然无法做来源间比对，退一步做不依赖外部来源的形态检验（脚本 \texttt{code/audit\_share\_source.py}，输出见 \texttt{outputs/audit\_share\_source.txt}）。这类检验不能证明数值正确，但能排除若干类明显错误。
+
+\begin{table}[htbp]
+\centering
+\caption{五项形态检验的结果}
+\label{tab:screen}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{6.4cm}>{\raggedright\arraybackslash}p{1.6cm}@{}}
+\toprule
+编号 & 检验项 & 结果 & 判定 \\
+\midrule
+C1 & 非正／缺失股本 & 400 只全部合格，0 只异常 & 通过 \\
+C2 & 变动次数与幅度 & 总变动 5195 次；幅度中位 $1.0005$（即多为微幅增量）；>3 倍或 <0.5 倍的跳变 70 次 & 通过（见下） \\
+C3 & 变动月份分布 & 6 月 19.7\%、12 月 13.9\%、3 月 10.8\%、9 月 10.1\%、7 月 8.7\%、1 月 7.3\% & 通过 \\
+C4 & 变动后短期回退（抖动） & 928 次，但\textbf{幅度中位 $0.0001\%$、最大 $0.06\%$；>1\% 的 0 次} & 通过 \\
+C5 & 异常值清单 & 76 条，均为大额跳变 & 通过（见下） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+两处需要解释，否则容易被误读为问题。
+
+\textbf{关于 70 次大跳变}：它们不是错误，而是 A 股\textbf{限售股解禁}的真实形态——上市初期流通股本很小，首发限售股解禁当日阶跃式放大数倍。例如京沪高铁 2021-01-21 由 $3.21\times10^9$ 股跳至 $2.73\times10^{10}$ 股（8.5 倍）。这类跳变若被“修正”掉，反而会引入错误。
+
+\textbf{关于 928 次抖动}：数量看着多（占全部变动的 17.9\%），但幅度中位仅 $0.0001\%$、最大 $0.06\%$，且没有一次超过 1\%。这符合数据源的\textbf{精度噪声}特征（某几日按较少小数位给出），对规模分位的影响可以忽略。这一项若只看次数会得出“数据不稳定”的错误印象，所以必须连幅度一起看。
+
+\subsection{该自检能排除什么、不能排除什么}
+
+能排除：非正与缺失、字段互换这类结构性错误、按年度或报告期错位的大规模错误、单位换算错误（若单位错了，跳变幅度会呈现统一的量级偏移，C2 的分位数形态会异常）。
+
+\textbf{不能排除}：任何“整体一致、方向一致”的错误。这正是第三层的定义。
+
+\section{残余风险的影响方向：上界性质}
+
+这一点比风险本身更重要。规模中性化用 $\ln(\text{流通市值})$ 作控制变量；若该变量含有测量误差，横截面回归会出现\textbf{衰减偏误}——控制变量越噪，能“剔除”的规模成分越少，残差里留下的规模暴露越多，中性化后的表现就越接近未中性化的原值。
+
+也就是说：\textbf{在股本数据完全准确的情形下，规模中性化后的表现不会高于实测值。}实测的含冲击夏普 $0.611$ 因此是一个\textbf{上界}。这个方向的含义很具体：
+
+\begin{itemize}
+  \item 若真实值明显低于 $0.611$，则本轮“无法分离”的判定应向\textbf{“由规模驱动”}一侧移动；
+  \item 换言之，当前的结论\textbf{已经是对“存在独立流动性维度”这一读法最有利的一侧}。即便股本数据有系统性噪声，也不会把它推向“存在独立维度”，只会推向更强的否定。
+\end{itemize}
+
+反过来也要说清：日常噪声的量级很小（C4 抖动最大 $0.06\%$、C2 变动幅度中位 $1.0005$），因此这一衰减偏误在实际量级上大概有限；真正可能造成较大偏差的是“变动日整体滞后”这类时点错误，而它恰好无法用内部检验发现。
+
+\section{影响范围：哪些结论受影响}
+
+\begin{table}[htbp]
+\centering
+\caption{结论受影响情况}
+\label{tab:scope}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{6.4cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{6.0cm}@{}}
+\toprule
+结论 & 依赖股本？ & 说明 \\
+\midrule
+规模中性化三组结果（M1 层内价差 $8.5$bp、M2 $0.611$、M3 $0.607$） & \textbf{是} & 唯一受影响的结论；且如上所述方向偏乐观 \\
+十层收益的单调性（相关 $0.975$） & 否 & 只用非流动性信号与收益 \\
+与其余七个因子的相关（最大 $0.27$） & 否 & 同上 \\
+成本稳健性（ADV 打到四分之一仍有 $0.91$） & 否 & 只用成交额与收益 \\
+可投资子集的衰减（$1.02 \to 0.08$） & 否 & 用 ADV 分位，不用股本 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+换句话说：股本来源风险\textbf{只影响规模中性化这一节，不影响整条非流动性线索的其他部分}。这也意味着该风险的处置成本应当与它的影响范围相称——不值得为它推翻已经成立的其他结论，但足以要求把“无法分离”这一判定标注为\textbf{依赖单一来源}。
+
+\section{补强路径}
+
+\begin{table}[htbp]
+\centering
+\caption{从“已做”到“可做”的四级补强}
+\label{tab:fix}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{3.0cm}@{}}
+\toprule
+级别 & 做法 & 能解决哪一层 & 状态 \\
+\midrule
+一 & 形态自检（本说明第 3.3 节） & 第一层 & \textbf{已完成} \\
+二 & 抽样人工核对：取 20 只跨规模分位的个股，逐只比对股本结构历史（含变动日期） & 第二层＋部分第三层 & 可立即执行，约需人工访问公开资料 \\
+三 & 解析本地 \texttt{vipdoc/cw} 逐股财务文件中的股本字段，作为第二来源 & 第三层 & 需先验证格式；参照 \texttt{gbbq} 先例，解析不可靠则放弃 \\
+四 & 引入付费数据源的股本变迁表（Wind／聚源） & 第三层 & 超出本项目的数据边界 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+建议的处置是：\textbf{把二级补强列为待办，但不阻塞当前结论}。理由是影响范围已被界定（只涉及规模中性化一节）、方向已知（偏乐观），且该项验证需要人工核对，与“先记录缺口、再按优先级补”的一贯做法一致。
+
+\section{结论}
+
+三句话：
+
+第一，股本数据的单一来源风险\textbf{无法在本环境内消除}——内部检验对系统性偏差天然不敏感，这是方法论上的限制，不是执行上的疏忽。
+
+第二，风险已被\textbf{界定到可操作的颗粒度}：已排除脏数据与口径错误（五项形态检验、一次口径判定、一次外部锚点核对），无法排除的是整体一致的系统性偏差；影响范围仅限规模中性化一节。
+
+第三，也是最重要的一点：残余风险的方向是\textbf{使实测的中性化后表现偏乐观}。因此本轮“无法分离”的判定不是被数据问题撑住的结论，而是在对“存在独立流动性维度”这一读法最有利的一侧给出的——若股本数据更准确，结论只会更偏向“由规模驱动”。
+
+\medskip
+
+\noindent 这与本文的一贯口径一致：\textbf{承认一项风险时，要说清它把结论推向哪一边}。只说“存在风险”而不说方向，等于把判断的负担转给了读者。
+
+\end{document}

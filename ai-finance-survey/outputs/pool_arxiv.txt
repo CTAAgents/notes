@@ -1,0 +1,351 @@
+  0 | 2026 | Reasoning Externalization for Faithful Large Language Model Narratives of Stock Re | 2609.38869v2
+  1 | 2026 | Tabular Deep Learning for Algorithmic Trading: Cross-Regime Bayesian Optimisation  | 2608.27076v1
+  2 | 2026 | Vector-Quantized Discrete Latent Factors Meet Financial Priors: Dynamic Cross-Sect | 2605.13407v1
+  3 | 2026 | FactorEngine: A Program-level Knowledge-Infused Factor Mining Framework for Quanti | 2603.16365v3
+  4 | 2026 | From Index to Equity: Pre-Training Transformers for Stock Return Prediction | 2605.23962v1
+  5 | 2026 | Impact of LLMs news Sentiment Analysis on Stock Price Movement Prediction | 2602.00086v3
+  6 | 2026 | Optimizing Transformer Neural Network for Real-Time Outlier Detection on FPGAs | 2607.22786v1
+  7 | 2026 | Financial time series augmentation using transformer based GAN architecture | 2602.17865v1
+  8 | 2026 | Hybrid Quantum-Classical Ridgelet Neural Networks for Portfolio Optimization | 2601.03654v2
+  9 | 2026 | EXAONE Finance 1.0: An Attention-free Time Series Foundation Model for Financial T | 2609.04239v2
+ 10 | 2026 | PatchFormer: A Patch-Based Time Series Foundation Model with Hierarchical Masked R | 2601.20845v2
+ 11 | 2026 | The End of the Foundation Model Era: Open-Weight Models, Sovereign AI, and Inferen | 2604.06217v1
+ 12 | 2026 | Assessing the Operational Viability of Foundation Models for Time Series Forecasti | 2605.24381v1
+ 13 | 2026 | Robust Market Making with Hawkes Order Flow and Price Impact via Adversarial Reinf | 2609.22785v1
+ 14 | 2026 | Market Informedness and Market-Maker Profitability: The Trade-Off Between Adverse  | 2606.05882v2
+ 15 | 2026 | Multi-agent Reinforcement Learning for Low-Carbon P2P Energy Trading among Self-In | 2604.08973v1
+ 16 | 2026 | A Review of Large Language Models for Stock Price Forecasting from a Hedge-Fund Pe | 2605.05211v1
+ 17 | 2026 | EnterpriseBench: Benchmarking LLM Agents on Enterprise-Level Strategic Reasoning a | 2609.37658v2
+ 18 | 2026 | Time Series Augmented Generation for Financial Applications | 2604.19633v1
+ 19 | 2026 | Financial Fragility in Societies of LLM Agents: Coordination Failures and Stabiliz | 2609.30940v1
+ 20 | 2026 | SoK: Trading Agents or Market Crashers? Dissecting Robustness and Security Failure | 2609.19705v1
+ 21 | 2026 | Strategic Exploitation in LLM Agent Markets: A Simulation Framework for E-Commerce | 2605.10059v3
+ 22 | 2026 | PandaAI: A Practical Agent CQ2 for Neuro-symbolic Data Analysis And Integrated Dec | 2606.06823v1
+ 23 | 2026 | Are AI Risks Priced in the U.S. Stock Market? Evidence from Financial News Factors | 2609.05485v1
+ 24 | 2026 | The CLEF-2026 FinMMEval Lab: Multilingual and Multimodal Evaluation of Financial A | 2602.10886v1
+ 25 | 2026 | Evaluation and Benchmarking Suite for Financial Large Language Models and Agents | 2602.19073v1
+ 26 | 2026 | The Acoustic Camouflage Phenomenon: Re-evaluating Speech Features for Financial Ri | 2604.14619v1
+ 27 | 2026 | Detecting Corporate AI-Washing via Cross-Modal Semantic Inconsistency Learning | 2604.09644v1
+ 28 | 2026 | High-Quality Synthetic Financial Time-Series using a GAN-Diffusion Framework | 2605.27113v1
+ 29 | 2026 | Tweedie's Formulae and Diffusion Generative Models Beyond Gaussian | 2605.19391v1
+ 30 | 2026 | Parameter Estimation for the Mixed Fractional Merton Jump Diffusion Model with EM  | 2609.20041v1
+ 31 | 2026 | Quantum Generative Diffusion Model for Real-World Time Series | 2606.27561v1
+ 32 | 2026 | FairFinGAN: Fairness-aware Synthetic Financial Data Generation | 2603.05327v1
+ 33 | 2026 | Cross-Stock Predictability via LLM-Augmented Semantic Networks | 2604.19476v2
+ 34 | 2026 | RankGLU: Residual Gated Score Formation for Cross-Sectional Stock Prediction | 2606.08930v1
+ 35 | 2026 | It Takes Two to Tango, but More to Assess Systemic Risk: Credit Networks Through t | 2607.10943v1
+ 36 | 2026 | Bridging Cognitive Neuroscience and Graph Intelligence: Hippocampus-Inspired Multi | 2601.11073v3
+ 37 | 2026 | GAPNet: Plug-in Jointly Learning Task-Specific Graph for Dynamic Stock Relation | 2602.00888v1
+ 38 | 2026 | Data-Driven Measures of High-Frequency Trading | 2608.00858v3
+ 39 | 2026 | Explainable Deep Learning for Price-Trade Dynamics: From Black-Box Forecasts to Ef | 2609.06085v1
+ 40 | 2026 | Persona-Trained Monte Carlo: Estimating Market-Outcome Distributions via Swarms of | 2606.29556v1
+ 41 | 2026 | Estimating the Impact of COVID-19 on Travel Demand in Houston Area Using Deep Lear | 2603.27486v1
+ 42 | 2026 | Enhancing Portfolio Optimization with Deep Learning Insights | 2601.07942v1
+ 43 | 2026 | Titans-QFWP: A Regime-Aware Hybrid Quantum Fast Weight Programmer for Portfolio Op | 2608.29093v1
+ 44 | 2026 | ViperQ: Order Flow Pattern Recognition via Auction Market Theory for Reinforcement | 2609.13825v1
+ 45 | 2026 | PPO-HRAP: Proximal Policy Optimization with a Hybrid Regime-Aware Policy for Risk- | 2610.01325v1
+ 46 | 2026 | Learning Stock Trading Policies via Barycenter-Based Adversarial Inverse Reinforce | 2608.15770v1
+ 47 | 2026 | Comparative Evaluation of Modern Deep Learning Methodologies for Portfolio Optimiz | 2604.24486v1
+ 48 | 2026 | DeepSeekMath Meets Order Book: Group-Aware Policy Optimization for High-Frequency  | 2605.25527v1
+ 49 | 2026 | Beyond Prompting: An Autonomous Framework for Systematic Factor Investing via Agen | 2603.14288v2
+ 50 | 2026 | The GT-Score: A Robust Objective Function for Reducing Overfitting in Data-Driven  | 2602.00080v1
+ 51 | 2026 | From Cointegration to Out-of-Sample Failure: A Pairs-Trading Case Study on PEP-KO | 2609.35359v1
+ 52 | 2026 | What survives honest evaluation? Leakage-safe, search-aware assessment of LLM-driv | 2608.27734v1
+ 53 | 2026 | Equity Strategy Backtesting: Luck or Edge? The MinervaScore as a Statistical Robus | 2608.23808v2
+ 54 | 2026 | Hour-Aware Adaptive Risk Management for Autonomous Memecoin Trading on Solana DEXs | 2606.08232v3
+ 55 | 2026 | The Corporate Bond Factor Replication Crisis | 2604.07880v1
+ 56 | 2026 | Collective completeness and pricing-hedging duality II | 2606.19038v1
+ 57 | 2026 | S$^{3}$G: Stock State Space Graph for Enhanced Stock Trend Prediction | 2603.24236v1
+ 58 | 2026 | PredictionMarketBench: A SWE-bench-Style Framework for Backtesting Trading Agents  | 2602.00133v1
+ 59 | 2026 | EvolveTrade: Experience-Driven Policy Refinement for Self-Evolving LLM Trading Age | 2609.17632v1
+ 60 | 2026 | A Human-Centered Validation of the Explainability-Performance Coefficient | 2607.29614v1
+ 61 | 2025 | Deep Learning for Short Term Equity Trend Forecasting: A Behavior Driven Multi Fac | 2508.14656v1
+ 62 | 2025 | Deep Learning Enhanced Multi-Day Turnover Quantitative Trading Algorithm for Chine | 2506.06356v1
+ 63 | 2025 | Multi-Horizon Echo State Network Prediction of Intraday Stock Returns | 2504.19623v2
+ 64 | 2025 | Finance-Grounded Optimization For Algorithmic Trading | 2509.04541v2
+ 65 | 2025 | FINN-GL: Generalized Mixed-Precision Extensions for FPGA-Accelerated LSTMs | 2506.20810v1
+ 66 | 2025 | Enhancing Financial Decision-Making: Machine Learning and AI-Powered Predictions a | 2510.25201v1
+ 67 | 2025 | Forecasting Nigerian Equity Stock Returns Using Long Short-Term Memory Technique | 2507.01964v1
+ 68 | 2025 | Data-Efficient Realized Volatility Forecasting with Vision Transformers | 2511.03046v1
+ 69 | 2025 | A diffusion-based generative model for financial time series via geometric Brownia | 2507.19003v1
+ 70 | 2025 | On Identifying Why and When Foundation Models Perform Well on Time-Series Forecast | 2508.20437v1
+ 71 | 2025 | Advancing Financial Engineering with Foundation Models: Progress, Applications, an | 2507.18577v2
+ 72 | 2025 | Unified Interaction Foundational Model (UIFM) for Predicting Complex User and Syst | 2509.06025v1
+ 73 | 2025 | Multimodal Financial Foundation Models (MFFMs): Progress, Prospects, and Challenge | 2506.01973v2
+ 74 | 2025 | Reinforcement Learning for Portfolio Optimization with a Financial Goal and Define | 2511.18076v1
+ 75 | 2025 | Attention-Enhanced Reinforcement Learning for Dynamic Portfolio Optimization | 2510.06466v1
+ 76 | 2025 | Cryptocurrency Portfolio Management with Reinforcement Learning: Soft Actor--Criti | 2511.20678v1
+ 77 | 2025 | Reinforcement Learning in Queue-Reactive Models: Application to Optimal Execution | 2511.15262v1
+ 78 | 2025 | Right Place, Right Time: Market Simulation-based RL for Execution Optimisation | 2510.22206v1
+ 79 | 2025 | Market Making Strategies with Reinforcement Learning | 2507.18680v1
+ 80 | 2025 | Reinforcement Learning-Based Market Making as a Stochastic Control on Non-Stationa | 2509.12456v2
+ 81 | 2025 | JaxMARL-HFT: GPU-Accelerated Large-Scale Multi-Agent Reinforcement Learning for Hi | 2511.02136v1
+ 82 | 2025 | Hi-DARTS: Hierarchical Dynamically Adapting Reinforcement Trading System | 2509.12048v1
+ 83 | 2025 | 3S-Trader: A Multi-LLM Framework for Adaptive Stock Scoring, Strategy, and Selecti | 2510.17393v1
+ 84 | 2025 | FINRS: A Risk-Sensitive Trading Framework for Real Financial Markets | 2511.12599v1
+ 85 | 2025 | TradingGroup: A Multi-Agent Trading System with Self-Reflection and Data-Synthesis | 2508.17565v1
+ 86 | 2025 | Adaptive Alpha Weighting with PPO: Enhancing Prompt-Based LLM-Generated Alphas in  | 2509.01393v2
+ 87 | 2025 | Agentic Retrieval of Topics and Insights from Earnings Calls | 2507.07906v1
+ 88 | 2025 | StockBench: Can LLM Agents Trade Stocks Profitably In Real-world Markets? | 2510.02209v2
+ 89 | 2025 | UDora: A Unified Red Teaming Framework against LLM Agents by Dynamically Hijacking | 2503.01908v3
+ 90 | 2025 | Multi-Modal Opinion Integration for Financial Sentiment Analysis using Cross-Modal | 2512.03464v1
+ 91 | 2025 | Advanced Deep Learning Techniques for Analyzing Earnings Call Transcripts: Methodo | 2503.01886v1
+ 92 | 2025 | Open FinLLM Leaderboard: Towards Financial AI Readiness | 2501.10963v2
+ 93 | 2025 | FinSphere, a Real-Time Stock Analysis Agent Powered by Instruction-Tuned LLMs and  | 2501.12399v2
+ 94 | 2025 | FinNLI: Novel Dataset for Multi-Genre Financial Natural Language Inference Benchma | 2504.16188v1
+ 95 | 2025 | FinNuE: Exposing the Risks of Using BERTScore for Numerical Semantic Evaluation in | 2511.09997v1
+ 96 | 2025 | Prediction of Stocks Index Price using Quantum GANs | 2509.12286v1
+ 97 | 2025 | Diffusion Generative Models Meet Compressed Sensing, with Applications to Imaging  | 2509.03898v2
+ 98 | 2025 | Diffolio: A Diffusion Model for Multivariate Probabilistic Financial Time-Series F | 2511.07014v2
+ 99 | 2025 | CoFinDiff: Controllable Financial Diffusion Model for Time Series Generation | 2503.04164v1
+100 | 2025 | Synthetic Financial Data Generation for Enhanced Financial Modelling | 2512.21791v1
+101 | 2025 | Towards Causal Market Simulators | 2511.04469v4
+102 | 2025 | New Money: A Systematic Review of Synthetic Data Generation for Finance | 2510.26076v1
+103 | 2025 | Predicting Liquidity-Aware Bond Yields using Causal GANs and Deep Reinforcement Le | 2502.17011v2
+104 | 2025 | Financial Wind Tunnel: A Retrieval-Augmented Market Simulator | 2503.17909v1
+105 | 2025 | Deep Generative Models for Synthetic Financial Data: Applications to Portfolio and | 2512.21798v2
+106 | 2025 | Long-Range Dependence in Financial Markets: Empirical Evidence and Generative Mode | 2509.19663v3
+107 | 2025 | Stock Market Telepathy: Graph Neural Networks Predicting the Secret Conversations  | 2506.01945v1
+108 | 2025 | EP-GAT: Energy-based Parallel Graph Attention Neural Network for Stock Trend Class | 2507.08184v2
+109 | 2025 | NGAT: A Node-level Graph Attention Network for Long-term Stock Prediction | 2507.02018v1
+110 | 2025 | Structure Over Signal: A Globalized Approach to Multi-relational GNNs for Stock Pr | 2510.10775v1
+111 | 2025 | Unleashing Expert Opinion from Social Media for Stock Prediction | 2504.10078v2
+112 | 2025 | From News to Returns: A Granger-Causal Hypergraph Transformer on the Sphere | 2510.04357v1
+113 | 2025 | Unveiling Latent Information in Transaction Hashes: Hypergraph Learning for Ethere | 2503.21463v1
+114 | 2025 | H3M-SSMoEs: Hypergraph-based Multimodal Learning with LLM Reasoning and Style-Stru | 2510.25091v1
+115 | 2025 | Does FOMC Tone Really Matter? Statistical Evidence from Spectral Graph Network Ana | 2510.02705v1
+116 | 2025 | Deep Learning Models Meet Financial Data Modalities | 2504.13521v2
+117 | 2025 | Deep Learning Meets Queue-Reactive: A Framework for Realistic Limit Order Book Sim | 2501.08822v1
+118 | 2025 | Learning Multidimensional Urban Poverty Representation with Satellite Imagery | 2509.04958v1
+119 | 2025 | Coverage Biases in High-Resolution Satellite Imagery | 2505.03842v2
+120 | 2025 | Deep Declarative Risk Budgeting Portfolios | 2504.19980v1
+121 | 2025 | Decision-informed Neural Networks with Large Language Model Integration for Portfo | 2502.00828v1
+122 | 2025 | Descent-Net: Learning Descent Directions for Constrained Optimization | 2512.11396v2
+123 | 2025 | Investment Portfolio Optimization Based on Modern Portfolio Theory and Deep Learni | 2508.14999v1
+124 | 2025 | SHAP Stability in Credit Risk Management: A Case Study in Credit Card Default Mode | 2508.01851v1
+125 | 2025 | An Artificial Intelligence Value at Risk Approach: Metrics and Models | 2509.18394v1
+126 | 2025 | Deep Hedging of Green PPAs in Electricity Markets | 2503.13056v1
+127 | 2025 | MARS: A Meta-Adaptive Reinforcement Learning Framework for Risk-Aware Multi-Agent  | 2508.01173v2
+128 | 2025 | Language Model Guided Reinforcement Learning in Quantitative Trading | 2508.02366v3
+129 | 2025 | Can LLM-based Financial Investing Strategies Outperform the Market in Long Run? | 2505.07078v6
+130 | 2025 | MM-ARC: Multimodal Adaptive Routing of Capital with Robustness-Audited Strategy Po | 2509.05080v3
+131 | 2025 | Collective completeness and pricing hedging duality | 2503.14086v1
+132 | 2025 | Orchestration Framework for Financial Agents: From Algorithmic Trading to Agentic  | 2512.02227v1
+133 | 2025 | FactorGCL: A Hypergraph-Based Factor Model with Temporal Residual Contrastive Lear | 2502.05218v1
+134 | 2025 | FinRL-DeepSeek: LLM-Infused Risk-Sensitive Reinforcement Learning for Trading Agen | 2502.07393v1
+135 | 2025 | Meta-Learning Reinforcement Learning for Crypto-Return Prediction | 2509.09751v2
+136 | 2025 | TradeTrap: Are LLM-based Trading Agents Truly Reliable and Faithful? | 2512.02261v1
+137 | 2025 | A New DAPO Algorithm for Stock Trading | 2505.06408v2
+138 | 2025 | FinPos: A Position-Aware Trading Agent System for Real Financial Markets | 2510.27251v2
+139 | 2025 | ATLAS: Adaptive Trading with LLM AgentS Through Dynamic Prompt Optimization and Mu | 2510.15949v5
+140 | 2024 | Data-generating process and time-series asset pricing | 2405.10920v1
+141 | 2024 | Cyber risk and the cross-section of stock returns | 2402.04775v2
+142 | 2024 | From Factor Models to Deep Learning: Machine Learning in Reshaping Empirical Asset | 2403.06779v1
+143 | 2024 | AlphaForge: A Framework to Mine and Dynamically Combine Formulaic Alpha Factors | 2406.18394v5
+144 | 2024 | Guided Learning: Lubricating End-to-End Modeling for Multi-stage Decision-making | 2411.10496v1
+145 | 2024 | HRFT: Mining High-Frequency Risk Factor Collections End-to-End via Transformer | 2408.01271v5
+146 | 2024 | Leveraging Fundamental Analysis for Stock Trend Prediction for Profit | 2410.03913v1
+147 | 2024 | Generation of synthetic financial time series by diffusion models | 2410.18897v1
+148 | 2024 | Transformer for Times Series: an Application to the S&amp;P500 | 2403.02523v1
+149 | 2024 | Generative modelling of financial time series with structured noise and MMD-based  | 2407.19848v4
+150 | 2024 | 'Finance Wizard' at the FinLLM Challenge Task: Financial Text Summarization | 2408.03762v1
+151 | 2024 | A Deep Reinforcement Learning Framework for Dynamic Portfolio Optimization: Eviden | 2412.18563v3
+152 | 2024 | Deep Reinforcement Learning and Mean-Variance Strategies for Responsible Portfolio | 2403.16667v1
+153 | 2024 | Markowitz Meets Bellman: Knowledge-distilled Reinforcement Learning for Portfolio  | 2405.05449v1
+154 | 2024 | Multimodal Deep Reinforcement Learning for Portfolio Optimization | 2412.17293v1
+155 | 2024 | Deep Reinforcement Learning for Online Optimal Execution Strategies | 2410.13493v1
+156 | 2024 | Optimal Execution with Reinforcement Learning | 2411.06389v2
+157 | 2024 | Carbon Market Simulation with Adaptive Mechanism Design | 2406.07875v2
+158 | 2024 | Algorithmic Collusion And The Minimum Price Markov Game | 2407.03521v3
+159 | 2024 | Modelling crypto markets by multi-agent reinforcement learning | 2402.10803v1
+160 | 2024 | Evaluating Uncertainties in Electricity Markets via Machine Learning and Quantum C | 2407.16404v1
+161 | 2024 | When AI Meets Finance (StockAgent): Large Language Model-based Stock Trading in Si | 2407.18957v5
+162 | 2024 | Financial News-Driven LLM Reinforcement Learning for Portfolio Management | 2411.11059v1
+163 | 2024 | TradExpert: Revolutionizing Trading with Mixture of Expert LLMs | 2411.00782v2
+164 | 2024 | FinLLM-B: When Large Language Models Meet Financial Breakout Trading | 2402.07536v2
+165 | 2024 | INVESTORBENCH: A Benchmark for Financial Decision-Making Tasks with LLM-based Agen | 2412.18174v1
+166 | 2024 | BioFinBERT: Finetuning Large Language Models (LLMs) to Analyze Sentiment of Press  | 2401.11011v1
+167 | 2024 | A Dutch Financial Large Language Model | 2410.12835v1
+168 | 2024 | A Report on Financial Regulations Challenge at COLING 2025 | 2412.11159v2
+169 | 2024 | NumLLM: Numeric-Sensitive Large Language Model for Chinese Finance | 2405.00566v1
+170 | 2024 | Evaluating Named Entity Recognition: A comparative analysis of mono- and multiling | 2403.12212v2
+171 | 2024 | RAGIC: Risk-Aware Generative Adversarial Model for Stock Interval Construction | 2402.10760v1
+172 | 2024 | A Financial Time Series Denoiser Based on Diffusion Model | 2409.02138v1
+173 | 2024 | Reinforcement Learning in Agent-Based Market Simulation: Unveiling Realistic Styli | 2403.19781v1
+174 | 2024 | Stock Type Prediction Model Based on Hierarchical Graph Neural Network | 2412.06862v1
+175 | 2024 | Evaluating Financial Relational Graphs: Interpretation Before Prediction | 2410.07216v1
+176 | 2024 | SETN: Stock Embedding Enhanced with Textual and Network Information | 2408.02899v1
+177 | 2024 | Global Stock Market Volatility Forecasting Incorporating Dynamic Graphs and All Tr | 2409.15320v3
+178 | 2024 | MDGNN: Multi-Relational Dynamic Graph Neural Network for Comprehensive and Dynamic | 2402.06633v1
+179 | 2024 | DGDNN: Decoupled Graph Diffusion Neural Network for Stock Movement Prediction | 2401.01846v1
+180 | 2024 | GRU-PFG: Extract Inter-Stock Correlation from Stock Factors with Graph Neural Netw | 2411.18997v1
+181 | 2024 | Breaking Down Financial News Impact: A Novel AI Approach with Geometric Hypergraph | 2409.00438v1
+182 | 2024 | Temporal Graph Networks for Graph Anomaly Detection in Financial Networks | 2404.00060v1
+183 | 2024 | Deep Limit Order Book Forecasting | 2403.09267v4
+184 | 2024 | HLOB -- Information Persistence and Structure in Limit Order Books | 2405.18938v3
+185 | 2024 | Minimal Batch Adaptive Learning Policy Engine for Real-Time Mid-Price Forecasting  | 2412.19372v2
+186 | 2024 | Dynamic Portfolio Rebalancing: A Hybrid new Model Using GNNs and Pathfinding for C | 2410.01864v1
+187 | 2024 | Data-driven measures of high-frequency trading | 2405.08101v4
+188 | 2024 | High-Frequency Trading Liquidity Analysis | Application of Machine Learning Classi | 2408.10016v1
+189 | 2024 | Online High-Frequency Trading Stock Forecasting with Automated Feature Clustering  | 2412.16160v2
+190 | 2024 | Inferring Option Movements Through Residual Transactions: A Quantitative Model | 2410.16563v1
+191 | 2024 | Program Evaluation with Remotely Sensed Outcomes | 2411.10959v5
+192 | 2024 | Hopfield Networks for Asset Allocation | 2407.17645v1
+193 | 2024 | Application of Natural Language Processing in Financial Risk Detection | 2406.09765v2
+194 | 2024 | Design and Optimization of Big Data and Machine Learning-Based Risk Monitoring Sys | 2407.19352v1
+195 | 2024 | An Integrated Approach to Importance Sampling and Machine Learning for Efficient M | 2408.02401v3
+196 | 2024 | Improving Business Insurance Loss Models by Leveraging InsurTech Innovation | 2401.16723v1
+197 | 2024 | LENS: Large Pre-trained Transformer for Exploring Financial Time Series Regulariti | 2408.10111v3
+198 | 2024 | Large Language Model Agent in Financial Trading: A Survey | 2408.06361v2
+199 | 2024 | A Reflective LLM-based Agent to Guide Zero-shot Cryptocurrency Trading | 2407.09546v2
+200 | 2024 | Simulation of Social Media-Driven Bubble Formation in Financial Markets using an A | 2409.00742v1
+201 | 2024 | MarS: a Financial Market Simulation Engine Powered by Generative Foundation Model | 2409.07486v2
+202 | 2024 | FinVision: A Multi-Agent Framework for Stock Market Prediction | 2411.08899v1
+203 | 2024 | A Deep Learning Representation of Spatial Interaction Model for Resilient Spatial  | 2401.04849v1
+204 | 2023 | E2EAI: End-to-End Deep Learning Framework for Active Investing | 2305.16364v1
+205 | 2023 | Joint Latent Topic Discovery and Expectation Modeling for Financial Markets | 2307.08649v1
+206 | 2023 | Transformers versus LSTMs for electronic trading | 2309.11400v1
+207 | 2023 | Temporal and Heterogeneous Graph Neural Network for Financial Time Series Predicti | 2305.08740v1
+208 | 2023 | Risk Aware Benchmarking of Large Language Models | 2310.07132v3
+209 | 2023 | Benchmarking Robustness of Deep Reinforcement Learning approaches to Online Portfo | 2306.10950v1
+210 | 2023 | A Comparative Analysis of Portfolio Optimization Using Mean-Variance, Hierarchical | 2305.17523v1
+211 | 2023 | Many learning agents interacting with an agent-based market model | 2303.07393v4
+212 | 2023 | Systematic Review on Reinforcement Learning in the Field of Fintech | 2305.07466v1
+213 | 2023 | JAX-LOB: A GPU-Accelerated limit order book simulator to unlock large scale reinfo | 2308.13289v1
+214 | 2023 | Integrating Tick-level Data and Periodical Signal for High-frequency Market Making | 2306.17179v1
+215 | 2023 | Over-the-Counter Market Making via Reinforcement Learning | 2307.01816v1
+216 | 2023 | An Ensemble Method of Deep Reinforcement Learning for Automated Cryptocurrency Tra | 2309.00626v1
+217 | 2023 | Logic-Q: Improving Deep Reinforcement Learning-based Quantitative Trading via Prog | 2310.05551v3
+218 | 2023 | Approximating Energy Market Clearing and Bidding With Model-Based Reinforcement Le | 2303.01772v3
+219 | 2023 | Large Language Models can Strategically Deceive their Users when Put Under Pressur | 2311.07590v4
+220 | 2023 | Transforming Sentiment Analysis in the Financial Domain with ChatGPT | 2308.07935v1
+221 | 2023 | Integrating Stock Features and Global Information via Large Language Models for En | 2310.05627v1
+222 | 2023 | Assessing Look-Ahead Bias in Stock Return Predictions Generated By GPT Sentiment A | 2309.17322v1
+223 | 2023 | DISC-FinLLM: A Chinese Financial Large Language Model based on Multiple Experts Fi | 2310.15205v2
+224 | 2023 | FinGPT: Instruction Tuning Benchmark for Open-Source Large Language Models in Fina | 2310.04793v2
+225 | 2023 | ClimateBERT-NetZero: Detecting and Assessing Net Zero and Reduction Targets | 2310.08096v1
+226 | 2023 | Stock Broad-Index Trend Patterns Learning via Domain Knowledge Informed Generative | 2302.14164v1
+227 | 2023 | Volatility and irregularity Capturing in stock price indices using time series Gen | 2311.12987v1
+228 | 2023 | Order book regulatory impact on stock market quality: a multi-agent reinforcement  | 2302.04184v1
+229 | 2023 | Deep Calibration of Market Simulations using Neural Density Estimators and Embeddi | 2311.11913v2
+230 | 2023 | Learning Not to Spoof | 2306.06087v1
+231 | 2023 | Agent-Based Modelling for Real-World Stock Markets under Behavioral Economic Princ | 2307.12987v3
+232 | 2023 | Media Moments and Corporate Connections: A Deep Learning Approach to Stock Movemen | 2309.06559v1
+233 | 2023 | Higher-order Graph Attention Network for Stock Selection with Joint Analysis | 2306.15526v1
+234 | 2023 | BOURNE: Bootstrapped Self-supervised Learning Framework for Unified Graph Anomaly  | 2307.15244v2
+235 | 2023 | LOB-Based Deep Learning Models for Stock Price Trend Prediction: A Benchmark Study | 2308.01915v2
+236 | 2023 | Semi-static Conditions in Low-latency C++ for High Frequency Trading: Better than  | 2308.14185v1
+237 | 2023 | From Deep Filtering to Deep Econometrics | 2311.06256v1
+238 | 2023 | PS-AAS: Portfolio Selection for Automated Algorithm Selection in Black-Box Optimiz | 2310.10685v1
+239 | 2023 | A Satellite Imagery Dataset for Long-Term Sustainable Development in United States | 2308.00465v1
+240 | 2023 | Fires and Local Labor Markets | 2308.02739v1
+241 | 2023 | Sports Betting: an application of neural networks and modern portfolio theory to t | 2307.13807v1
+242 | 2023 | Portfolio Optimization using Predictive Auxiliary Classifier Generative Adversaria | 2304.11856v1
+243 | 2023 | Collective Arbitrage and the Value of Cooperation | 2306.11599v2
+244 | 2023 | Isotonic Recalibration under a Low Signal-to-Noise Ratio | 2301.02692v1
+245 | 2023 | Market Making with Deep Reinforcement Learning from Limit Order Books | 2305.15821v1
+246 | 2023 | FinGPT: Democratizing Internet-scale Data for Financial Large Language Models | 2307.10485v2
+247 | 2023 | A novel approach for quantum financial simulation and quantum state preparation | 2308.01844v2
+248 | 2023 | AS-XAI: Self-supervised Automatic Semantic Interpretation for CNN | 2312.14935v1
+249 | 2022 | Empirical Asset Pricing via Ensemble Gaussian Process Regression | 2212.01048v3
+250 | 2022 | Embedding-based neural network for investment return prediction | 2210.00876v1
+251 | 2022 | Do t-Statistic Hurdles Need to be Raised? | 2204.10275v4
+252 | 2022 | Attention-based CNN-LSTM and XGBoost hybrid model for stock prediction | 2204.02623v2
+253 | 2022 | Predict stock prices with ARIMA and LSTM | 2209.02407v1
+254 | 2022 | Imitate then Transcend: Multi-Agent Optimal Execution with Dual-Window Denoise PPO | 2206.10736v1
+255 | 2022 | A simple learning agent interacting with an agent-based market model | 2208.10434v4
+256 | 2022 | Deep Reinforcement Learning for Market Making Under a Hawkes Process-Based Limit O | 2207.09951v1
+257 | 2022 | Market Making via Reinforcement Learning in China Commodity Market | 2205.08936v3
+258 | 2022 | Deep Reinforcement Learning for Cryptocurrency Trading: Practical Approach to Addr | 2209.05559v6
+259 | 2022 | Fast and Accurate FSA System Using ELBERT: An Efficient and Lightweight BERT | 2211.08842v2
+260 | 2022 | High-frequency financial market simulation and flash crash scenarios analysis: an  | 2208.13654v1
+261 | 2022 | Understanding intra-day price formation process by agent-based financial market si | 2208.14207v1
+262 | 2022 | Stock Movement Prediction Based on Bi-typed Hybrid-relational Market Knowledge Gra | 2201.04965v2
+263 | 2022 | Can LSTM outperform volatility-econometric models? | 2202.11581v1
+264 | 2022 | Publication Bias in Asset Pricing Research | 2209.13623v3
+265 | 2022 | A primer on perpetuals | 2209.03307v1
+266 | 2022 | Quantitative Fundamental Theorem of Asset Pricing | 2209.15037v2
+267 | 2022 | FinRL-Meta: Market Environments and Benchmarks for Data-Driven Financial Reinforce | 2211.03107v1
+268 | 2022 | Reinforcement Learning Portfolio Manager Framework with Monte Carlo Simulation | 2207.02458v1
+269 | 2022 | CTMSTOU driven markets: simulated environment for regime-awareness in trading poli | 2202.00941v2
+270 | 2022 | Quant 4.0: Engineering Quantitative Investment with Automated, Explainable and Kno | 2301.04020v1
+271 | 2021 | Performance vs Persistence : Assess the alpha to identify outperformers | 2111.06886v2
+272 | 2021 | Constructing long-short stock portfolio with a new listwise learn-to-rank algorith | 2104.12484v1
+273 | 2021 | Learning Multiple Stock Trading Patterns with Temporal Routing Adaptor and Optimal | 2106.12950v2
+274 | 2021 | Factor Representation and Decision Making in Stock Markets Using Deep Reinforcemen | 2108.01758v1
+275 | 2021 | Application of deep reinforcement learning for Indian stock trading automation | 2106.16088v1
+276 | 2021 | A parallel-network continuous quantitative trading model with GARCH and PPO | 2105.03625v2
+277 | 2021 | FinRL-Podracer: High Performance and Scalable Deep Reinforcement Learning for Quan | 2111.05188v1
+278 | 2021 | Generative Adversarial Network (GAN) and Enhanced Root Mean Square Error (ERMSE):  | 2112.03946v1
+279 | 2021 | Stock price prediction using BERT and GAN | 2107.09055v1
+280 | 2021 | Towards Robust Representation of Limit Orders Books for Deep Learning Models | 2110.05479v2
+281 | 2021 | A horizontally scalable online processing system for trigger-less data acquisition | 2111.05155v2
+282 | 2021 | Explainable AI in Credit Risk Management | 2103.00949v1
+283 | 2021 | Adaptive learning for financial markets mixing model-based and model-free RL for v | 2104.10483v2
+284 | 2021 | Towards Realistic Market Simulations: a Generative Adversarial Networks Approach | 2110.13287v1
+285 | 2021 | Pyramid scheme in stock market: a kind of financial market simulation | 2102.02179v2
+286 | 2021 | Self-explaining Neural Network with Concept-based Explanations for ICU Mortality P | 2110.04598v3
+287 | 2020 | An overall view of key problems in algorithmic trading and recent progress | 2006.05515v1
+288 | 2020 | Extending Deep Reinforcement Learning Frameworks in Cryptocurrency Market Making | 2004.06985v1
+289 | 2020 | Deep Deterministic Portfolio Optimization | 2003.06497v2
+290 | 2020 | Adversarial Attacks on Deep Algorithmic Trading Policies | 2010.11388v1
+291 | 2020 | Generating Realistic Stock Market Order Streams | 2006.04212v1
+292 | 2020 | EB-dynaRE: Real-Time Adjustor for Brownian Movement with Examples of Predicting St | 2003.11473v1
+293 | 2020 | Deep Learning Based on Generative Adversarial and Convolutional Neural Networks fo | 2008.08041v3
+294 | 2020 | Multi-Agent Reinforcement Learning in a Realistic Limit Order Book Market Simulati | 2006.05574v2
+295 | 2020 | Transformers for Limit Order Books | 2003.00130v1
+296 | 2020 | Deep Investing in Kyle's Single Period Model | 2006.13889v1
+297 | 2020 | Using Machine Learning and Alternative Data to Predict Movements in Market Risk | 2009.07947v1
+298 | 2020 | ε-BMC: A Bayesian Ensemble Approach to Epsilon-Greedy Exploration in Model-Free Re | 2007.00869v1
+299 | 2020 | Prediction &amp; Model Evaluation for Space-Time Data | 2012.13867v2
+300 | 2020 | Learning low-frequency temporal patterns for quantitative trading | 2008.09481v1
+301 | 2020 | Automated Creation of a High-Performing Algorithmic Trader via Deep Learning on Le | 2012.00821v1
+302 | 2020 | Explainable Deep Modeling of Tabular Data using TableGraphNet | 2002.05205v1
+303 | 2020 | Cracking the Black Box: Distilling Deep Sports Analytics | 2006.04551v4
+304 | 2019 | Altcoin-Bitcoin Arbitrage | 1903.06033v2
+305 | 2019 | A Robust Transferable Deep Learning Framework for Cross-sectional Investment Strat | 1910.01491v1
+306 | 2019 | Risk Management via Anomaly Circumvent: Mnemonic Deep Learning for Midterm Stock P | 1908.01112v1
+307 | 2019 | HATS: A Hierarchical Graph Attention Network for Stock Movement Prediction | 1908.07999v3
+308 | 2019 | Extending Deep Learning Models for Limit Order Books to Quantile Regression | 1906.04404v1
+309 | 2019 | Intra-day Equity Price Prediction using Deep Learning as a Measure of Market Effic | 1908.08168v1
+310 | 2019 | Lightweight and Robust Representation of Economic Scales from Satellite Imagery | 1912.08197v1
+311 | 2019 | Avoiding Backtesting Overfitting by Covariance-Penalties: an empirical investigati | 1905.05023v1
+312 | 2019 | Asset Price Bubbles in market models with proportional transaction costs | 1911.10149v4
+313 | 2019 | An agent-based model for designing a financial market that works well | 1906.06000v1
+314 | 2018 | Comparing Asset Pricing Models: Distance-based Metrics and Bayesian Interpretation | 1803.01389v1
+315 | 2018 | Deep Learning for Forecasting Stock Returns in the Cross-Section | 1801.01777v4
+316 | 2018 | A Machine Learning Framework for Stock Selection | 1806.01743v2
+317 | 2018 | Optimizing Market Making using Multi-Agent Reinforcement Learning | 1812.10252v1
+318 | 2018 | Market Making via Reinforcement Learning | 1804.04216v1
+319 | 2018 | Practical Deep Reinforcement Learning Approach for Stock Trading | 1811.07522v3
+320 | 2018 | Temporal Relational Ranking for Stock Prediction | 1809.09441v2
+321 | 2018 | DeepLOB: Deep Convolutional Neural Networks for Limit Order Books | 1808.03668v6
+322 | 2018 | Investigating Limit Order Book Characteristics for Short Term Price Prediction: a  | 1901.10534v1
+323 | 2018 | Trading the Twitter Sentiment with Reinforcement Learning | 1801.02243v1
+324 | 2018 | Mapping Informal Settlements in Developing Countries with Multi-resolution, Multi- | 1812.00812v1
+325 | 2018 | Assigning a Grade: Accurate Measurement of Road Quality Using Satellite Imagery | 1812.01699v2
+326 | 2018 | Can Deep Learning Predict Risky Retail Investors? A Case Study in Financial Risk B | 1812.06175v3
+327 | 2018 | Technical Analysis and Discrete False Discovery Rate: Evidence from MSCI Indices | 1811.06766v2
+328 | 2018 | On Carr and Lee's correlation immunization strategy | 1809.10256v2
+329 | 2018 | Risk-Neutral Pricing and Hedging of In-Play Football Bets | 1811.03931v1
+330 | 2018 | Evaluating Gaussian Process Metamodels and Sequential Designs for Noisy Level Set  | 1807.06712v2
+331 | 2017 | Dead Alphas as Risk Factors | 1709.06641v1
+332 | 2017 | Poverty Prediction with Public Landsat 7 Satellite Imagery and Machine Learning | 1711.03654v1
+333 | 2017 | CDS Rate Construction Methods by Machine Learning Techniques | 1705.06899v1
+334 | 2017 | Opening the Black Box of Financial AI with CLEAR-Trade: A CLass-Enhanced Attentive | 1709.01574v1
+335 | 2016 | Time-varying return predictability in the Chinese stock market | 1611.04090v1
+336 | 2016 | Jump Diffusion and α-Stable Techniques for the Markov Switching Approach to Financ | 1605.05893v1
+337 | 2016 | Deep Learning for Limit Order Books | 1601.01987v7
+338 | 2015 | Profitability of simple technical trading rules of Chinese stock exchange indexes | 1504.04254v1
+339 | 2015 | Testing the performance of technical trading rules in the Chinese market | 1504.06397v1
+340 | 2014 | Factor Models for Alpha Streams | 1406.3396v2
+341 | 2014 | Can Turnover Go to Zero? | 1406.0044v4
+342 | 2014 | Notes on Alpha Stream Optimization | 1406.1249v2
+343 | 2014 | Bayesian DEJD model and detection of asymmetric jumps | 1404.2050v1
+344 | 2013 | A model-free version of the fundamental theorem of asset pricing and the super-rep | 1301.5568v2
+345 | 2013 | Fluctuation analysis of the three agent groups herding model | 1305.5958v1
+346 | 2012 | Active Portfolio Management, Positive Jensen-Jarrow Alpha, and Zero Sets of CAPM | 1206.4562v1
+347 | 2012 | Alpha Representation For Active Portfolio Management and High Frequency Trading In | 1206.2662v1
+348 | 2012 | Low-Frequency Waves and the Medium to Long-Term US Stock Market Outlook | 1203.2250v2
+349 | 2003 | Could short selling make financial markets tumble? | cond-mat/0308548v1
+--- 350 rows ---

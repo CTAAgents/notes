@@ -1,0 +1,13 @@
+# LaTeX 编译中间件
+*.aux
+*.log
+*.out
+*.toc
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 超大本地缓存数据（本地保留，不入库）
+outputs/outstanding_shares.json
+outputs/adjust_check.json

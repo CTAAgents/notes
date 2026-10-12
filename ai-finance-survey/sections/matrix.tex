@@ -1,0 +1,56 @@
+% 第13章 统一比较矩阵
+\section{统一比较矩阵}\label{sec:matrix}
+
+第 \ref{sec:evidence} 章的证据表回答“来源是什么”，这一章的矩阵回答另一个问题：“把不同工作的数字放在一起看，它们究竟可比吗？”矩阵按六列对齐——数据与样本、任务、样本外检验、成本口径、开源与许可、复现状态；\textbf{每行首列给出对应的证据表编号}，可与证据表 B 逐条对照。填表原则是：原文未报告的项一律写“未报告”，绝不替作者补齐。
+
+{\small
+\begin{xltabular}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.7cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{1.2cm}@{}}
+\caption{统一比较矩阵（代表性工作，含证据表编号）}\\
+\toprule
+ID & 工作 & 数据/样本 & 任务 & 样本外 & 成本口径 & 开源/许可 & 复现状态 \\
+\midrule
+\endhead
+E7 & Gu 等\allowbreak（2020） & 美股 CRSP\slash Compustat 1957--2016 & 月度横截面收益、排序 & 滚动前向 & 未报告 & 部分代码/数据受限 & 部分复现 \\
+E9 & Chen 等\allowbreak（2024） & 美股 1967--2016 & 条件因子/定价核 & 时间切分 & 未报告 & 部分/数据受限 & 部分复现 \\
+E10 & Kelly 等\allowbreak（2024） & 美股长样本 & 收益预测（高维） & 时间切分 & 未报告 & 部分 & 未核实 \\
+E12 & Krauss 等\allowbreak（2017） & 标普 500 成分 1992--2015 & 日度统计套利 & 时间切分 & 未报告 & 部分代码 & 部分复现 \\
+E13 & Fischer \\& Krauss\allowbreak（2018） & 标普 500 成分 1992--2015 & 日度方向预测 & 时间切分 & 报告成本敏感性 & 部分代码 & 部分复现 \\
+E14 & Zhang 等\allowbreak（2019） & 限价订单簿（多资产） & 短时价格方向 & 时间切分 & 未报告 & 数据受限 & 部分复现 \\
+E17 & Sirignano\allowbreak（2019） & 美股限价订单簿 & 短时中间价 & 时间切分 & 未报告 & 数据受限 & 部分复现 \\
+E16 & Ntakaris 等\allowbreak（2018） & FI-2010 公开订单簿 & 中间价方向 & 标准划分 & 不适用 & 公开数据/代码 & 可复现 \\
+E27 & Jiang 等\allowbreak（2017） & 加密/多资产日频 & 组合权重 & 时间切分 & 报告费率 & 公开代码 & 部分复现 \\
+E28 & Liu\allowbreak（2020） & 美股日频 & 交易/组合 & 时间切分 & 可配置 & MIT、公开 & 部分复现 \\
+E29 & Nevmyvaka 等\allowbreak（2006） & 历史订单簿（私有） & 最优执行 & 时间切分 & 内生化 & 未公开 & 部分复现 \\
+E30 & Spooner 等\allowbreak（2018） & 仿真订单流 & 做市报价 & 时间切分 & 内生化 & 公开代码 & 部分复现 \\
+E31 & Gu\'eant \\& Manziuk\allowbreak（2019） & 公司债仿真 & 做市报价 & 时间切分 & 内生化 & 公开代码 & 部分复现 \\
+E35 & Araci\allowbreak（2019） & 金融语料 & 情感分类 & 标准划分 & 不适用 & 公开权重 & 可复现 \\
+E37 & Huang 等\allowbreak（2023） & 财报 10-K/电话会 & 信息抽取 & 标准划分 & 不适用 & 公开权重 & 可复现 \\
+E40 & Lopez-Lira \\& Tang\allowbreak（2023） & 新闻标题 & 收益信号 & 时间切分 & 未报告 & 未公开 & 不可复现 \\
+E41 & Ke 等\allowbreak（2019） & 新闻文本 & 收益预测 & 时间切分 & 未报告 & 部分 & 部分复现 \\
+E42 & Yu 等\allowbreak（2023） & 股票日频 + 新闻 & LLM 智能体交易 & 时间切分 & 未报告 & 部分代码 & 不可复现 \\
+E48 & Wiese 等\allowbreak（2020） & 金融时序 & 生成 & 风格化事实检验 & 不适用 & 公开代码 & 部分复现 \\
+E50 & Yoon 等\allowbreak（2019） & 通用时序 & 生成 & 标准划分 & 不适用 & 公开代码 & 部分复现 \\
+E51 & Buehler 等\allowbreak（2019） & 合成/半合成 & 对冲 & 时间切分 & 交易成本 & 公开代码 & 部分复现 \\
+E52 & Byrd 等\allowbreak（2020） & 仿真市场 & 仿真环境 & 不适用 & 内生化 & 公开代码 & 部分复现 \\
+E57 & Feng 等\allowbreak（2019） & 美股关系图 & 排序 & 时间切分 & 未报告 & 部分代码 & 部分复现 \\
+E59 & Xu\allowbreak（2019） & 美股 + 概念图 & 股价动向 & 时间切分 & 未报告 & 部分代码 & 部分复现 \\
+E54 & Cohen \\& Frazzini\allowbreak（2008） & 美股供应链 & 横截面收益 & 时间切分 & 未报告 & 数据受限 & 部分复现 \\
+E64 & Katona 等\allowbreak（2018） & 卫星数据 & 资本市场后果 & 时间切分 & 不适用 & 数据私有 & 不可复现 \\
+E62 & Zhu\allowbreak（2019） & 招聘/评价大数据 & 公司治理 & 时间切分 & 不适用 & 数据私有 & 不可复现 \\
+E76 & Zhang 等\allowbreak（2020） & 多资产 & 端到端组合 & 时间切分 & 报告费率 & 公开代码 & 部分复现 \\
+E75 & Costa \\& Iyengar\allowbreak（2022） & 多资产 & 风险预算组合 & 时间切分 & 报告 & 公开代码 & 部分复现 \\
+E67 & Almgren \\& Chriss\allowbreak（2000） & 理论 & 最优执行 & 不适用 & 解析式 & 不适用 & 可复现（理论） \\
+E6 & Martin \\& Sch\"oneborn\allowbreak（2011） & 理论/数值 & 均值回归最优带 & 不适用 & 解析式 & 不适用 & 可复现（理论） \\
+\bottomrule
+\end{xltabular}
+}
+
+\noindent 读这张表，有三点值得单独指出。
+
+第一，\textbf{“成本口径”一列里“未报告”出现的频率高得惊人}。这意味着大量方法学结论，是在没有计入摩擦的前提下得出的；而按第 \ref{sec:foundations} 章的缝隙判据，未扣成本的结论无法判断是否可交易。这不是苛责，而是选择偏差的温床。
+
+第二，\textbf{“样本外”一列里“时间切分”与“滚动前向”混杂}。一次性的时间切分容易被反复用于选模型，从而失去样本外的意义；真正可信的是滚动前向。表格区分这两者，是希望读者在读原文时能分辨。
+
+第三，\textbf{可复现性与“离摩擦的远近”高度相关}。理论工作（Almgren--Chriss、Martin--Sch\"oneborn）与公开数据工作（FI-2010、FinBERT）复现状态最好；一旦涉及私有数据（另类数据）或商业模型（LLM），复现状态立刻掉到“不可复现”。这与第 \ref{sec:repro_audit} 章的结论互相印证。
+
+本章要记住的一句话是：\textbf{把工作摆进同一张矩阵，你才会发现——真正无法比较的，往往不是方法，而是它们各自缺的那几列。}

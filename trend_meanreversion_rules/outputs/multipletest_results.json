@@ -1,0 +1,126 @@
+{
+  "reality_check": {
+    "统计量": 0.0197053558221178,
+    "p值": 0.523,
+    "最优组合": "astk_XS_reversion_L60",
+    "n_boot": 2000,
+    "studentized": false
+  },
+  "reality_check_studentized": {
+    "统计量": 3.180350851669833,
+    "p值": 0.0455,
+    "最优组合": "astk_XS_reversion_L60",
+    "n_boot": 2000,
+    "studentized": true
+  },
+  "hansen_spa": {
+    "统计量": 3.180350851669833,
+    "p值": 0.038,
+    "最优组合": "astk_XS_reversion_L60",
+    "劣质策略阈值": -2.0405142073810105,
+    "n_poor": 10
+  },
+  "romano_wolf": {
+    "n_rejected": 1,
+    "alpha": 0.05,
+    "rejected": [
+      "astk_XS_reversion_L60"
+    ],
+    "p_adj": {
+      "fut_TS_trend_L5": 1.0,
+      "fut_TS_trend_L10": 1.0,
+      "fut_TS_trend_L20": 1.0,
+      "fut_TS_trend_L60": 1.0,
+      "fut_TS_trend_L120": 1.0,
+      "fut_TS_trend_L250": 1.0,
+      "fut_TS_reversion_L5": 1.0,
+      "fut_TS_reversion_L10": 1.0,
+      "fut_TS_reversion_L20": 1.0,
+      "fut_TS_reversion_L60": 1.0,
+      "fut_TS_reversion_L120": 1.0,
+      "fut_TS_reversion_L250": 1.0,
+      "fut_XS_trend_L5": 1.0,
+      "fut_XS_trend_L10": 1.0,
+      "fut_XS_trend_L20": 1.0,
+      "fut_XS_trend_L60": 1.0,
+      "fut_XS_trend_L120": 1.0,
+      "fut_XS_trend_L250": 1.0,
+      "fut_XS_reversion_L5": 1.0,
+      "fut_XS_reversion_L10": 1.0,
+      "fut_XS_reversion_L20": 1.0,
+      "fut_XS_reversion_L60": 1.0,
+      "fut_XS_reversion_L120": 1.0,
+      "fut_XS_reversion_L250": 1.0,
+      "aidx_TS_trend_L5": 1.0,
+      "aidx_TS_trend_L10": 1.0,
+      "aidx_TS_trend_L20": 1.0,
+      "aidx_TS_trend_L60": 1.0,
+      "aidx_TS_trend_L120": 1.0,
+      "aidx_TS_trend_L250": 1.0,
+      "aidx_TS_reversion_L5": 1.0,
+      "aidx_TS_reversion_L10": 1.0,
+      "aidx_TS_reversion_L20": 1.0,
+      "aidx_TS_reversion_L60": 1.0,
+      "aidx_TS_reversion_L120": 1.0,
+      "aidx_TS_reversion_L250": 1.0,
+      "astk_TS_trend_L5": 1.0,
+      "astk_TS_trend_L10": 1.0,
+      "astk_TS_trend_L20": 1.0,
+      "astk_TS_trend_L60": 1.0,
+      "astk_TS_trend_L120": 1.0,
+      "astk_TS_trend_L250": 1.0,
+      "astk_TS_reversion_L5": 1.0,
+      "astk_TS_reversion_L10": 1.0,
+      "astk_TS_reversion_L20": 1.0,
+      "astk_TS_reversion_L60": 1.0,
+      "astk_TS_reversion_L120": 1.0,
+      "astk_TS_reversion_L250": 1.0,
+      "astk_XS_trend_L5": 1.0,
+      "astk_XS_trend_L10": 1.0,
+      "astk_XS_trend_L20": 1.0,
+      "astk_XS_trend_L60": 1.0,
+      "astk_XS_trend_L120": 1.0,
+      "astk_XS_trend_L250": 1.0,
+      "astk_XS_reversion_L5": 1.0,
+      "astk_XS_reversion_L10": 1.0,
+      "astk_XS_reversion_L20": 1.0,
+      "astk_XS_reversion_L60": 0.0455,
+      "astk_XS_reversion_L120": 0.1455,
+      "astk_XS_reversion_L250": 1.0
+    },
+    "steps": [
+      {
+        "第几步": 1,
+        "假设": "astk_XS_reversion_L60",
+        "t": 3.180350851669833,
+        "剩余假设数": 60,
+        "逐步校正p": 0.0455
+      },
+      {
+        "第几步": 2,
+        "假设": "astk_XS_reversion_L120",
+        "t": 2.713160141624273,
+        "剩余假设数": 59,
+        "逐步校正p": 0.1455
+      }
+    ],
+    "n_boot": 2000
+  },
+  "deflated_sharpe": {
+    "SR_hat(日)": 0.06252005197044723,
+    "SR0(日,期望最大值)": 0.10110720545476669,
+    "DSR": 0.01600365056326278,
+    "N_trials": 60,
+    "best": "astk_XS_reversion_L60",
+    "年化夏普": 0.9924750568118227
+  },
+  "pbo": {
+    "PBO": 0.1111111111111111,
+    "n_combinations": 252,
+    "OOS相对排名均值": 0.8416601613322925
+  },
+  "verdict": [
+    "Reality Check 不拒绝：最优组合的超额收益在数据窥探下不显著",
+    "DSR = 0.016 < 0.95：最优夏普不高于「60 次试验下的期望最大值」"
+  ]
+}

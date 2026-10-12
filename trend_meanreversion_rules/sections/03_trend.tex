@@ -1,0 +1,212 @@
+\section{规则一：期货时序趋势跟踪}\label{sec:trend}
+
+\subsection{适用性依据}
+
+论文表 5 的期货时序口径（TS）结果：
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{期货时序口径下趋势策略的实测（论文表 5，成本 2 基点）}\label{tab:trendsrc}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.8cm}@{}}
+\toprule
+\textbf{$L$} & \textbf{净夏普} & \textbf{毛利夏普} & \textbf{年化收益} & \textbf{最大回撤} & \textbf{年化换手} & \textbf{成本占毛利} \\
+\midrule
+5   & $+0.20$ & $+0.40$ & $+0.92\%$ & $-13.97\%$ & $52.41$ & $50.1\%$ \\
+10  & $+0.32$ & $+0.45$ & $+1.56\%$ & $-14.23\%$ & $35.14$ & $29.4\%$ \\
+20  & $+0.21$ & $+0.30$ & $+1.01\%$ & $-15.24\%$ & $24.78$ & $30.0\%$ \\
+60  & $+0.21$ & $+0.26$ & $+1.06\%$ & $-14.96\%$ & $16.14$ & $20.9\%$ \\
+120 & $+0.09$ & $+0.13$ & $+0.36\%$ & $-22.78\%$ & $12.10$ & $31.0\%$ \\
+250 & $+0.24$ & $+0.27$ & $+1.36\%$ & $-15.97\%$ & $8.83$ & $10.2\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+三个可直接读出的判断。其一，六个月窗口全部为正收益，趋势侧在这个口径上稳健。其二，$L=10$ 夏普最高（$0.32$），但换手 $35.14$ 倍、成本占毛利 $29.4\%$，已接近铁律二的 $33\%$ 边界。其三，$L=250$ 是成本效率最好的一档——换手仅 $8.83$ 倍、成本占毛利 $10.2\%$，夏普 $0.24$ 且年化 $1.36\%$ 为全窗口最高。这构成“低换手档”的实证依据。
+
+需要如实指出一点：这一档的绝对收益很低（年化 $1.36\%$）。论文的期货趋势结果整体弱于文献中的国际样本（Hurst 等 2017 的百年样本、Moskowitz 等 2012 的 58 合约）\cite{mop2012,hop2017}，这与样本期仅 2014--2026 年、且中国商品期货该期间趋势性偏弱有关。规则设计必须以这个较弱的基准为出发点，不能引用国际文献的收益量级。
+
+另外，本规则的信号构造（过去 $L$ 期累计收益的符号、按波动率缩放、跨品种组合）直接沿用时间序列动量的标准范式\cite{mop2012}，并在百年尺度上被验证过稳健性\cite{hop2017}。这意味着规则的\emph{形式}有充分的文献支持，但\emph{在中国期货上的收益水平}只由论文表 5 支撑——两者不能混为一谈。
+
+\subsection{信号}
+
+\textbf{基础信号}。对品种 $i$ 在交易日 $t$：
+
+\begin{equation}
+s_i(L)=\sum_{k=0}^{L-1}\ln\left(1+r_{i,t-k}\right),\qquad
+\sigma_i(L)=\mathrm{sign}\bigl(s_i(L)\bigr).
+\end{equation}
+
+\textbf{窗口选择}。论文按成本效率给出三档（$L=10$ 高效、$L=60$ 平衡、$L=250$ 低换手），但那是在没有入场门槛与止损的口径下读出的。加入本规则的工程增强项后重做网格，排序发生实质变化（重标定依据见第~\ref{sec:retune}~节），本文因此给出两档：
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{首选 $L=10$}：工程增强后夏普 $0.44$、成本占毛利 $18.1\%$，参数曲面随门槛单调平滑，稳健性最好；
+  \item \textbf{备选 $L=20$}：夏普 $0.33$、最大回撤 $-16.9\%$，适合更看重回撤的资金。
+\end{itemize}
+
+$L=250$ 与 $L=120$ 在工程增强下失效（第~\ref{sec:verify}~节：$L=250$ 的夏普由 $0.24$ 落到 $-0.00$、成本占毛利升至 $108.7\%$），$L=5$ 在 $K\ge1.0$ 时不通过成本门槛。窗口还必须与入场门槛\emph{联合}选择——$L=250$ 在 $K=1.5$ 处的孤立峰按稳健性判据拒收。
+
+\textbf{入场门槛}。论文指出趋势信号的噪声在短窗口上极大。为过滤无意义的微小信号，要求标准化信号强度超过噪声水平才允许建仓：
+
+\begin{equation}
+\frac{\left|s_i(L)\right|}{\hat\sigma_i\sqrt{L}}>\;1.0 ,
+\end{equation}
+
+其中 $\hat\sigma_i$ 为日收益标准差。不满足门槛的品种当日目标权重置零。这一门槛在论文中未检验，属\textbf{工程判断}。
+
+\textbf{关于多窗口集成}。工程上有一种常见做法是把多个窗口的符号加权平均（如 $L\in\{10,20,60,120,250\}$ 等权投票），以期降低单一窗口的参数风险。论文\emph{未}检验集成效果，因此本文不建议把它作为默认做法，而是列为可选增强项，并要求上线前单独回测验证。这一点必须说清楚：集成听起来稳妥，但它属于“未经本文实证支持的做法”。
+
+\subsection{组合构建}
+
+\textbf{候选池}。取流动性分层后日均成交额前 $N$ 的品种，$N$ 建议 $20\sim30$。论文实证使用了 45 个品种的全池，未做品种筛选；剔除低流动性品种会改变组合的风险特征，需单独验证。
+
+\textbf{权重}。时序口径下每个品种独立建仓，权重由波动率与方向共同决定（见下节），归一化使总敞口为 1。
+
+\textbf{为何不做行业中性化}。期货的“行业”即产业链，趋势策略在产业链内的同向暴露是其收益来源之一（即论文所述“持续单向运动”环境下的板块共振），因此不对期货趋势做板块中性化。这一点与 A 股反转规则相反——那里必须做中性化（详见第~\ref{sec:ashare}~节）。差异的根据是论文对偶四：趋势的收益来自承担共同方向风险，反转的收益来自剥离共同因子后的特质回复。
+
+\subsection{仓位与缩放}
+
+\textbf{波动率目标化适用}。这是三套规则中唯一适用波动率目标化的一套。论文引用 Barroso 与 Santa-Clara(2015) 把动量夏普从 $0.53$ 提到 $0.97$、Harvey 等(2018) 在 60 多个资产上验证波动率目标改善风险资产夏普\cite{barroso2015,harvey2018}，并引 Moreira 与 Muir(2017) 的波动率管理组合\cite{moreiramuir2017}。
+
+权重公式：
+
+\begin{equation}
+w_i=\sigma_i(L)\cdot\min\left(\frac{V_{\text{target}}}{\hat\sigma_i^{(60)}},\;C_{\text{cap}}\right),
+\qquad\text{随后归一化}\quad w\leftarrow\frac{w}{\sum_j|w_j|},
+\end{equation}
+
+其中 $\hat\sigma_i^{(60)}$ 为 60 日已实现波动年化值，$V_{\text{target}}=10\%$，$C_{\text{cap}}=3.0$（单品种杠杆上限）。这三个参数取自论文实证设定，与其期货时序回测一致，因此规则的历史绩效可直接与论文表 5 对照。
+
+\textbf{归因警告}。论文引用 Kim 等(2016) 指出，时间序列动量策略的收益有很大一部分来自波动率缩放本身而非时序符号\cite{kim2016}，Huang 等(2020) 更直接地指出 TsMOM 的表现与“按历史样本均值投资”的简单规则几乎相同\cite{huang2020}。这对规则设计有一个直接要求：\textbf{上线前必须做缩放与信号的分离归因}——分别测试“只保留符号、不做缩放”与“只做缩放、符号恒定”两个对照组，确认收益来源。若收益主要来自缩放，则该规则的经济含义应重新表述，而不是继续称为“趋势跟踪”。
+
+\subsection{进出场纪律}
+
+\textbf{调仓频率}：每 5 个交易日。信号使用至 $t$ 日收盘的信息，仓位自 $t+1$ 日起生效。
+
+\textbf{免交易带}（no-trade band）。论文实证显示，即使目标权重不变，持仓随收益漂移仍会产生换手。为压低成本，设免交易带：
+
+\begin{equation}
+\text{若}\;\left|w_i^{\text{new}}-w_i^{\text{current}}\right|<\theta_{\text{band}},
+\quad\text{则}\;w_i^{\text{new}}\leftarrow w_i^{\text{current}},
+\qquad\theta_{\text{band}}=0.1\times\frac{V_{\text{target}}}{\hat\sigma_i^{(60)}} .
+\end{equation}
+
+带宽随波动率自适应：波动率高的品种带宽更窄（更频繁调整以免敞口失控），波动率低的品种带宽更宽（减少无谓交易）。这一设计在论文中未检验，属\textbf{工程判断}，但其必要性由论文的成本证据支持——成本占毛利比在短窗口上已达 $29.4\%$，任何能压低换手的机制都有价值。
+
+\subsection{失效防线}
+
+\subsubsection*{防线一：恐慌状态过滤（对移动量崩溃）}
+
+论文引用 Daniel 与 Moskowitz(2016)：动量崩溃发生在恐慌状态（市场下跌后、波动率高企并伴随反弹），且部分可预测；据此构造的动态动量策略把 alpha 与夏普大约翻倍\cite{danielmoskowitz2016}。
+
+\textbf{触发定义}：
+
+\begin{equation}
+\text{恐慌状态}\iff
+\Bigl(\underbrace{R_{\text{mkt}}^{(60)}<-5\%}_{\text{市场 60 日下跌}}\Bigr)
+\;\wedge\;
+\Bigl(\underbrace{\sigma_{\text{mkt}}^{(60)}>\text{历史 80 分位}}_{\text{波动率高企}}\Bigr) ,
+\end{equation}
+
+其中 $R_{\text{mkt}}^{(60)}$ 为等权市场组合的 60 日收益，$\sigma_{\text{mkt}}^{(60)}$ 为其 60 日已实现波动年化值，分位数在滚动 3 年窗口上计算。
+
+\textbf{动作}：触发后总敞口乘以 $0.5$，持续至波动率回落至 60 分位以下。
+
+\textbf{参数边界}：$-5\%$ 与 80 分位是两个可调参数。设得过严（如 $-10\%$ 且 90 分位）会导致几乎从不触发，防线形同虚设；设得过松（如 $0\%$ 且 60 分位）会导致频繁降仓、错失趋势收益。论文仅给出“恐慌状态”的定性刻画，未给出精确阈值，因此这两个数字属\textbf{工程判断}，需用滚动回测标定。
+
+\subsubsection*{防线二：拥挤监控（对信号同质化）}
+
+论文对偶五指出趋势策略的容量约束来自\emph{拥挤}而非成本：Stein(2009) 的协调失败理论\cite{stein2009}、Lou 与 Polk(2022) 的 comomentum 度量（高拥挤预示动量收益下降）\cite{loupolk2022}、Baltas(2019) 的另类风险溢价拥挤研究\cite{baltas2019}。
+
+\textbf{指标}：策略内品种日收益的两两平均相关系数 $\bar\rho_t$，在滚动 3 年窗口上取分位。
+
+\textbf{动作}：$\bar\rho_t$ 超过 90 分位时，总敞口乘以 $0.7$，并输出预警。
+
+\textbf{边界}：论文明确指出拥挤度的定量估计尚无统一口径，容量上限的估计分歧较大（见论文遗留课题 Q3）。因此本防线只作为\emph{减速器}而非\emph{开关}使用——它降低敞口，但不强制清仓。把它当作精确的容量计量工具是误用。
+
+\subsubsection*{防线三：组合止损}
+
+\begin{itemize}[leftmargin=2.2em]
+  \item 组合最大回撤达 $15\%$：总敞口腰斩；
+  \item 组合最大回撤达 $25\%$：全部平仓，暂停 20 个交易日后再评估；
+  \item 单品种浮亏达 $2.5\times\text{ATR}_{20}$：该品种平仓。
+\end{itemize}
+
+论文实验中的最大回撤为 $-13.97\%$ 至 $-22.78\%$，因此 $15\%$ 与 $25\%$ 两条线分别位于历史回撤的浅部与深部，属于\emph{基于实测回撤分布}的设定。ATR 倍数属\textbf{工程判断}。
+
+\textbf{不得使用反转式加仓}。趋势策略在震荡市中的常规应对是止损离场而非逢低加仓；论文指出趋势策略的失效包含“慢性出血”，加仓会把慢性出血放大为急性亏损。
+
+\subsection{成本门槛与容量}
+
+\textbf{成本核算}。按表~\ref{tab:cost}，期货单边 2 基点。按铁律二检查：
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{期货趋势各窗口的成本门槛检查（论文口径）}\label{tab:trendcost}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{3.6cm}@{}}
+\toprule
+\textbf{$L$} & \textbf{成本占毛利} & \textbf{毛利/成本} & \textbf{门槛判定（要求 $>3$）} \\
+\midrule
+250 & $10.2\%$ & $9.8$ & 通过（余量充足） \\
+60  & $20.9\%$ & $4.8$ & 通过 \\
+120 & $31.0\%$ & $3.2$ & 勉强通过 \\
+20  & $30.0\%$ & $3.3$ & 勉强通过 \\
+10  & $29.4\%$ & $3.4$ & 勉强通过 \\
+5   & $50.1\%$ & $2.0$ & \textbf{不通过，废弃} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+这张表给出一个明确的操作结论：\textbf{在 2 基点成本下，$L=5$ 必须废弃}；$L=10/20/120$ 处于门槛边缘，一旦实际成本升到 3 基点以上（例如加入冲击成本），应优先切换到 $L=60$。需要提醒的是，本表按\emph{论文口径}计算；本规则的工程增强会改变各窗口的成本占毛利（实测值见第~\ref{sec:verify}~节的表~\ref{tab:grid1}），其中 $L=250$ 的余量优势在增强后消失、成本占毛利反升至 $108.7\%$，因此“低换手档”这一档在增强口径下不再可用。
+
+\textbf{容量约束}。趋势的容量约束来自拥挤，不来自成本。论文未给出容量上限的定量估计，本文因此不给数字，只给监控项：comomentum 分位、策略资金规模占品种持仓量的比例、以及与同类 CTA 的相关性。
+
+\subsection{参数边界表}
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{规则一参数边界}\label{tab:trendparam}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{6.4cm}@{}}
+\toprule
+\textbf{参数} & \textbf{取值} & \textbf{证据来源} & \textbf{越界后果} \\
+\midrule
+窗口 $L$ & $10$（首选）/ $20$（备选） & 论文表 5 + 第~\ref{sec:retune}~节 & 短于 $10$ 成本占毛利超 $33\%$ 须废弃；$250$ 与 $120$ 在工程增强下失效 \\
+调仓频率 & 5 交易日 & 论文设定 & 缩短至日频换手翻倍，成本占毛利可能翻倍 \\
+目标波动率 & 10\% & 论文设定（MOP12/HOP17 体系） & 提高则杠杆上升、回撤放大 \\
+单品种杠杆上限 & 3.0 & 论文设定 & 提高则单品种主导组合风险 \\
+免交易带系数 & 0.1 & 工程判断 & 加宽则跟踪滞后；收窄则换手上升 \\
+入场门槛 & 1.0 & 工程判断 & 提高则持仓数骤减、集中度上升 \\
+恐慌阈值 & $-5\%$ / 80 分位 & DM16 定性 + 工程标定 & 过严则永不触发；过松则错失趋势 \\
+拥挤阈值 & 90 分位 / 乘 0.7 & Lou--Polk、Baltas 定性 & 论文注明容量定量估计无统一口径，不宜作精确开关 \\
+回撤止损线 & $15\%$ / $25\%$ & 论文实测回撤分布 & 过紧则频繁触发；过松则失去保护 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{证据映射表}
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{规则一：决策与论文证据的映射}\label{tab:trendmap}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{5.3cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+\textbf{决策} & \textbf{论文结论} & \textbf{证据来源} & \textbf{置信度} \\
+\midrule
+用趋势方向而非反转 & 期货时序趋势全窗口夏普为正、反转全为负 & 论文表 5 & \confhigh \\
+不用 $L=5$ & $L=5$ 成本占毛利 $50.1\%$ & 论文表 5 & \confhigh \\
+波动率目标化 & 趋势侧多源验证有效 & \cite{barroso2015,harvey2018,moreiramuir2017} & \confmid \\
+须做缩放归因 & 收益可能主要来自缩放而非符号 & \cite{kim2016,huang2020} & \confmid \\
+恐慌状态过滤 & 崩溃可预测、动态动量翻倍 & \cite{danielmoskowitz2016} & \confmid \\
+拥挤监控 & 高拥挤预示动量收益下降 & \cite{stein2009,loupolk2022,baltas2019} & \confmid \\
+不做板块中性化 & 趋势收益来自共同方向风险 & 论文对偶四 & \confmid \\
+不得逢低加仓 & 趋势失效含慢性出血 & 论文对偶六 & \confmid \\
+\midrule
+多窗口集成 & \emph{论文未检验} & — & \conflow \\
+ATR 止损倍数 & \emph{论文未检验} & — & \conflow \\
+免交易带系数 & \emph{论文未检验} & — & \conflow \\
+恐慌阈值精确取值 & \emph{论文仅给定性刻画} & — & \conflow \\
+容量上限 & \emph{论文注明无统一口径} & — & \conflow \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表中最后一组五行是本文刻意保留的“未支持清单”。它们不是可有可无的脚注，而是规则上线前的待办事项：任何标为\conflow~的条目，都必须先用自己的历史数据回测验证，再写入实盘规则。

@@ -1,0 +1,188 @@
+\section{上线前的多重检验校正流程}\label{sec:mtflow}
+
+论文在审计章明确指出：自建实证未做多重检验校正，$48$（实际为 $60$）个参数组合的网格扫描结果不能读作统计显著。本节把这句警告落实为一个可执行的流程，并对 $60$ 个组合实跑。
+
+\subsection{流程设计：四道闸门}
+
+流程的目的不是「证明策略有效」，而是\emph{找出那些在数据窥探下依然站得住的结果}。四道闸门的判据不同，必须同时通过：
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item \textbf{闸门一：White Reality Check}——对「所有策略的期望收益均 $\le0$」这一零假设做自举检验\cite{white2000}。它回答：$60$ 个组合里最好的那个，是否只是搜索空间的产物？
+  \item \textbf{闸门二：Hansen SPA}——Reality Check 的 studentized 改进版，对表现差的策略做再中心化，避免劣质策略拖累检验\cite{hansen2005}。
+  \item \textbf{闸门二附：Romano--Wolf 逐步多重检验}——给出\emph{每一个}假设的逐步校正 $p$ 值，在控制族错误率（FWER）的同时比单步法保留更多功效\cite{romanowolf2005}。
+  \item \textbf{闸门三：紧缩夏普比率（DSR）}——把「试验次数」直接计入显著性：把最优夏普与「$N$ 次独立试验下的期望最大夏普」比较\cite{bailey2014}。
+  \item \textbf{闸门四：回测过拟合概率（PBO/CSCV）}——用组合对称交叉验证估计「样本内最优在样本外落到中位数以下」的概率\cite{bailey2016}。
+\end{enumerate}
+
+四道闸门的关系需要说清：闸门一、二检验\emph{最大值}的显著性，闸门三检验\emph{幅度}是否超过搜索带来的期望膨胀，闸门四检验\emph{选择过程}是否稳健。它们测的是不同侧面，因此可能出现分歧——本文的实测正好出现了分歧。
+
+\subsection{方法细节}
+
+\subsubsection*{平稳自举}
+
+Reality Check 与 SPA 都需要对时间序列重采样。金融收益存在波动率聚集，简单 i.i.d. 自举会破坏这一结构、低估统计量的方差。本文采用 Politis--Romano 平稳自举：以几何分布的块长抽样，平均块长取 20 个交易日，自举次数 2000。
+
+\subsubsection*{Reality Check 统计量}
+
+非 studentized 版本：
+\begin{equation}
+V=\max_k\ \sqrt{T}\,\bar f_k ,
+\end{equation}
+其中 $\bar f_k$ 为第 $k$ 个组合的日均收益。自举时以 $\bar f_k$ 为中心再抽样，得到 $V^*_b=\max_k\sqrt T\,(\bar f^{*}_{k,b}-\bar f_k)$，$p$ 值为 $\Pr(V^*_b\ge V)$。
+
+studentized 版本把 $\bar f_k$ 换成 $t_k=\bar f_k/\hat\sigma_k$（$\hat\sigma_k$ 为 Newey--West 标准误），量纲无关，因此不会因为某些组合的波动极大而主导最大值。
+
+\textbf{为何两个版本都要报}：非 studentized 版本对高波动组合极其敏感——本文的 $60$ 个组合横跨期货与 A 股两类资产，波动相差数倍，非 studentized 统计量几乎被波动最大的组合支配（实测统计量仅 $0.02$，即最大值来自一个低波动组合）。
+
+\subsubsection*{Romano--Wolf 逐步检验}
+
+单步的 Reality Check 只回答「最强的那个是否显著」；实务上更常需要「哪些组合能被留下」。Romano--Wolf(2005) 给出逐步算法\cite{romanowolf2005}：
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item 把 $t$ 统计量由大到小排序，得假设序列 $(1),(2),\dots,(N)$；
+  \item 用\emph{同一次}自举抽样计算再中心化的 studentized 统计量矩阵 $t^*_{b,k}$；
+  \item 第 $j$ 步只在剩余假设集合 $\{(j),(j+1),\dots,(N)\}$ 上取
+        $\max_{k\ge j}t^*_{b,k}$ 作为临界分布，与 $\max_{k\ge j}t_{(k)}$ 比较得逐步 $p$ 值；
+  \item 一旦某步 $p>\alpha$ 即停止，其后假设一律不拒绝。
+\end{enumerate}
+
+第 3 步的「逐步缩小比较集」是功效来源：越靠后的假设面对的临界值越松。第 2 步的「共用同一次自举」是它与「逐条单独检验再加 Bonferroni」的本质区别——后者会因忽略假设间相关性而过度保守。
+
+\textbf{一个可用的实现校验}：RW 第 1 步的 $p$ 值应当\emph{恰好等于} studentized Reality Check 的 $p$ 值（两者在第 1 步定义相同）。本文实测两者均为 $0.0455$，这构成对实现的内部一致性检验。
+
+\subsubsection*{Hansen SPA}
+
+SPA 的关键是再中心化：对 $\hat t_k$ 低于阈值 $-\sqrt{2\log\log T}$ 的「劣质策略」，自举时用 $0$ 而非 $\bar f_k$ 作中心，从而使其不再贡献正的偏差。统计量取 $\max(0,\max_k t_k)$。
+
+\subsubsection*{紧缩夏普比率}
+
+令 $\widehat{SR}$ 为最优组合的（日频）夏普，$T$ 为样本长度，$\hat\gamma_3$、$\hat\gamma_4$ 为其偏度与峰度，$\hat V$ 为全部 $N$ 次试验夏普的横截面方差。期望最大夏普为
+\begin{equation}
+SR_0=\sqrt{\hat V}\left[(1-\gamma)\,\Phi^{-1}\!\left(1-\frac1N\right)
++\gamma\,\Phi^{-1}\!\left(1-\frac{1}{N e}\right)\right],
+\qquad \gamma=0.5772\ldots ,
+\end{equation}
+紧缩夏普比率为
+\begin{equation}
+\text{DSR}=\Phi\!\left(\frac{\left(\widehat{SR}-SR_0\right)\sqrt{T-1}}
+{\sqrt{1-\hat\gamma_3\widehat{SR}+\frac{\hat\gamma_4-1}{4}\widehat{SR}^2}}\right).
+\end{equation}
+$\text{DSR}>0.95$ 才可认为最优夏普在 $5\%$ 水平上超过搜索带来的期望膨胀。
+
+\textbf{口径一致性的陷阱}：$SR_0$ 与 $\widehat{SR}$ 必须同为日频（或同为年化）。本文首版把年化的试验方差与日频的 $\widehat{SR}$ 混用，得到 $SR_0=1.605$（日频！）的荒谬值，使 DSR 恒为 $0$。修正口径后 $SR_0=0.1011$，结果才有意义。这类单位错误在多重检验实现中极易发生，且因为「结论都是拒绝」而不会被察觉，需要专门校验。
+
+\subsubsection*{PBO/CSCV}
+
+把 $T$ 个交易日切成 $S=10$ 个等长区块，枚举所有 $\binom{10}{5}=252$ 种「5 块作样本内、5 块作样本外」的切分。对每种切分：在样本内选出夏普最高的组合 $n^*$，计算其在样本外的夏普排名 $\omega\in(0,1)$，取 $\lambda=\ln\frac{\omega}{1-\omega}$。PBO 为 $\lambda<0$ 的比例，即样本内最优在样本外落到中位数以下的概率。$\text{PBO}>0.5$ 表示选择过程不比抛硬币更好。
+
+\subsection{实测结果}
+
+对 $60$ 个组合（$4$ 组口径 $\times$ 两个方向 $\times$ 六个窗口）实跑：
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{多重检验校正实跑结果（$60$ 个组合，$3039$ 个交易日）}\label{tab:mtres}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.1cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{5.0cm}@{}}
+\toprule
+\textbf{方法} & \textbf{统计量} & \textbf{结果} & \textbf{判读} \\
+\midrule
+White RC（非 studentized） & $V=0.02$ & $p=0.523$ & 不拒绝；但该统计量被波动结构支配，参考价值低 \\
+White RC（studentized） & $V=3.18$ & $p=0.046$ & 边际拒绝（$5\%$ 线上） \\
+Hansen SPA & $V=3.18$ & $p=0.038$ & 拒绝；10/60 被判为劣质策略 \\
+Romano--Wolf（FWER $5\%$） & 逐步 & 拒绝 $1/60$ & 仅 \texttt{astk\_XS\_rev\_L60} 存活；第 2 步 $p=0.146$ 即停止 \\
+紧缩夏普比率（DSR） & $SR_0=0.1011$ & $0.016$ & \textbf{不通过}：最优日夏普 $0.0625$ 低于 $60$ 次试验的期望最大值 \\
+PBO / CSCV（$S=10$） & $252$ 种切分 & $0.111$ & 通过：样本内最优在样本外平均排在第 $84.2$ 百分位 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Romano--Wolf 的结果给出一张更清晰的图景：\textbf{$60$ 个组合中只有 $1$ 个能在族错误率 $5\%$ 下存活}，且第二名（\texttt{L=120}）的逐步 $p$ 值立刻跳到 $0.146$——优势并不连续。这与「哪些参数值得留下」的实务判断直接衔接：可留下的只有一个点，而一个孤立的点恰恰是稳健性最差的情形。
+
+最优组合为 \texttt{A股个股截面反转 L=60}（年化夏普 $0.99$），与论文表 $6$ 一致——这同时验证了本文网格与论文口径的可复现性。
+
+\subsection{分歧的解读：为什么 DSR 拒绝而 SPA 与 PBO 通过}
+
+四项结果并不一致，这不是实现错误，而是它们测的东西不同。这个分歧本身值得展开。
+
+\textbf{SPA 与 studentized RC 通过了}，因为它们检验的是「最大值是否显著为正」。实测 $t=3.18$ 的自举分布下，$p$ 值确实落在 $5\%$ 附近。也就是说：\emph{在 $60$ 个组合中，确实存在一个统计上强于零的组合}。
+
+\textbf{DSR 拒绝，因为它引入了幅度基准}。$SR_0=0.1011$ 是「从 $N(0,\hat V)$ 中抽 $60$ 次取最大」的期望值——由于 $60$ 个试验的夏普横截面方差较大，这个期望最大值本身就很高（日频 $0.10$，年化约 $1.6$）。最优组合的日夏普 $0.0625$ 反而低于它。换句话说：\emph{最优组合的夏普绝对值，与「纯粹靠搜索挑出来的最大值」没有区别}。
+
+\textbf{PBO 通过，因为它测的是排序而非幅度}。样本内最优在样本外平均排在第 $84.2$ 百分位，说明选择过程是有信息的（不是随机的）。但它不回答「这个排名对应的收益是否值得交易」。
+
+三者的合并结论应当是：\textbf{A 股 $L=60$ 反转确实是一个「相对更好」的组合，但它的夏普幅度不足以排除「它只是搜索空间的极值」这一解释}。这正好对应论文结论置信度一章给该口径的评级——实证直接支持其\emph{相对}优势，但绝对水平不可承诺。
+
+\subsection{流程的落地形式}
+
+把上述四道闸门写成上线前的固定步骤：
+
+\begin{quote}\ttfamily\small
+步骤 1：登记搜索空间\\
+\quad 记录本次策略研发的全部试验次数 N（含失败与废弃的参数）\\
+\quad 未登记的搜索空间会使后续校正失效\\
+步骤 2：计算网格日收益矩阵（T × N）\\
+步骤 3：闸门一、二（自举类：RC / SPA / Romano--Wolf）\\
+\quad 若三者均不拒绝：停止，判定为数据窥探产物\\
+步骤 4：闸门三（DSR）\\
+\quad 若 DSR < 0.95：不得以「统计显著」表述，降级为「候选」\\
+步骤 5：闸门四（PBO）\\
+\quad 若 PBO > 0.5：判定选择过程无效，需重新设计信号而非调参\\
+步骤 6：对通过者施加样本外检验（滚动 walk-forward）与\\
+\quad 可交易性过滤（涨跌停、停牌、参与率约束）\\
+步骤 7：归档：N、各条 p 值、DSR、PBO、样本外结果，一并写入策略档案
+\end{quote}
+
+\textbf{步骤 1 是最容易被跳过、也最关键的一步}。多重检验校正的全部依据是「试验次数 $N$」；如果研发过程中试过的参数、改过的信号、调过的止损没有全部登记，$N$ 会被系统性低估，校正随之失效。本文的 $N=60$ 是完整登记的网格，因此 DSR 的判定可信；若实际研发中还有未登记的尝试，真实的 $SR_0$ 会更高，结论只会更保守。
+
+\subsection{总入口：一次跑完七步并出总判决}
+
+上述七步此前分散在三个脚本里（\texttt{multipletest.py} 四道闸门、\texttt{walkforward.py} 组合层面的样本外、\texttt{rule\_wf.py} 规则自身的样本外）。现已收敛为唯一入口 \texttt{code/go\_live\_check.py}，跑一次输出逐项结论与总判决：
+
+\begin{quote}\ttfamily\small
+python go\_live\_check.py \hfill \# 完整检查（自举 2000 次，约 2 分钟）\\
+python go\_live\_check.py --fast \hfill \# 快速检查（自举 300 次，约 10 秒）\\
+python go\_live\_check.py --with-rule-wf \hfill \# 额外跑规则自身参数的样本外检验
+\end{quote}
+
+\textbf{退出码约定}：$0$ = 七步全部通过；$1$ = 存在未通过项。这一约定使它可以\emph{直接挂在 CI 里做阻断}——研究流程产出的新参数组合若过不了闸门，合并请求就无法通过。
+
+本文对当前网格（$N=60$）实跑的结果：
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{上线检查单实跑结果（$N=60$，自举 300 次）}\label{tab:golive}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{1.4cm}>{\raggedright\arraybackslash}p{9.6cm}@{}}
+\toprule
+\textbf{步骤} & \textbf{结果} & \textbf{依据} \\
+\midrule
+1 搜索空间登记 & ✓ & $N=60$、$T=3039$ \\
+2 网格构建 & ✓ & 形状与缺失率检查通过（缺失 $1.37\%$） \\
+3 自举类检验 & ✓ & studentized RC $p=0.027$、SPA $p=0.023$、RW 拒绝 $1/60$ \\
+4 紧缩夏普比率 & \textbf{✗} & DSR $=0.016$，远低于 $0.95$ \\
+5 过拟合概率 & ✓ & PBO $=0.111$ \\
+6 样本外检验 & \textbf{✗} & IS $\to$ OOS 相对衰减 $54.7\%$，超过 $50\%$ 判据 \\
+7 可交易性核查 & \textbf{✗} & 涨跌停与停牌过滤尚未接入回测引擎（引擎来自论文口径） \\
+\midrule
+\multicolumn{3}{@{}l}{\textbf{总判决：$3$ 项未通过，不得直接上线 —— DSR、样本外、可交易性}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+这张表比任何单一指标都更能说明问题：\textbf{「最强的组合在自举下确实显著」（步骤 3 通过），但它同时过不了幅度基准（步骤 4）、样本外外推（步骤 6）与可执行性（步骤 7）}。这正是第~\ref{sec:verify}~节反复出现的形态——单看一项容易得出乐观结论，放到完整闸门序列里就会露馅。
+
+步骤 7 的未通过是\textbf{刻意保留的诚实结果}：本文网格由论文口径的引擎生成，该引擎未做涨跌停与停牌的成交剔除。要让它通过，必须把共享层的 \texttt{C.tradable\_mask} 接进成交判定（涨跌停当日顺延、停牌不调仓），并把 \texttt{go\_live\_check.py} 顶部的 \texttt{TRADABILITY\_APPLIED} 置为 \texttt{True} 后重跑。这个开关刻意做成人工确认，以免「声称做了过滤」而实际没做。
+
+\subsection{回归测试}
+
+四道闸门实现在 \texttt{code/multipletest.py}，运行 \texttt{python multipletest.py} 即可复现本节全部数字（$N=60$，自举 $2000$ 次，随机种子固定为 $20261008$）。框架另附 \texttt{code/tests/test\_rules.py}（$23$ 项，全部通过，运行约 $3$ 秒），覆盖四类：
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{共享层数值正确性}：涨跌停分板块判定、指标与手算值一致、成本门槛边界；
+  \item \textbf{策略对称性}（G1 门禁）：权重取负后毛收益是否\emph{严格}互为相反数、换手是否完全相同。
+        测试同时揭示了一个此前未被写明的边界——\emph{含权重漂移时对称性只是近似}（漂移分母 $1\pm r$ 不同），
+        只有关闭漂移才是精确的；
+  \item \textbf{统计工具性质}：EG 临界值在 $T=60$ 处等于 $-3.4396$、比标准 ADF 更负、随样本长度单调；OU 参数能回收已知半衰期；Kalman 返回的一步前瞻 $\beta$ 首项等于初值（不吸收当期观测）；
+  \item \textbf{多重检验思想校验}：纯噪声下 RC 不拒绝、注入强信号后拒绝；SPA 不会把劣质策略「再中心化」成显著；RW 在噪声下零拒绝、在强信号下捕获该列；DSR 在 $N=1$ 时退化为标准正态检验且随试验数增加而下降；PBO 在「全样本一致的真信号」下偏低、在「仅样本内有效」下偏高。
+\end{itemize}
+
+这些测试的价值不在于覆盖率，而在于把三次实跑中暴露过的错误固化为断言：Kalman 的一步前瞻性质、EG 与标准 ADF 的临界值差、$N=1$ 时 DSR 的退化行为，都曾是实际踩过的坑。三处口径问题——$SR_0$ 与 $\widehat{SR}$ 的单位混用、跨资产网格必须报告 studentized 版本、多数交易日空仓的策略不能用日频 $t$ 值——分别在第~\ref{sec:mtflow}~节与第~\ref{sec:pairalgo}~节展开，此处不再重复。

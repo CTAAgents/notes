@@ -1,0 +1,105 @@
+% !TEX program = xelatex
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue, citecolor=black}
+\captionsetup{font=small,labelfont=bf}
+\setlength{\parskip}{0.35em}
+\setlength{\parindent}{2em}
+\setlength{\emergencystretch}{3em}
+\setlength{\tabcolsep}{4pt}
+\setlist{nosep}
+\renewcommand{\arraystretch}{1.15}
+
+\newcommand{\confhigh}{\textbf{高}}
+\newcommand{\confmid}{中}
+\newcommand{\conflow}{\textit{低}}
+
+\title{\bfseries 趋势跟踪与均值回归交易规则设计\\[3pt]
+\large 基于《趋势跟踪与均值回归：同一自相关结构的两侧剪影》的实证结论}
+\author{叨客宁宁}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent 本文把综述《趋势跟踪与均值回归：同一自相关结构的两侧剪影》的实证结论翻译为可执行的交易规则，
+共三套：\textbf{期货时序趋势跟踪}（对应论文中期货时序口径趋势全窗口占优的证据）、
+\textbf{A 股截面反转}（对应 A 股个股截面反转在 $L=20\sim120$ 全面占优、$L=60$ 净夏普 $0.99$ 的证据）、
+\textbf{期货截面统计套利}（对应期货截面反转在 $L=60/120$ 占优、净夏普 $0.72/0.56$ 且
+Newey--West $t=2.59$ 的证据）。
+
+三套规则共享同一套数据、成本与可交易性口径，均按"适用性依据 $\to$ 信号 $\to$ 组合构建 $\to$
+仓位与缩放 $\to$ 进出场纪律 $\to$ 止损与失效防线 $\to$ 成本门槛 $\to$ 容量约束"的固定结构展开，
+每条规则附\textbf{参数边界表}（说明每个参数在论文实证中的取值范围与越界后果）
+与\textbf{证据映射表}（逐条对应论文结论、证据来源与置信度）。
+
+三条贯穿全部规则的设计铁律：\textbf{其一，每条规则必须能追溯到论文的具体证据}，
+凡属工程改进而非本文实证支持的做法，一律显式标注；
+\textbf{其二，成本先于信号}——任何信号的预期毛收益必须超过其往返成本的 3 倍，
+否则该参数组合直接废弃（论文实证中 $L=5$ 的 A 股反转毛利夏普 $1.08$ 被 $12.31\%$ 的成本拖累压至 $-0.35$，是这条铁律的来源）；
+\textbf{其三，失效防线内置}——趋势规则内置恐慌状态过滤与拥挤监控，反转规则内置止损与资金冗余，
+因为两策略的失效模式不同（前者"慢性出血加跳崖"，后者"不收敛加资金断裂"）。
+
+本文不宣称任何规则能产生正收益。论文已明确其自建实证是\emph{变量受控的相对比较}而非绝对收益估计；
+本文沿用了这一限定，所有规则的可执行性以论文披露的边界为限。
+
+为把「可执行」落到实处，本文另附三份东西。第一，\textbf{可运行的回测代码框架}
+（\texttt{code/} 目录）：规则一、规则二各一套完整回测实现，共享同一数据、成本与评估口径；
+代码已实跑，三处实现缺陷（清仓止损的永久锁定、对冲 beta 未按因果估计、Kalman 使用当期观测
+制造虚假均值回归）在实跑中暴露并修正，全部过程如实记录。
+第二，\textbf{规则三的协整配对筛选算法}（第~\ref{sec:pairalgo}~节）：
+七步流程、每步判据与实测拒绝率；在中国期货 16992 次配对检验中仅 75 条通过（通过率 $0.44\%$），
+印证了反转策略「条件性」的结构特征（改用 Engle--Granger 专用临界值后为 26 条，见第~\ref{sec:verify}~节）。
+第三，\textbf{上线前的多重检验校正流程}（第~\ref{sec:mtflow}~节）：
+四道闸门（White Reality Check、Hansen SPA、紧缩夏普比率、过拟合概率）对 60 个参数组合实跑，
+结果出现分歧——自举类检验边际拒绝，而紧缩夏普比率判定最优组合的幅度不足以排除数据窥探。
+本文如实保留这一分歧并给出解读。
+
+第四，\textbf{四项验证补充}（第~\ref{sec:verify}~节）：
+样本外 walk-forward（样本内夏普 $1.26$ 衰减到样本外 $0.57$，仅 $44\%$ 的折为正）、
+行业中性化口径对照（真实申万 vs 聚类代理，量级一致）、
+规则一完整窗口网格（推翻了前文对 $L=250$ 的推荐）、
+规则三统计口径修正（Engle--Granger 专用临界值使通过数减少 $65\%$，严格口径下成交仅 $7$ 笔）。
+这四项验证各自修正了前文的一处判断，共同把本文的定位收紧为
+\textbf{设计模板与验证流程}，而非可上线策略。
+
+第五，\textbf{依据上述验证重标定的参数}（第~\ref{sec:retune}~节）：
+规则一的窗口由「$250/60/10$ 三档」改为 $\mathbf{L=10}$（首选）、$\mathbf{L=20}$（备选），
+且窗口必须与入场门槛\emph{联合}选择（$L=250$ 在 $K=1.5$ 处的孤立峰按稳健性判据拒收）；
+规则二的窗口由 $L=60$ 改为 $\mathbf{L=250}$（首选）、$L=60$（备选），
+依据是二者夏普几乎相同而 $L=250$ 的最大回撤浅 $16$ 个百分点、成本占毛利低 $6.6$ 个百分点；
+ATR 止损倍数被实测判定为\emph{低敏感参数}（夏普跨度 $0.04$），无须精调。
+必须同时声明的是：重标定改善的是\emph{相对排序}，
+两条规则的首选参数在自身 walk-forward 中的样本外夏普分别为 $-0.03$ 与 $-0.18$，\textbf{均不兑现正收益}。
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\input{sections/01_intro}
+\input{sections/02_shared}
+\input{sections/03_trend}
+\input{sections/04_ashare}
+\input{sections/05_statarb}
+\input{sections/06_compare}
+\input{sections/07_mapping}
+\input{sections/08_pseudocode}
+\input{sections/09_pairalgo}
+\input{sections/10_multipletest}
+\input{sections/11_verify}
+\input{sections/12_retune}
+\input{sections/90_bibliography}
+
+\end{document}

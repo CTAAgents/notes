@@ -1,0 +1,203 @@
+\section{规则二：A 股截面反转}\label{sec:ashare}
+
+\subsection{适用性依据}
+
+论文表 6 的 A 股个股截面（XS）结果：
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{A 股个股截面反转的实测（论文表 6，成本 15 基点）}\label{tab:ashsrc}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.2cm}>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{1.7cm}@{}}
+\toprule
+\textbf{$L$} & \textbf{毛利夏普} & \textbf{净夏普} & \textbf{年化收益} & \textbf{最大回撤} & \textbf{年化换手} & \textbf{月胜率} \\
+\midrule
+5   & $+1.08$ & $-0.35$ & $-3.26\%$ & $-39.27\%$ & $79.80$ & $46.7\%$ \\
+10  & $+1.10$ & $+0.10$ & $+0.47\%$ & $-27.80\%$ & $57.74$ & $52.7\%$ \\
+20  & $+1.46$ & $+0.76$ & $+6.86\%$ & $-20.53\%$ & $42.77$ & $54.7\%$ \\
+60  & $+1.46$ & $+0.99$ & $+8.98\%$ & $-18.64\%$ & $28.09$ & $60.0\%$ \\
+120 & $+1.24$ & $+0.86$ & $+7.17\%$ & $-22.95\%$ & $21.55$ & $57.8\%$ \\
+250 & $+0.86$ & $+0.56$ & $+4.41\%$ & $-25.41\%$ & $16.37$ & $54.6\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+四点必须读出。
+
+\textbf{其一，信号在短窗口上很强但被成本摧毁}。$L=5$ 的毛利夏普 $1.08$，是全部实验中最强的信号之一；但 $79.80$ 倍换手带来 $12.31\%$ 的年化成本拖累，净夏普变成 $-0.35$。这是铁律二的原型案例。
+
+\textbf{其二，$L=60$ 是全面最优}。净夏普 $0.99$、年化 $8.98\%$、最大回撤 $-18.64\%$（全窗口最浅）、月胜率 $60\%$（全窗口最高）。成本的下降（$4.69\%$）而不是信号的增强（毛利夏普与 $L=20$ 同为 $1.46$）是它胜出的原因。
+
+\textbf{其三，优势随 $L$ 呈倒 U 形}。毛利夏普在 $L=20$ 与 $L=60$ 达到峰值 $1.46$，在两端下降（$L=5$ 的 $1.08$、$L=250$ 的 $0.86$）。这说明 A 股的反转是\emph{中期}现象，不是微观结构的买卖价差反弹——后者应当在极短窗口最强。这个判断直接影响规则设计：不应采用高频反转，而应采用月度或季度的低频反转。
+
+\textbf{其四，做空不可实现}。论文明确披露 A 股融券受限、成本高、可借券池小，截面多空组合在多数时段不可实现，其结果应视为上限估计。这决定了本规则必须给出纯多头版本。
+
+补充一条背景：反转策略的长期存在性有深厚的行为金融解释（过度反应后的回归\cite{debondt1985}、价值策略的外推偏差\cite{lakonishok1994}），而 A 股作为散户占比高、情绪波动大的市场，理论上更有利于这类现象的存续。但这是机制层面的推理，不构成对收益水平的承诺——论文对机制归属的置信度评级本身是中低（第~\confmid~至~\conflow~档）。
+
+\subsection{信号与因子剥离}
+
+\textbf{基础信号}：
+
+\begin{equation}
+s_i=\sum_{k=0}^{L-1}\ln\left(1+r_{i,k}\right) \quad\text{（过去 $L$ 个交易日累计对数收益；首选 $L=250$、备选 $60$）}.
+\end{equation}
+
+\textbf{因子剥离（必需步骤）}。论文指出行业动量解释了个股动量的大部分\cite{moskowitzgrinblatt1999}。若不剥离行业暴露，按 $s_i$ 排序得到的组合实际上在押注行业轮动，而非个股反转——这会让“反转”这一叙事失效，也会让回撤集中在少数行业。
+
+剥离方法为横截面回归取残差（沿用论文的工程约定）：
+
+\begin{equation}
+s_i=\alpha+\sum_g\beta_g\,\mathbf 1_{\{i\in g\}}+\gamma\ln(\mathrm{MV}_i)+\varepsilon_i,
+\qquad \tilde s_i=\hat\varepsilon_i ,
+\end{equation}
+
+其中 $\mathbf 1_{\{i\in g\}}$ 为行业哑变量（建议采用申万一级或中信一级），$\mathrm{MV}_i$ 为流通市值。用残差 $\tilde s_i$ 排序。
+
+\textbf{市值中性化的理由}。小市值股票的反转幅度天然更大（波动更高、流动性更差）。若不做市值中性化，组合会系统性偏向小市值，其收益中混入规模因子的暴露，无法归因。
+
+\subsection{组合构建}
+
+\subsubsection*{版本 A：可执行（纯多头 + 指数对冲）}
+
+这是唯一可实盘的版本。
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{多头}：$\tilde s_i$ 最低的 20\%（即“输家”）；
+  \item \textbf{加权}：等权，或按波动率倒数加权（后者可降低组合波动，但会增加小市值暴露，需配合市值中性化使用）；
+  \item \textbf{对冲}：用 IC/IF/IM 空头对冲组合 beta，对冲比例 = 组合对对应指数的滚动 beta（60 日窗口，每 21 日更新）；
+  \item \textbf{持仓数}：建议 $30\sim50$ 只。论文实验按 20\% 分位取，5083 只股票的池子在样本后期会给出上千只股票的组合，实盘不可行，必须限制持仓数并相应提高分位门槛。
+\end{itemize}
+
+对冲的必要性来自实证而非偏好：不对冲的纯多头反转组合的收益会与 A 股 beta 高度绑定，其最大回撤将远超表中 $-18.64\%$ 的水平（因为表中的多空组合已隐含对冲了市场方向）。
+
+\subsubsection*{版本 B：研究（多空，明确不可实盘）}
+
+按 $\tilde s_i$ 排序，做多最低 20\%、做空最高 20\%，两端等权。此版本用于评估信号强度与对照论文表 6，\textbf{不得用于实盘}，也不得用其实测收益做任何资金规划。
+
+\subsection{仓位与缩放：不适用波动率目标化}
+
+这是本规则与规则一最重要的差异，也是论文执行章的核心判断之一。
+
+论文指出：波动率目标化在趋势策略上被反复验证有效，但把它机械照搬到反转策略上是错的——原因是信号与波动率的关系在两策略中符号相反。趋势策略在波动率上升时信号质量下降（趋势被噪声打断），降敞口是保护；而\textbf{反转策略的利润经常恰好来自高波动时段}（偏离更大，回归的绝对空间也更大）。在波动率上升时降低反转敞口，等于在信号最强时把仓位压到最小。
+
+因此本规则明确\textbf{不做}波动率缩放。波动率信息的用途改为\emph{风险预算}与\emph{防线触发}：
+
+\begin{itemize}[leftmargin=2.2em]
+  \item 波动率显著上升（超过 80 分位）时：收紧单票止损线（由 $15\%$ 收紧至 $10\%$），检查资金冗余，但\emph{不}降低目标仓位；
+  \item 波动率回落时：恢复常规止损线。
+\end{itemize}
+
+这一设计在论文中属机制推理而非直接实证（论文将“反转侧波动率目标有害”标为置信度中，缺少反转侧的系统实证）。因此本文把它标为\conflow~到\confmid~之间，并要求上线前用自有数据做对照测试。
+
+\subsection{进出场纪律}
+
+\textbf{调仓频率与窗口}：每 $21$ 个交易日（月频）。窗口选择与论文口径不同：论文下 A 股反转的最优区间为 $L=20\sim120$、$L=60$ 最优（月频与 $L=60$ 组合的成本占毛利约 $31.9\%$）；但在本规则的实际口径（真实申万行业中性化、纯多头、含止损与回撤控制）下重做 $L$ 扫描后，\textbf{$L=250$ 的风险特征优于 $L=60$}——两者夏普几乎相同（$0.18$ 对 $0.19$），而 $L=250$ 的最大回撤浅 $16$ 个百分点、换手低 $32\%$、成本占毛利低 $6.6$ 个百分点。因此推荐 $L=250$（首选）与 $L=60$（备选）；$L=20$ 不通过成本门槛、$L=120$ 收益为负，均排除（第~\ref{sec:retune}~节）。
+
+\textbf{为何不用周频}。论文 $L=5$ 与 $L=10$ 的实证给出答案：$L=10$ 成本占毛利 $91.1\%$（毛利夏普 $1.10$ 对净 $0.10$），$L=5$ 直接把净夏普压成负数。周频在 A 股不可行。
+
+\textbf{建仓与调仓细节}：
+\begin{itemize}[leftmargin=2.2em]
+  \item 分 $2\sim3$ 个交易日完成调仓，降低单日冲击；
+  \item 涨跌停当日不成交，顺延至下一可交易日；
+  \item 停牌股保留至复牌后第二个交易日再处理；
+  \item 新纳入股票需满足流动性门槛（20 日均成交额 $\ge5000$ 万元）与上市满 250 日。
+\end{itemize}
+
+\subsection{失效防线}
+
+\subsubsection*{防线一：单票偏离止损（对不收敛）}
+
+反转策略的核心风险是“价差不收敛且继续扩大”。论文引用 Leung 与 Li(2015) 把止损退出纳入最优均值回归交易框架，正是因为它无法靠仓位缩放消除\cite{leungli2015}。
+
+\begin{itemize}[leftmargin=2.2em]
+  \item 从建仓加权成本下跌超过 $15\%$：该票止损；
+  \item 跌破 60 日最低价且创出 120 日新低：该票止损（加速下跌不宜继续等待）；
+  \item 高波动状态下止损线收紧至 $10\%$。
+\end{itemize}
+
+\textbf{不得逢跌加仓}。这是本规则最重要的一条纪律，也最容易违反。论文在处理 LTCM 与 2007 年量化危机时指出，反转策略的亏损本身不可怕，可怕的是亏损触发资金约束；业绩与资金流的正反馈会让套利者在错价最深时被迫减仓\cite{shleifervishny1997,khandanilo2011,brunnermeier2009}。因此加仓必须绑定在“价差已开始收敛”的证据上（例如该票已从低点反弹 5\%），而不是绑在“跌幅更大了”上。
+
+\subsubsection*{防线二：资金冗余}
+
+\begin{itemize}[leftmargin=2.2em]
+  \item 常年预留 $30\%$ 现金，不参与建仓；
+  \item 组合最大回撤达 $20\%$：目标敞口减半；
+  \item 组合最大回撤达 $30\%$：全部平仓，暂停 40 个交易日。
+\end{itemize}
+
+$30\%$ 的现金冗余不是保守，而是对论文所述失效机制的针对性设计——反转策略的致命处不在亏损本身，而在被迫平仓。
+
+\subsubsection*{防线三：行业暴露监控}
+
+即便已做行业中性化，实际持仓的行业偏离仍会因个股停牌、涨跌停等原因累积。监控项：实际行业权重与基准行业权重的偏离度，单行业偏离超过 $5\%$ 时调整。
+
+\subsection{成本门槛与容量}
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{A 股反转各窗口的成本门槛检查（论文口径，单边 15 基点）}\label{tab:ashcost}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{3.6cm}@{}}
+\toprule
+\textbf{$L$} & \textbf{成本占毛利} & \textbf{毛利/成本} & \textbf{门槛判定（要求 $>3$）} \\
+\midrule
+250 & $34.5\%$ & $2.9$ & 勉强通过（临界） \\
+120 & $30.7\%$ & $3.3$ & 通过 \\
+60  & $31.9\%$ & $3.1$ & 通过 \\
+20  & $47.6\%$ & $2.1$ & \textbf{不通过} \\
+10  & $91.1\%$ & $1.1$ & \textbf{不通过} \\
+5   & $132.7\%$ & $0.8$ & \textbf{不通过} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+门槛检查把可用区间收窄到 $L\ge60$。这一结论与论文的实操判断一致：\emph{在 A 股做截面反转，中期窗口是唯一可行区间}，短窗口不可行。
+
+\textbf{成本上升的敏感性}。若实际成本升至 20 基点（加入冲击成本，这对大资金是现实的），成本拖累按换手比例放大，$L=60$ 的成本占毛利将从 $31.9\%$ 升至约 $42.5\%$，毛利/成本降至约 $2.4$，跌破门槛。此时须切换到 $L=120$（换手 $21.55$，成本占毛利将从 $30.7\%$ 升至约 $40.9\%$，毛利/成本约 $2.4$）——注意这仍然跌破门槛。\textbf{结论是：当单边成本超过约 18 基点时，本规则在铁律二下不再成立}。这是本规则最硬的边界。
+
+\textbf{容量约束}。约束来自成本（论文对偶五：反转的约束是自己付的成本）。参考量级：按 $L=60$ 的 $28.09$ 倍年化换手，若组合规模为 $Q$，则年成交额约 $28Q$；在日均成交额门槛 5000 万元的股票上，需保证单票单日委托不超过其成交额的一定比例（建议 $\le5\%$）。
+
+\subsection{参数边界表}
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{规则二参数边界}\label{tab:ashparam}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{6.4cm}@{}}
+\toprule
+\textbf{参数} & \textbf{取值} & \textbf{证据来源} & \textbf{越界后果} \\
+\midrule
+窗口 $L$ & $250$（首选）/ $60$（备选） & 第~\ref{sec:retune}~节 & 短于 $60$ 成本占毛利超 $33\%$ 须废弃；$20$ 不通过门槛、$120$ 收益为负 \\
+调仓频率 & 21 交易日 & 论文表 6 的 $L$ 区间 & 周频（$L=5/10$）毛利/成本低于 1.1，不可行 \\
+分位门槛 & 20\%（实盘收窄至 $30\sim50$ 只） & 论文设定 + 工程约束 & 分位过宽则持仓过千只，不可执行 \\
+因子剥离 & 行业 + log 市值 & \cite{moskowitzgrinblatt1999} + 工程约定 & 不剥离则实为押注行业轮动 \\
+波动率缩放 & \textbf{不用} & 论文执行章（机制推理） & 使用则在高波动期削减最强信号 \\
+单票止损线 & $15\%$（高波动 $10\%$） & \cite{leungli2015} + 工程标定 & 过紧则频繁止损；过松则失去保护 \\
+现金冗余 & $30\%$ & \cite{shleifervishny1997,khandanilo2011} & 不足则可能被强制平仓 \\
+回撤止损线 & $20\%$ / $30\%$ & 论文实测回撤 $\le18.64\%$ & 过紧则频繁降仓 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{证据映射表}
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{规则二：决策与论文证据的映射}\label{tab:ashmap}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{5.3cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+\textbf{决策} & \textbf{论文结论} & \textbf{证据来源} & \textbf{置信度} \\
+\midrule
+用截面反转方向 & A 股截面反转 $L=20\sim250$ 净夏普为正 & 论文表 6 & \confhigh \\
+取 $L=250$（备选 $60$） & $L=60$ 净夏普 $0.99$、月胜率 $60\%$（论文口径）；$L=250$ 回撤更浅、成本更低 & 论文表 6 + 第~\ref{sec:retune}~节 & \confhigh \\
+月频而非周频 & $L=5$ 毛利夏普 $1.08$ 被成本压至 $-0.35$ & 论文表 6 & \confhigh \\
+必须做因子剥离 & 行业动量解释个股动量的大部分 & \cite{moskowitzgrinblatt1999} & \confmid \\
+纯多头加对冲 & A 股做空不可实现（论文已披露） & 论文审计章 & \confhigh \\
+不用波动率缩放 & 反转利润常来自高波动时段 & 论文执行章 & \confmid \\
+单票偏离止损 & 止损须纳入最优反转交易框架 & \cite{leungli2015} & \confmid \\
+资金冗余 & 资金约束是反转策略的致命处 & \cite{shleifervishny1997,khandanilo2011} & \confmid \\
+不得逢跌加仓 & 亏损触发资金约束即被迫平仓 & \cite{brunnermeier2009} & \confmid \\
+\midrule
+对冲 beta 的窗口长度 & \emph{论文未检验} & — & \conflow \\
+分仓完成调仓的交易日数 & \emph{论文未检验} & — & \conflow \\
+行业分类标准选择 & \emph{论文未检验} & — & \conflow \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,189 @@
+\section{依据四项验证重标定参数}\label{sec:retune}
+
+第~\ref{sec:verify}~节的四项验证各自推翻了前文的一处判断。本节据此重新标定规则一与规则二的参数，并给出必须同时声明的限定。
+
+\subsection{重标定的三条判据}
+
+参数推荐不能沿用论文口径的最优值（验证 3 已证明工程增强会改变最优参数），也不能只看全样本夏普（验证 1 已证明样本内表现不能外推）。本文采用三条判据，须\emph{同时}满足：
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item \textbf{成本门槛}（铁律二）：毛利/成本 $>3$，即成本占毛利 $<33\%$。
+  \item \textbf{参数曲面平滑}（验证 2 的 G7）：最优参数的邻域不得出现剧烈跳变。存在孤立峰者判为过拟合征兆，予以拒收。
+  \item \textbf{样本外可兑现}（验证 1）：用规则自身的 walk-forward 检验参数选择是否外推。
+\end{enumerate}
+
+第 2 条是本次新增的判据，它在下面的扫描中起了决定性作用。
+
+\subsection{规则一：窗口 $L$ 与入场门槛 $K$ 必须联合选择}
+
+前文把入场门槛 $K=1.0$ 与窗口 $L$ 分别设定，这是错误的做法——验证 3 显示 $L=250$ 的失效与 $K=1.0$ 直接相关。因此本节做 $6\times4$ 的联合扫描（$L\in\{5,10,20,60,120,250\}$，$K\in\{0,0.5,1.0,1.5\}$）。
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{规则一 $L\times K$ 联合扫描（每格：夏普 / 年化\% / 成本占毛利\%）}\label{tab:r1LK}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.9cm}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{2.5cm}>{\raggedright\arraybackslash}p{2.5cm}@{}}
+\toprule
+\textbf{$L$} & \textbf{$K=0$} & \textbf{$K=0.5$} & \textbf{$K=1.0$} & \textbf{$K=1.5$} \\
+\midrule
+$5$   & $0.29$ / $0.58$ / $3.6$  & $0.25$ / $0.90$ / $19.4$ & $0.14$ / $0.67$ / $44.9$ & $0.05$ / $-0.04$ / $67.6$ \\
+$10$  & $\mathbf{0.56}$ / $0.90$ / $1.5$ & $0.52$ / $1.77$ / $7.2$ & $\mathbf{0.44}$ / $3.55$ / $18.1$ & $0.15$ / $1.10$ / $33.5$ \\
+$20$  & $0.25$ / $0.56$ / $1.9$ & $0.12$ / $0.38$ / $19.4$ & $0.33$ / $2.58$ / $17.8$ & $0.25$ / $2.36$ / $19.4$ \\
+$60$  & $0.22$ / $0.49$ / $1.4$ & $0.08$ / $0.25$ / $18.8$ & $0.19$ / $1.30$ / $20.1$ & $0.09$ / $0.18$ / $35.1$ \\
+$120$ & $0.04$ / $0.08$ / $7.3$  & $0.06$ / $0.16$ / $16.4$ & $0.05$ / $0.08$ / $44.5$ & $-0.17$ / $-3.22$ / $-28.4$ \\
+$250$ & $0.02$ / $0.02$ / $12.8$ & $-0.15$ / $-0.77$ / $-8.2$ & $-0.00$ / $-0.32$ / $108.7$ & $0.50$ / $5.63$ / $6.2$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+这四行数据里最关键的信息不在数值高低，而在\textbf{曲面的形状}：
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{$L=10$ 是唯一单调平滑的行}：$K$ 从 $0$ 升到 $1.5$，夏普依次 $0.56\to0.52\to0.44\to0.15$，单调递减、无跳变。这是稳健的参数结构——门槛越严，信号越少，夏普越低，符合预期。
+  \item \textbf{$L=250$ 是非单调且有孤立峰的行}：$0.02\to-0.15\to-0.00\to\mathbf{0.50}$。$K=1.5$ 处的 $0.50$ 是孤立的好点，紧邻的 $K=1.0$ 却是 $-0.00$。更可疑的是$K=1.5$ 的换手（$22.64$）反而\emph{高于} $K=1.0$（$12.74$）——门槛更严却交易更频繁，说明信号在阈值附近反复穿越，这是典型的参数不稳定特征。\textbf{按判据 2，$L=250$ 全部拒收}。
+  \item \textbf{$L=120$ 全档夏普 $\le0.06$}，直接排除。
+  \item \textbf{$L=20$ 与 $L=60$ 非单调}（$K=0.5$ 处塌陷到 $0.12$ 与 $0.08$），稳健性弱于 $L=10$。
+\end{itemize}
+
+\textbf{修正后的规则一参数推荐}：首选 $L=10$、ENTRY\_K$=1.0$（夏普 $0.44$、年化 $3.55\%$、最大回撤 $-19.8\%$、成本占毛利 $18.1\%$），备选 $L=20$、ENTRY\_K$=1.0$（夏普 $0.33$、年化 $2.58\%$、回撤 $-16.9\%$）；$L=250$、$120$ 分别因曲面非单调与全档夏普过低排除，$L=5$ 在 $K\ge1.0$ 时不通过成本门槛。
+
+为何首选 $K=1.0$ 而非夏普更高的 $K=0$（$0.56$）？因为 $K=0$ 意味着无入场门槛，全部品种按波动率倒数建仓，组合极度分散、波动极低，于是夏普虚高而年化仅 $0.90\%$。$K=1.0$ 的年化是其 $4$ 倍（$3.55\%$），夏普略低（$0.44$），成本占比 $18.1\%$ 仍在门槛内。这是收益与稳健性的折中。
+
+\subsection{规则一：ATR 止损是低敏感参数}
+
+前文把 ATR 止损倍数标为“工程判断”。本次做敏感性测试，结论是它可以不必精调。
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{规则一 ATR 止损倍数敏感性}\label{tab:r1atr}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{2.1cm}@{}}
+\toprule
+\textbf{$L$} & \textbf{ATR 倍数} & \textbf{夏普} & \textbf{年化} & \textbf{最大回撤} & \textbf{止损次数} \\
+\midrule
+\multirow{4}{*}{$10$} & $1.5$ & $0.47$ & $3.63\%$ & $-17.83\%$ & $691$ \\
+ & $2.5$ & $0.44$ & $3.55\%$ & $-19.82\%$ & $279$ \\
+ & $4.0$ & $0.48$ & $4.01\%$ & $-16.98\%$ & $90$ \\
+ & 关闭 & $0.45$ & $3.77\%$ & $-17.82\%$ & $0$ \\
+\midrule
+\multirow{4}{*}{$20$} & $1.5$ & $0.28$ & $2.03\%$ & $-17.21\%$ & $738$ \\
+ & $2.5$ & $0.33$ & $2.58\%$ & $-16.91\%$ & $323$ \\
+ & $4.0$ & $0.33$ & $2.64\%$ & $-17.50\%$ & $86$ \\
+ & 关闭 & $0.32$ & $2.62\%$ & $-17.93\%$ & $0$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{$L=10$ 档的夏普跨度仅 $0.04$（$0.44\sim0.48$），$L=20$ 档仅 $0.05$（$0.28\sim0.33$）}。而止损次数从 $0$ 到 $738$ 相差两个数量级。这说明：
+
+\begin{itemize}[leftmargin=2.2em]
+  \item ATR 止损在本策略上\emph{既不创造也不破坏}收益，其主要作用是改变单品种的路径依赖与操作负荷；
+  \item 该参数可以从“工程判断”降级为\textbf{低敏感参数}：取 $2.5$ 或直接关闭均可，无须精调；
+  \item 若考虑操作成本（$691$ 次止损意味着大量小额交易与监控负担），取 $4.0$ 或关闭更省事，且夏普不劣。
+\end{itemize}
+
+这是四项验证中唯一“参数不确定性被消除”的结论，值得单独记下：\emph{并非所有未经验证的工程参数都重要，实测能把无关紧要的挑出来。}
+
+\subsection{规则二：$L=250$ 的风险特征优于 $L=60$}
+
+前文规则二只有 $L=60$ 一个数据点（来自论文口径），无法给出参数推荐。本次在真实申万行业口径下做 $L$ 扫描。
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{规则二窗口 $L$ 扫描（真实申万一级口径，纯多头）}\label{tab:r2L}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{1.8cm}@{}}
+\toprule
+\textbf{$L$} & \textbf{多头夏普} & \textbf{年化} & \textbf{最大回撤} & \textbf{换手} & \textbf{成本占毛利} & \textbf{门槛} \\
+\midrule
+$20$  & $0.09$ & $0.09\%$ & $-67.05\%$ & $12.83$ & $53.94\%$ & 不通过 \\
+$60$  & $0.19$ & $1.69\%$ & $-61.54\%$ & $10.39$ & $32.22\%$ & 通过（贴线） \\
+$120$ & $-0.15$ & $-2.93\%$ & $-64.94\%$ & $7.77$ & $-99.48\%$ & 收益为负 \\
+$\mathbf{250}$ & $\mathbf{0.18}$ & $1.57\%$ & $\mathbf{-45.24\%}$ & $\mathbf{7.10}$ & $\mathbf{25.65\%}$ & \textbf{通过（余量足）} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{$L=60$ 与 $L=250$ 的夏普几乎相同（$0.19$ 对 $0.18$），但 $L=250$ 在三个风险维度上全面更优}：
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \textbf{最大回撤浅 $16$ 个百分点}（$-45.24\%$ 对 $-61.54\%$）；
+  \item \textbf{换手低 $32\%$}（$7.10$ 对 $10.39$）；
+  \item \textbf{成本占毛利低 $6.6$ 个百分点}（$25.65\%$ 对 $32.22\%$），且 $L=60$ 的 $32.22\%$ 已贴上 $33\%$ 门槛线，成本一旦上升即失效。
+\end{itemize}
+
+因此\textbf{规则二的推荐改为：$L=250$ 首选，$L=60$ 备选}。这与论文口径（A 股截面反转 $L=60$ 最优、$L=250$ 明显衰减）相反，是工程增强再次改变参数排序的案例——持仓上限、止损与回撤控制对长窗口更友好，因为长窗口的信号更稳、更耐受这些干预。
+
+同时要注意，$L=20$ 不通过成本门槛（$53.94\%$），$L=120$ 收益为负，两者都应排除。可用区间因此是 $\{60, 250\}$，比论文口径的 $\{20,\dots,250\}$ 窄得多。
+
+\textbf{一条必须保留的限定}：即便在最优的 $L=250$ 上，纯多头版本的对冲后夏普仍为 $-0.04$（第~\ref{sec:ashare}~节已指出其跑输被对冲的指数）。\emph{参数重标定改善的是相对排序，不改变该版本在样本期上失效的事实。}
+
+\subsection{规则自身参数的样本外检验}
+
+上面的推荐依据全样本夏普与曲面形状。更直接的检验是：\emph{若在样本内选参数，样本外能否兑现}。为此对规则自身的参数（规则一的 $L$、规则二的 $L$）做 walk-forward，做法是对每个候选参数跑一次全样本回测、拿到逐日净收益序列，再按滚动折切片（IS $756$ 日选参数、OOS $252$ 日检验）。
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{规则自身参数的 walk-forward 汇总（$9$ 折）}\label{tab:rulewf}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+\textbf{规则} & \textbf{IS 夏普} & \textbf{OOS 夏普} & \textbf{OOS 为正折} & \textbf{选择增益} & \textbf{选中参数分布} \\
+\midrule
+规则一 & $0.74$ & $-0.03$ & $7/9$ & $+0.05$ & $\{L{=}10:6,\ L{=}20:2,\ L{=}5:1\}$ \\
+规则二 & $0.20$ & $-0.18$ & $4/9$ & $+0.12$ & $\{L{=}250:5,\ L{=}120:3,\ L{=}60:1\}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+（“选择增益” = 所选参数的 OOS 夏普 $-$ 该折全部候选参数的 OOS 夏普中位数。完整逐折数据见 \texttt{outputs/rule\_wf\_rule1.csv} 与 \texttt{rule\_wf\_rule2.csv}。）
+
+\textbf{两条规则的参数选择都稳定，但都不兑现收益}。
+
+\textbf{规则一}：$9$ 折中有 $6$ 折选中 $L=10$、$2$ 折选中 $L=20$、$1$ 折选中 $L=5$——\emph{从未选中 $60/120/250$}。这与本节的推荐（$L=10$ 首选、$L=20$ 备选）完全一致，说明参数选择过程稳定。但 IS 均值 $0.74$ → OOS 均值 $-0.03$（相对衰减 $104.5\%$），选择增益仅 $+0.05$。其中第 $1$ 折（选中 $L=5$）的 OOS 为 $-2.12$，是极端值；剔除后 OOS 均值回升到 $+0.23$——\emph{结果对单一折高度敏感，样本量（$9$ 折）不足以支撑稳定结论}。
+
+\textbf{规则二}：$9$ 折中有 $5$ 折选中 $L=250$、$3$ 折选中 $L=120$、$1$ 折选中 $L=60$。对 $L=250$ 的偏好与本节的推荐一致（这构成了对“$L=250$ 优于 $L=60$”的独立支持）。但 IS 均值仅 $0.20$ → OOS 均值 $-0.18$（相对衰减 $194.4\%$），$9$ 折中仅 $4$ 折为正，选择增益 $+0.12$。
+
+\subsection{修正后的参数推荐总表}
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{参数推荐：原版与重标定后对照}\label{tab:retunecmp}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{4.3cm}>{\raggedright\arraybackslash}p{5.8cm}@{}}
+\toprule
+\textbf{参数} & \textbf{前文推荐} & \textbf{重标定后} \\
+\midrule
+\multicolumn{3}{@{}l}{\textbf{规则一（期货时序趋势）}} \\
+窗口 $L$ & $250$ / $60$ / $10$ 三档 & $\mathbf{10}$（首选）、$\mathbf{20}$（备选）；排除 $250$、$120$、$5$ \\
+入场门槛 ENTRY\_K & $1.0$（独立设定） & $\mathbf{1.0}$，但必须与 $L$ \emph{联合}选择（$L=250$ 的失效源于 $K=1.0$） \\
+调仓频率 & $5$ 交易日 & 不变（$5$ 交易日） \\
+波动率目标 & $10\%$ & 不变 \\
+ATR 止损倍数 & $2.5$（工程判断） & $2.5$ 或关闭均可（\textbf{低敏感}，夏普跨度 $0.04$） \\
+恐慌阈值/拥挤阈值 & $-5\%$ / $90$ 分位 & 不变（未做敏感性，仍属未验证） \\
+\midrule
+\multicolumn{3}{@{}l}{\textbf{规则二（A 股截面反转）}} \\
+窗口 $L$ & $60$（备选 $120$） & $\mathbf{250}$（首选）、$\mathbf{60}$（备选）；排除 $20$、$120$ \\
+行业中性化口径 & 聚类代理（权宜） & $\mathbf{sw}$ 真实申万一级（与聚类代理量级一致，但可解释可审计） \\
+持仓上限 & $50$ 只 & 不变（$50$ 只） \\
+单票止损 & $15\%$（高波动 $10\%$） & 不变 \\
+现金冗余 & $30\%$ & 不变 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{代码中的落地}。上述推荐已写入回测框架，不再是文档与代码两张皮：\texttt{code/rule1\_trend.py} 与 \texttt{code/rule2\_ashare.py} 各自定义了 \texttt{RECOMMENDED}（首选/备选两档，含实测指标注释）与 \texttt{EXCLUDED}（被排除窗口及原因）两个常量，类属性 \texttt{Rule1Config.L}$=10$、\texttt{Rule2Config.L}$=250$ 亦同步为首选档，并提供 \texttt{--preset} 开关：
+
+\begin{quote}\ttfamily\small
+python rule1\_trend.py --preset 首选 \hfill \# L=10, ENTRY\_K=1.0\\
+python rule1\_trend.py --preset 备选 \hfill \# L=20, ENTRY\_K=1.0\\
+python rule2\_ashare.py --preset 首选 \hfill \# L=250, 申万一级中性化\\
+python rule1\_trend.py --grid \hfill \# 完整 6 窗口网格（复现第 11.3 节）
+\end{quote}
+
+两个首选档均已实跑复核，输出与本节表格逐项一致（规则一：夏普 $0.44$ / 年化 $3.55\%$ / 回撤 $-19.82\%$ / 成本占毛利 $18.09\%$；规则二：多头夏普 $0.18$ / 年化 $1.57\%$ / 回撤 $-45.24\%$ / 成本占毛利 $25.65\%$）。规则三的 \texttt{USE\_EG\_CRIT} 亦默认为 \texttt{True}（EG 专用临界值），与第~\ref{sec:verify}~节的修正一致。
+
+\subsection{必须同时声明的两条限定}
+
+重标定给出了更稳健的参数，但有两件事不能因此被掩盖。
+
+\textbf{其一，重标定改善的是相对排序，不是绝对水平}。两条规则的首选参数在自身 walk-forward 中的样本外夏普分别为 $-0.03$ 与 $-0.18$（表~\ref{tab:rulewf}）——\textbf{本文推荐的参数在样本外均不兑现正收益}。推荐的依据是“参数曲面平滑、选择过程稳定”，不是“能赚钱”。
+
+\textbf{其二，可推荐性建立在很薄的样本上}。规则一的 walk-forward 只有 $9$ 折且对单一折高度敏感；规则二的 IS 夏普本身只有 $0.20$，远低于论文口径的 $0.99$（差异来自流动性过滤与纯多头化）。
+
+因此本次重标定的正确读法是：\textbf{它把参数从“论文口径的最优值”修正为“在本文工程口径下更稳健的值”，但并未使规则达到可上线的标准}。第~\ref{sec:verify}~节给出的定位——设计模板与验证流程——在重标定后依然成立。

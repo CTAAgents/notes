@@ -1,0 +1,223 @@
+\section{四项验证补充}\label{sec:verify}
+
+第~\ref{sec:mtflow}~节把「样本外检验」写进了流程的第 6 步，但当时并未实跑。本节补齐四项验证：样本外 walk-forward、行业中性化口径对照、规则一完整窗口网格、规则三统计口径修正。
+
+四项验证的结论并不温和——它们各自修正了前文的一处判断。本文如实报告。
+
+\subsection{样本外 walk-forward：IS 夏普 1.26 对 OOS 0.57}
+
+\textbf{设计}。把 $3039$ 个交易日切成滚动折：样本内窗口 $756$ 日（约 3 年）用于从 $60$ 个组合中选出最优，紧随其后的样本外窗口 $252$ 日（约 1 年）用于检验该选择，步长 $252$ 日。IS 与 OOS 严格不重叠，共得 $9$ 折。实现见 \texttt{code/walkforward.py}。
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{walk-forward 逐折结果（$9$ 折）}\label{tab:wf}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}p{1.5cm}>{\raggedright\arraybackslash}p{1.6cm}@{}}
+\toprule
+\textbf{IS 区间} & \textbf{OOS 区间} & \textbf{选中组合} & \textbf{IS 夏普} & \textbf{OOS 夏普} \\
+\midrule
+2014-04 $\sim$ 2017-05 & 2017-05 $\sim$ 2018-05 & \texttt{astk\_XS\_rev\_L120} & $1.96$ & $-0.55$ \\
+2015-04 $\sim$ 2018-05 & 2018-05 $\sim$ 2019-06 & \texttt{astk\_XS\_rev\_L60} & $1.55$ & $+3.03$ \\
+2016-04 $\sim$ 2019-06 & 2019-06 $\sim$ 2020-06 & \texttt{fut\_XS\_rev\_L60} & $1.37$ & $+0.91$ \\
+2017-05 $\sim$ 2020-06 & 2020-06 $\sim$ 2021-06 & \texttt{astk\_XS\_rev\_L60} & $0.99$ & $-0.05$ \\
+2018-05 $\sim$ 2021-06 & 2021-07 $\sim$ 2022-07 & \texttt{aidx\_TS\_rev\_L5} & $0.80$ & $-0.83$ \\
+2019-06 $\sim$ 2022-07 & 2022-07 $\sim$ 2023-07 & \texttt{astk\_TS\_rev\_L250} & $0.90$ & $+1.48$ \\
+2020-06 $\sim$ 2023-07 & 2023-07 $\sim$ 2024-08 & \texttt{astk\_TS\_rev\_L250} & $1.05$ & $-0.18$ \\
+2021-07 $\sim$ 2024-08 & 2024-08 $\sim$ 2025-08 & \texttt{astk\_XS\_rev\_L120} & $1.26$ & $+1.49$ \\
+2022-07 $\sim$ 2025-08 & 2025-08 $\sim$ 2026-09 & \texttt{astk\_XS\_rev\_L120} & $1.46$ & $-0.16$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{核心数字}：
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{walk-forward 汇总指标}\label{tab:wfsum}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{5.2cm}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{6.4cm}@{}}
+\toprule
+\textbf{指标} & \textbf{数值} & \textbf{含义} \\
+\midrule
+IS 夏普均值 & $1.26$ & 样本内选出的组合平均夏普 \\
+OOS 夏普均值 & $0.57$ & 同一组合在紧随其后的样本外平均夏普 \\
+相对衰减 & $54.7\%$ & 超过一半的样本内表现不能兑现 \\
+OOS 为正的折占比 & $44.4\%$ & 不到一半的样本外窗口录得正收益 \\
+被选组合的 OOS 平均分位 & $0.66$ & 高于随机（$0.5$），选择过程有信息但弱 \\
+IS$\to$OOS 秩相关 & $0.27$（$p=0.000$） & 统计显著但幅度低 \\
+OOS 中位数组合夏普 & $-0.26$ & 随便挑一个组合的典型结果 \\
+OOS 事后最优夏普 & $1.93$ & 事后诸葛的上界 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{三点评读}。
+
+第一，\textbf{选择过程确实携带信息，但远不足以覆盖衰减}。被选组合在样本外的平均分位 $0.66$、秩相关 $0.27$ 且统计显著（$p=0.000$），说明「样本内夏普高」与「样本外夏普高」之间不是噪声关系。但相对衰减 $54.7\%$、OOS 为正月数仅 $44.4\%$——选择带来的收益改善（$0.57$ 对中位数 $-0.26$，改善 $0.83$）被衰减吃掉了大半。
+
+第二，\textbf{选中组合高度集中，且包含证据薄弱者}。$9$ 折中被选最多的三个是 \texttt{astk\_XS\_rev\_L120}（$3$ 次）、\texttt{astk\_XS\_rev\_L60}（$2$ 次）、\texttt{astk\_TS\_rev\_L250}（$2$ 次）。前两个属于论文表 $6$ 直接支持的口径，尚可；但 \texttt{astk\_TS\_rev\_L250} 属 A 股宽基指数时序口径——论文已明确标注该口径\emph{证据力弱}（$7$ 个指数相关性 $>0.85$，实质是单一 beta 择时）。它在两折中被选中，说明\emph{单纯按历史夏普选组合会选到证据薄弱的口径}。这正是多重检验流程要求登记搜索空间的原因。
+
+第三，\textbf{这些数字不支持「按历史最优参数上线」}。论文结论置信度一章曾把「本文实证支持持有期决定归属」评为低置信度，理由是样本单一、未做多重检验、做空不可实现。walk-forward 给出了第四个理由，而且是最直接的：\emph{样本内最优参数在样本外平均衰减过半}。
+
+\subsection{行业中性化口径：真实申万 vs 聚类代理}
+
+前文规则二使用「收益相关结构做主成分 $+$ 聚类」得到的行业代理，因为当时未找到本地真实行业分类。本次从通达信自带文件解析出了真实分类：
+
+\begin{itemize}[leftmargin=2.2em]
+  \item \texttt{<TDX>/incon.dat}：行业码 $\to$ 行业名（含 \texttt{\#TDXNHY} 通达信行业、\texttt{\#TDXRSHY} 申万体系行业两段）；
+  \item \texttt{<TDX>/T0002/hq\_cache/tdxyh.cfg}：证券代码 $\to$（通达信行业码, 申万体系行业码）。
+\end{itemize}
+
+解析结果：\textbf{申万体系一级 $30$ 个行业、覆盖 $5586$ 只证券}；二级 $128$ 个行业。实现见 \texttt{code/industry\_data.py}，无需联网。
+
+\textbf{对照结果}（规则二纯多头版，$L=60$，其余参数不变）：
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{行业中性化口径对照}\label{tab:indcmp}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.4cm}@{}}
+\toprule
+\textbf{中性化口径} & \textbf{夏普} & \textbf{年化} & \textbf{换手} & \textbf{成本/毛利} \\
+\midrule
+真实申万一级（$30$ 行业） & $0.19$ & $1.69\%$ & $10.39$ & $32.22\%$ \\
+聚类代理（$k=20$ 簇） & $0.23$ & $2.25\%$ & $9.02$ & $26.94\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{结论：聚类代理基本够用}。两者夏普相差 $0.04$，量级一致。真实申万版的换手更高（$10.39$ 对 $9.02$）、成本占比更高（$32.22\%$ 对 $26.94\%$），已经贴近铁律二的 $3$ 倍门槛（$33\%$）——这是一个需要留意的信号：\emph{用真实行业分类做中性化反而更接近成本门槛}。
+
+但从严谨性看，真实分类应当作为默认：它可解释、可审计、不依赖聚类超参数（簇数 $k$ 与随机种子）。本文据此把规则二的默认口径从 \texttt{cluster} 改为 \texttt{sw}。
+
+需要说明一项已知偏差：本地行业分类是\emph{静态快照}（当前时点的分类），不含行业变更历史。真实历史回测应当使用\emph{时点}行业分类；本文无法获得，因此该偏差保留。
+
+\subsection{规则一完整窗口网格：工程增强改变了窗口排序}
+
+前文只对 $L\in\{250,60,10\}$ 三档做了记录。本次跑完 $6$ 个窗口的完整网格，结果揭示了前文的一处判断错误。
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{规则一完整窗口网格：论文口径 vs 加入工程增强后}\label{tab:grid1}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.3cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{1.9cm}>{\raggedright\arraybackslash}p{2.1cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.0cm}@{}}
+\toprule
+\multirow{2}{*}{\textbf{$L$}} & \multicolumn{2}{c}{\textbf{夏普}} & \multicolumn{2}{c}{\textbf{换手}} & \multirow{2}{*}{\textbf{成本门槛}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+ & 论文口径 & 规则一 & 论文口径 & 规则一 & \\
+\midrule
+$5$   & $+0.20$ & $+0.14$ & $52.41$ & $36.08$ & 不通过（$44.9\%$） \\
+$10$  & $+0.32$ & $\mathbf{+0.44}$ & $35.14$ & $44.28$ & 通过（$18.1\%$） \\
+$20$  & $+0.21$ & $\mathbf{+0.33}$ & $24.78$ & $33.68$ & 通过（$17.8\%$） \\
+$60$  & $+0.21$ & $+0.19$ & $16.14$ & $22.98$ & 通过（$20.1\%$） \\
+$120$ & $+0.09$ & $+0.05$ & $12.10$ & $18.74$ & 不通过（$44.5\%$） \\
+$250$ & $+0.24$ & $\mathbf{-0.00}$ & $8.83$ & $12.74$ & \textbf{不通过（$108.7\%$）} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{被推翻的判断}。前文把 $L=250$ 推荐为「低换手档」，依据是论文表 $5$ 的夏普 $0.24$、换手 $8.83$、成本占毛利 $10.2\%$。加入工程增强后，$L=250$ 的夏普降到 $-0.00$、成本占毛利升到 $108.7\%$——\textbf{该档失效}。
+
+\textbf{成因}。工程增强项对长窗口的伤害最大，三个机制叠加：
+
+\begin{enumerate}[leftmargin=2.2em]
+  \item \textbf{入场门槛}：要求标准化信号强度 $|s|/(\hat\sigma\sqrt L)>1.0$。$L=250$ 时分母含 $\sqrt{250}$，门槛相对信号被大幅抬高，大量本可持仓的品种被弃权（实测平均持仓由论文的全池降到 $11.1$ 个品种）。
+  \item \textbf{免交易带}：带宽 $\theta\propto V_{\text{target}}/\hat\sigma_i$ 与窗口无关，但长窗口的信号变化本来就小，宽带的相对抑制更强。
+  \item \textbf{ATR 止损}：$L=250$ 是慢信号，$2.5$ 倍 $\text{ATR}_{20}$ 的止损会在信号兑现前把仓位砍掉（止损 $279$ 次）。
+\end{enumerate}
+
+三者共同把 $L=250$ 的毛收益压到接近零，而换手成本照付，于是成本占毛利比爆炸。
+
+\textbf{修正后的推荐}。规则一的可用区间应从「$250/60/10$ 三档」改为「\textbf{$10$ 与 $20$ 两档}」：$L=10$ 夏普 $0.44$、$L=20$ 夏普 $0.33$，且二者成本占毛利均在 $18\%$ 以内、余量充足。$L=60$ 勉强可用（$0.19$），$L=120$ 与 $L=250$ 应放弃。
+
+这一修正同时给出了一个方法论教训：\textbf{论文口径下的最优参数，在加入工程增强后可能不再最优，甚至失效}。工程增强必须与参数选择一起重做网格，不能沿用原论文的最优参数。
+
+\subsection{规则三统计口径修正}
+
+修正两处。
+
+\subsubsection*{修正一：改用 Engle--Granger 专用临界值}
+
+前文用标准 ADF 检验的 $5\%$ 临界值（约 $-2.86$）判定协整。这在方法上是错的：标准 ADF 适用于\emph{已知无协整关系}的单序列单位根检验；而协整检验的残差是\emph{估计出来的}，其分布左移，必须用更负的临界值。按 MacKinnon 响应面（$N=2$，含常数项）
+
+\begin{equation}
+\text{crit}_{5\%}(T)=-3.3377-\frac{5.967}{T}-\frac{8.98}{T^2},
+\qquad T=60\ \Rightarrow\ \text{crit}=-3.4396 .
+\end{equation}
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{S3 临界值口径修正的影响}\label{tab:egcrit}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{2.6cm}@{}}
+\toprule
+\textbf{口径} & \textbf{通过条数} & \textbf{通过者 ADF 中位数} & \textbf{半衰期中位数} \\
+\midrule
+标准 ADF（$p<0.05$） & $75$ & $-3.25$ & $5.9$ 日 \\
+EG 专用临界值（$-3.440$） & $26$ & $-3.68$ & $6.0$ 日 \\
+\midrule
+变化 & $-65.3\%$ & — & — \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{通过数从 $75$ 降到 $26$，减少 $65.3\%$}。也就是说，此前筛选出的「可交易对」中约三分之二是口径宽松造成的伪协整。前文把这一近似描述为「偏宽松、会略微高估通过率」——实测幅度是 $65\%$，远不止「略微」。这是本文对自身前文判断的一次修正。
+
+\textbf{更严重的是样本量崩塌}。用 EG 严格口径重跑交易回测：
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{规则三在两种临界值口径下的结果}\label{tab:r3cmp}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.2cm}@{}}
+\toprule
+\textbf{口径} & \textbf{通过配对} & \textbf{成交笔数} & \textbf{夏普} & \textbf{年化} \\
+\midrule
+标准 ADF & $75$ & $21$ & $1.09$ & $4.31\%$ \\
+EG 专用临界值 & $26$ & $\mathbf{7}$ & $0.48$ & $0.95\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{$7$ 笔交易在 $12$ 年样本上不足以支撑任何统计推断}。因此规则三在严格口径下的结论应当是：\emph{筛选流程可用，但样本量太小，策略无法被评估}。前文给出的「夏普 $1.09$」应作废——它建立在被证明过宽的口径上。
+
+\subsubsection*{修正二：Kalman $q,r$ 参数敏感性}
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{Kalman $q,r$ 敏感性（EG 严格口径，$26$ 条配对）}\label{tab:kalsens}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.8cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{1.8cm}@{}}
+\toprule
+\textbf{$q$} & \textbf{$r$} & \textbf{夏普} & \textbf{年化} & \textbf{成交笔数} & \textbf{平均持仓} \\
+\midrule
+$10^{-6}$ & $10^{-4}$ & $1.17$ & $1.10\%$ & $5$ & $14.0$ 日 \\
+$10^{-6}$ & $10^{-2}$ & $0.70$ & $1.01\%$ & $4$ & $11.8$ 日 \\
+$10^{-5}$ & $10^{-3}$ & $0.48$ & $0.95\%$ & $7$ & $12.4$ 日 \\
+$10^{-4}$ & $10^{-3}$ & $1.06$ & $5.42\%$ & $22$ & $7.7$ 日 \\
+$10^{-4}$ & $10^{-2}$ & $0.88$ & $4.69\%$ & $14$ & $4.9$ 日 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+（完整 $9$ 组见 \texttt{outputs/rule3\_kalman\_sensitivity.csv}。）
+
+\textbf{夏普跨参数标准差 $0.20$，但成交笔数在 $3\sim22$ 之间波动（$7$ 倍）}。两点评读：
+
+第一，夏普对 $q,r$ 相对不敏感（除非同时把两者都调小），说明结论的方向不受参数选择支配——这是好的一面。
+
+第二，\textbf{交易频率对 $q,r$ 极度敏感}，而频率直接决定样本量（$3$ 笔 vs $22$ 笔）与成本。这意味着「规则三是否可评估」本身取决于一个此前未被注意的超参数。任何 $q,r$ 的选取都应当在报告结论时一并声明。
+
+\subsection{四项验证对前文判断的修正汇总}
+
+\begin{table}[htbp]
+\centering\footnotesize
+\caption{四项验证修正的判断}\label{tab:corrections}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{5.0cm}>{\raggedright\arraybackslash}p{5.2cm}@{}}
+\toprule
+\textbf{验证} & \textbf{前文判断} & \textbf{修正后} \\
+\midrule
+walk-forward & 「可进入执行层对照」（流程第 6 步写得通过即放行） & IS$\to$OOS 衰减 $54.7\%$、仅 $44.4\%$ 折为正：不得按历史最优参数上线 \\
+行业中性化 & 聚类代理为权宜之计，需接真实行业数据 & 真实申万（$0.19$）与聚类（$0.23$）量级一致，代理基本够用；但真实版更贴近成本门槛 \\
+规则一窗口 & 推荐 $250/60/10$ 三档，$L=250$ 为低换手档 & $L=250$ 在工程增强下失效（$0.24\to-0.00$）；改为推荐 $L=10$ 与 $20$ \\
+规则三临界值 & 「标准 ADF 偏宽松，会略微高估通过率」 & 高估幅度 $65.3\%$；严格口径下成交仅 $7$ 笔，策略无法评估 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+四项验证有一个共同的形态：\textbf{前文每一处「工程近似」或「暂用权宜」的地方，实跑后都被证明会实质改变结论}。这不是巧合，而是论文审计章那条规律在本文自身工作上的复现——「不同设置的差异使跨文献比较必须标注条件」，而同样的差异也出现在\emph{同一份工作内部}的不同版本之间。
+
+据此，本文的定位收紧为\textbf{设计模板与验证流程}，而非可上线的策略；三条规则各自的失效事实与可用边界，见表~\ref{tab:corrections}~与第~\ref{sec:retune}~节的参数推荐总表。

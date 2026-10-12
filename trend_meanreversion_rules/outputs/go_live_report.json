@@ -1,0 +1,194 @@
+{
+  "配置": {
+    "N": 60,
+    "T": 3039,
+    "n_boot": 300,
+    "block": 20,
+    "seed": 20261008,
+    "IS": 756,
+    "OOS": 252,
+    "step": 252,
+    "判据": {
+      "reality_check_p": 0.05,
+      "hansen_spa_p": 0.05,
+      "romano_wolf_alpha": 0.05,
+      "dsr": 0.95,
+      "pbo": 0.5,
+      "wf_decay": 0.5,
+      "wf_oos_sharpe": 0.0,
+      "limit_share": 0.01
+    }
+  },
+  "步骤1_搜索空间": {
+    "pass": true,
+    "N": 60,
+    "T": 3039
+  },
+  "步骤2_网格": {
+    "pass": true,
+    "shape": [
+      3039,
+      60
+    ],
+    "nan_share": 0.013710650433256553
+  },
+  "步骤3_自举检验": {
+    "pass": true,
+    "reality_check": {
+      "统计量": 0.0197053558221178,
+      "p值": 0.5433333333333333,
+      "最优组合": "astk_XS_reversion_L60",
+      "n_boot": 300,
+      "studentized": false
+    },
+    "reality_check_studentized": {
+      "统计量": 3.180350851669833,
+      "p值": 0.02666666666666667,
+      "最优组合": "astk_XS_reversion_L60",
+      "n_boot": 300,
+      "studentized": true
+    },
+    "hansen_spa": {
+      "统计量": 3.180350851669833,
+      "p值": 0.023333333333333334,
+      "最优组合": "astk_XS_reversion_L60",
+      "劣质策略阈值": -2.0405142073810105,
+      "n_poor": 10
+    },
+    "romano_wolf": {
+      "n_rejected": 1,
+      "alpha": 0.05,
+      "rejected": [
+        "astk_XS_reversion_L60"
+      ],
+      "p_adj": {
+        "fut_TS_trend_L5": 1.0,
+        "fut_TS_trend_L10": 1.0,
+        "fut_TS_trend_L20": 1.0,
+        "fut_TS_trend_L60": 1.0,
+        "fut_TS_trend_L120": 1.0,
+        "fut_TS_trend_L250": 1.0,
+        "fut_TS_reversion_L5": 1.0,
+        "fut_TS_reversion_L10": 1.0,
+        "fut_TS_reversion_L20": 1.0,
+        "fut_TS_reversion_L60": 1.0,
+        "fut_TS_reversion_L120": 1.0,
+        "fut_TS_reversion_L250": 1.0,
+        "fut_XS_trend_L5": 1.0,
+        "fut_XS_trend_L10": 1.0,
+        "fut_XS_trend_L20": 1.0,
+        "fut_XS_trend_L60": 1.0,
+        "fut_XS_trend_L120": 1.0,
+        "fut_XS_trend_L250": 1.0,
+        "fut_XS_reversion_L5": 1.0,
+        "fut_XS_reversion_L10": 1.0,
+        "fut_XS_reversion_L20": 1.0,
+        "fut_XS_reversion_L60": 1.0,
+        "fut_XS_reversion_L120": 1.0,
+        "fut_XS_reversion_L250": 1.0,
+        "aidx_TS_trend_L5": 1.0,
+        "aidx_TS_trend_L10": 1.0,
+        "aidx_TS_trend_L20": 1.0,
+        "aidx_TS_trend_L60": 1.0,
+        "aidx_TS_trend_L120": 1.0,
+        "aidx_TS_trend_L250": 1.0,
+        "aidx_TS_reversion_L5": 1.0,
+        "aidx_TS_reversion_L10": 1.0,
+        "aidx_TS_reversion_L20": 1.0,
+        "aidx_TS_reversion_L60": 1.0,
+        "aidx_TS_reversion_L120": 1.0,
+        "aidx_TS_reversion_L250": 1.0,
+        "astk_TS_trend_L5": 1.0,
+        "astk_TS_trend_L10": 1.0,
+        "astk_TS_trend_L20": 1.0,
+        "astk_TS_trend_L60": 1.0,
+        "astk_TS_trend_L120": 1.0,
+        "astk_TS_trend_L250": 1.0,
+        "astk_TS_reversion_L5": 1.0,
+        "astk_TS_reversion_L10": 1.0,
+        "astk_TS_reversion_L20": 1.0,
+        "astk_TS_reversion_L60": 1.0,
+        "astk_TS_reversion_L120": 1.0,
+        "astk_TS_reversion_L250": 1.0,
+        "astk_XS_trend_L5": 1.0,
+        "astk_XS_trend_L10": 1.0,
+        "astk_XS_trend_L20": 1.0,
+        "astk_XS_trend_L60": 1.0,
+        "astk_XS_trend_L120": 1.0,
+        "astk_XS_trend_L250": 1.0,
+        "astk_XS_reversion_L5": 1.0,
+        "astk_XS_reversion_L10": 1.0,
+        "astk_XS_reversion_L20": 1.0,
+        "astk_XS_reversion_L60": 0.02666666666666667,
+        "astk_XS_reversion_L120": 0.14333333333333334,
+        "astk_XS_reversion_L250": 1.0
+      },
+      "steps": [
+        {
+          "第几步": 1,
+          "假设": "astk_XS_reversion_L60",
+          "t": 3.180350851669833,
+          "剩余假设数": 60,
+          "逐步校正p": 0.02666666666666667
+        },
+        {
+          "第几步": 2,
+          "假设": "astk_XS_reversion_L120",
+          "t": 2.713160141624273,
+          "剩余假设数": 59,
+          "逐步校正p": 0.14333333333333334
+        }
+      ],
+      "n_boot": 300
+    }
+  },
+  "步骤4_DSR": {
+    "pass": false,
+    "best": "astk_XS_reversion_L60",
+    "年化夏普": 0.9924750568118227,
+    "SR_hat(日)": 0.06252005197044723,
+    "SR0(日,期望最大值)": 0.10110720545476669,
+    "DSR": 0.01600365056326278,
+    "N_trials": 60
+  },
+  "步骤5_PBO": {
+    "pass": true,
+    "PBO": 0.1111111111111111,
+    "n_combinations": 252,
+    "OOS相对排名均值": 0.8416601613322925
+  },
+  "步骤6_样本外": {
+    "pass": false,
+    "原因": [
+      "相对衰减 55% > 50%"
+    ],
+    "n_folds": 9,
+    "IS窗口": 756,
+    "OOS窗口": 252,
+    "IS夏普均值": 1.26012702767312,
+    "OOS夏普均值": 0.5702881629163343,
+    "衰减_IS减OOS": 0.6898388647567856,
+    "衰减比例": 0.5474359724119269,
+    "OOS为正的折占比": 0.4444444444444444,
+    "IS_OOS横截面回归斜率": 0.5415558366969482,
+    "IS_OOS秩相关": 0.273175300479235,
+    "秩相关p值": 1.0714147060413457e-10,
+    "逐折OOS_中位数夏普": -0.25867079910402707,
+    "逐折OOS事后最优夏普": 1.930231950651021,
+    "被选组合的OOS平均分位": 0.663023679417122
+  },
+  "步骤7_可交易性": {
+    "pass": false,
+    "limit_share": 0.00020291762641219698,
+    "tradability_applied": false
+  },
+  "总判决": {
+    "通过": false,
+    "未通过项": [
+      "DSR",
+      "样本外",
+      "可交易性"
+    ],
+    "耗时秒": 6.1
+  }
+}

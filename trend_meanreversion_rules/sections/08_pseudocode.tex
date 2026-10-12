@@ -1,0 +1,135 @@
+\section{伪代码汇总}\label{sec:pseudocode}
+
+本节把回测框架与三套规则的执行逻辑写成伪代码。写法遵循本文的既有约定：不引入语言特定的库依赖，不包含导入与函数定义，只描述变量、条件与动作的流转，便于直接翻译为任意实现语言。框架与策略分两层：先给三套规则共用的引擎骨架，再给各自策略层的执行逻辑。
+
+\subsection{回测框架：引擎与策略的分层}
+
+三套规则跑在同一个引擎上，差异全部封装在“取目标权重”这一步。引擎负责口径一致，策略负责信号正确——把两者分开，第~\ref{sec:mtflow}~节的流程才有统一的挂载点。
+
+\begin{quote}\ttfamily\small
+初始化：\\
+\quad 加载数据层（第~\ref{sec:shared}~节口径：复权、换月、可交易标记）\\
+\quad 加载成本参数、评估指标口径、防线阈值\\[2pt]
+对每个调仓周期（频率由策略声明：规则一每 5 个交易日，规则二、三每 21 个交易日）：\\
+\quad \textbf{取目标权重} $\gets$ 调用当前策略的信号逻辑（见下三小节）\\
+\quad 可交易性过滤：\\
+\qquad 对每个标的，若当日涨跌停或停牌：本次不下单，顺延至下一可交易日\\
+\qquad 若冲击模型算出参与率 $>10\%$：标记该笔，拆单或放弃\\[2pt]
+\quad \textbf{换手与成本}：\\
+\qquad 换手 $\gets\sum_i\bigl|w_{i}^{\text{target}}-w_{i}^{\text{current}}\bigr|$\\
+\qquad 成本 $\gets$ 仅对换入换出部分按固定基点收费 $+$ 冲击项\\
+\qquad 持有未动的仓位零成本\\[2pt]
+\quad \textbf{执行}：按目标权重下单；未成交部分保留旧权重，不重复收费\\[2pt]
+每个交易日：\\
+\quad 持仓漂移：$w_i \gets w_i\times(1+r_{i,t})/\bigl(1+\sum_j w_j r_{j,t}\bigr)$\\
+\quad 调用策略的防线检查（止损、回撤降敞口、状态过滤）\\[2pt]
+收尾（每次运行）：\\
+\quad 输出评估指标（含毛利与成本分列）\\
+\quad 记录本次运行的参数、口径版本与结果指纹，写入试验账本\\
+\quad 触发上线前流程的回归测试（第~\ref{sec:mtflow}~节）
+\end{quote}
+
+两条分层纪律值得单独说。其一，策略层只能读引擎给定的数据快照，不能自己取未来数据——look-ahead 一旦混进策略分支，引擎层的常规检查发现不了。其二，每次运行的参数与结果必须留痕：同一个策略在不同参数下跑一百次，账本里就是一百条记录，第~\ref{sec:mtflow}~节的试验族就以这份账本为准；只记最优一次，事后无从还原搜索代价。
+
+\subsection{规则一：期货时序趋势跟踪}
+
+\begin{quote}\ttfamily\small
+每个交易日 $t$：\\[2pt]
+\quad 若 $t$ 是重平衡日（距上次重平衡满 5 个交易日）：\\[2pt]
+\qquad 对候选池中每个品种 $i$：\\
+\qquad\qquad $s_i \gets \sum_{k=0}^{L-1}\ln(1+r_{i,t-k})$ \hfill \# 过去 $L$ 日累计对数收益\\
+\qquad\qquad $v_i \gets \mathrm{std}(r_i,\ 60\ \text{日})\times\sqrt{252}$ \hfill \# 已实现波动年化\\
+\qquad\qquad 若 $|s_i|/(\mathrm{std}(r_i)\times\sqrt L)\le 1.0$：\\
+\qquad\qquad\qquad 目标权重 $w_i \gets 0$ \hfill \# 信号强度不足，弃权\\
+\qquad\qquad 否则：\\
+\qquad\qquad\qquad $w_i \gets \mathrm{sign}(s_i)\times\min(10\%/v_i,\ 3.0)$\\[2pt]
+\qquad $w \gets w/\sum_j|w_j|$ \hfill \# 归一化，总敞口为 1\\[2pt]
+\qquad 若 $\big(R_{\text{mkt}}^{(60)}<-5\%\big)$ 且 $\big(\sigma_{\text{mkt}}^{(60)}>\text{历史 80 分位}\big)$：\\
+\qquad\qquad $w \gets 0.5\times w$ \hfill \# 恐慌状态降敞口\\[2pt]
+\qquad 若 $\bar\rho_t>$ 历史 90 分位：\\
+\qquad\qquad $w \gets 0.7\times w$ \hfill \# 拥挤度预警\\[2pt]
+\qquad 对每个 $i$：\\
+\qquad\qquad 若 $|w_i-w_i^{\text{current}}|<\theta_{\text{band},i}$：\\
+\qquad\qquad\qquad $w_i \gets w_i^{\text{current}}$ \hfill \# 免交易带\\[2pt]
+\qquad 提交调仓指令：\\
+\qquad\qquad 对每个 $i$，若当日涨跌停或停牌：顺延至下一可交易日\\
+\qquad\qquad 否则按 $w_i$ 下单，收取单边 2 基点成本\\[2pt]
+\quad 更新持仓漂移：\\
+\qquad 对每个 $i$：$w_i \gets w_i\times(1+r_{i,t})/\big(1+\sum_j w_j r_{j,t}\big)$\\[2pt]
+\quad 检查防线：\\
+\qquad 若组合回撤 $\ge15\%$：全部仓位 $\times0.5$\\
+\qquad 若组合回撤 $\ge25\%$：全部平仓，暂停 20 个交易日\\
+\qquad 对每个 $i$，若浮亏 $\ge2.5\times\text{ATR}_{20}(i)$：该品种平仓
+\end{quote}
+
+\subsection{规则二：A 股截面反转}
+
+\begin{quote}\ttfamily\small
+每 21 个交易日（调仓日）：\\[2pt]
+\quad 候选池 $\gets$ 全部 A 股\\[2pt]
+\quad 过滤：\\
+
+\qquad 剔除 ST 与 *ST\\
+\qquad 剔除上市不足 250 个交易日\\
+\qquad 剔除近 20 日日均成交额 $<5000$ 万元\\
+\qquad 标记当日涨跌停与停牌股票（不参与本次调仓）\\[2pt]
+\quad 对候选池每个 $i$：\\
+\qquad $s_i \gets \sum_{k=0}^{L-1}\ln(1+r_{i,k})$ \hfill \# 过去 $L$ 日累计对数收益（首选 $250$，备选 $60$）\\[2pt]
+\quad 横截面回归取残差：\\
+\qquad $s_i \gets \alpha+\sum_g\beta_g\mathbf 1_{\{i\in g\}}+\gamma\ln(\mathrm{MV}_i)+\tilde s_i$\\
+\qquad 用残差 $\tilde s_i$ 排序 \hfill \# 行业 + 市值中性化\\[2pt]
+\quad 多头集合 $\gets$ 残差最低的 20\%，按实盘约束收窄至 $30\sim50$ 只\\
+\quad 目标权重 $\gets$ 多头集合内等权 \hfill \# 版本 A：纯多头\\[2pt]
+\quad 计算对冲量：\\
+\qquad $\beta_{\text{port}} \gets$ 组合对目标指数（IC/IF/IM）的 60 日滚动 beta\\
+\qquad 空头名义 $\gets \beta_{\text{port}}\times$ 多头市值 \hfill \# 指数对冲\\[2pt]
+\quad 若组合回撤 $\ge20\%$：目标敞口 $\times0.5$\\
+\quad 若组合回撤 $\ge30\%$：全部平仓，暂停 40 个交易日\\[2pt]
+\quad 执行调仓（分 $2\sim3$ 个交易日完成，收取单边 15 基点成本）\\[2pt]
+每个交易日：\\
+\quad 对每只持仓股票：\\
+\qquad 若相对建仓加权成本跌幅 $\ge15\%$（高波动期 $\ge10\%$）：该票止损\\
+\qquad 若创 120 日新低且跌破 60 日最低价：该票止损\\
+\qquad 【硬约束】不得因跌幅扩大而加仓；仅当已从低点反弹 $\ge5\%$ 方可考虑补仓
+\end{quote}
+
+\subsection{规则三：期货截面统计套利}
+
+\begin{quote}\ttfamily\small
+每 21 个交易日（滚动重建）：\\[2pt]
+\quad 按产业链分组候选品种\\[2pt]
+\quad 对每个产业链内候选对 $(A,B)$：\\
+\qquad 取形成期 60 日数据\\
+\qquad $\beta \gets \mathrm{OLS}\big(\ln P^A \sim \ln P^B\big)$\\
+\qquad $e \gets \ln P^A-\beta\ln P^B$\\
+\qquad 若 $\mathrm{ADF}(e)\ge$ 5\% 临界值：跳过该对 \hfill \# 协整资格检验\\
+\qquad $\phi \gets$ 对 $e$ 拟合 AR(1) 的系数\\
+\qquad 若 $\phi\notin(0,1)$：跳过该对\\
+\qquad $\theta \gets -\ln(\phi)/\Delta$；\ $H \gets \ln 2/\theta$\\
+\qquad 若 $H\notin[5,60]$ 交易日：跳过该对 \hfill \# 半衰期筛选\\
+\qquad 记录 $(A,B,\alpha,\beta,H,\mu_e,\sigma_e)$ 进入活跃对列表\\[2pt]
+每个交易日：\\[2pt]
+\quad 对每个活跃对：\\
+\qquad 用 Kalman 滤波更新 $(\alpha_t,\beta_t)$ \hfill \# 在线对冲比\\
+\qquad $e_t \gets \ln P^A_t-\alpha_t-\beta_t\ln P^B_t$\\
+\qquad $\mu_t \gets$ 价差滚动 60 日均值；$\sigma_t \gets$ 滚动 60 日标准差\\
+\qquad $z_t \gets (e_t-\mu_t)/\sigma_t$\\[2pt]
+\qquad 若无持仓 且 $|z_t|>2.0$：\\
+\qquad\qquad 开仓：$z_t>2$ 时空 $A$ 多 $B$；$z_t<-2$ 时多 $A$ 空 $B$\\
+\qquad\qquad 仓位按价差波动率倒数归一\\
+\qquad 若有持仓 且 $|z_t|<0.5$：平仓 \hfill \# 收敛了结\\
+\qquad 若有持仓 且 $|z_t|>3.5$：强制止损 \hfill \# 不收敛防线\\
+\qquad 若有持仓 且持仓天数 $>3H$：平仓 \hfill \# 时间止损\\[2pt]
+\quad 组合层面：\\
+\qquad 同一产业链持仓对数 $\le$ 总对数的一半\\
+\qquad 若组合回撤 $\ge20\%$：敞口 $\times0.5$\\
+\qquad 若组合回撤 $\ge30\%$：全部平仓，暂停 40 个交易日\\
+\qquad 保证金冗余 $\ge$ 名义敞口的 40\%\\[2pt]
+\quad 成本参数：\\
+\qquad 单边 2 基点；若实际成本升至 $c'$，\\
+\qquad 按 $b\propto c^{1/3}$ 把开仓阈值由 2.0 调整为 $2.0\times(c'/c)^{1/3}$
+\end{quote}
+
+\subsection{三套伪代码的共同结构}
+
+三段并排看，骨架完全相同：\textbf{信号 $\to$ 归一化/中性化 $\to$ 缩放决策 $\to$ 门槛过滤 $\to$ 执行 $\to$ 防线}。差异只在三处——规则一有波动率缩放与免交易带、门槛是信号强度；规则二、三不做缩放，规则三的门槛是协整与半衰期、规则二没有独立门槛；防线上规则一是事前的状态过滤与拥挤监控，规则二、三是事中的止损与资金冗余。这三处正是第~\ref{sec:compare}~节“四行差异”里的三行，其余（成本处理、涨跌停顺延、调仓节奏、评估口径）三段完全一致——这是论文“唯一区别是符号，其余差异全在执行层”在规则层面的直接呈现。
